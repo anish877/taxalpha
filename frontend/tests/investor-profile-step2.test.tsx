@@ -106,6 +106,88 @@ describe('InvestorProfileStep2Page', () => {
         );
       }
 
+      if (
+        url.includes('/api/clients/client_1/investor-profile/step-3') &&
+        (!init || !init.method || init.method === 'GET')
+      ) {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'IN_PROGRESS',
+              step: {
+                key: 'STEP_3_PRIMARY_ACCOUNT_HOLDER_INFORMATION',
+                label: 'STEP 3. PRIMARY ACCOUNT HOLDER INFORMATION',
+                currentQuestionId: 'step3.holder.kind',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['step3.holder.kind'],
+                fields: {
+                  holder: {
+                    kind: { person: true, entity: false },
+                    name: '',
+                    taxId: { ssn: null, hasEin: { yes: false, no: false }, ein: null },
+                    contact: {
+                      email: '',
+                      dateOfBirth: null,
+                      specifiedAdult: null,
+                      phones: { home: null, business: null, mobile: null }
+                    },
+                    legalAddress: {
+                      line1: null,
+                      city: null,
+                      stateProvince: null,
+                      postalCode: null,
+                      country: null
+                    },
+                    mailingDifferent: { yes: false, no: false },
+                    mailingAddress: {
+                      line1: null,
+                      city: null,
+                      stateProvince: null,
+                      postalCode: null,
+                      country: null
+                    },
+                    citizenship: { primary: [], additional: [] },
+                    gender: { male: false, female: false },
+                    maritalStatus: {
+                      single: false,
+                      married: false,
+                      divorced: false,
+                      domesticPartner: false,
+                      widower: false
+                    },
+                    employment: {
+                      status: {
+                        employed: false,
+                        selfEmployed: false,
+                        retired: false,
+                        unemployed: false,
+                        student: false
+                      },
+                      occupation: null,
+                      yearsEmployed: null,
+                      typeOfBusiness: null,
+                      employerName: null,
+                      employerAddress: {
+                        line1: null,
+                        city: null,
+                        stateProvince: null,
+                        postalCode: null,
+                        country: null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
       return new Response(JSON.stringify({ message: 'Not Found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
@@ -129,7 +211,7 @@ describe('InvestorProfileStep2Page', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'Income From Earnings' }));
-    await user.click(screen.getByRole('button', { name: 'Save and Return' }));
+    await user.click(screen.getByRole('button', { name: 'Continue to Step 3' }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(

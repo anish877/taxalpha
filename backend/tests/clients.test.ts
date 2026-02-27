@@ -4,6 +4,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../src/app.js';
 import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
+import { defaultStep3Fields, type Step3Fields } from '../src/lib/investor-profile-step3.js';
+import { defaultStep4Fields, type Step4Fields } from '../src/lib/investor-profile-step4.js';
+import { defaultStep5Fields, type Step5Fields } from '../src/lib/investor-profile-step5.js';
+import { defaultStep6Fields, type Step6Fields } from '../src/lib/investor-profile-step6.js';
+import { defaultStep7Fields, type Step7Fields } from '../src/lib/investor-profile-step7.js';
 
 const config = {
   nodeEnv: 'test' as const,
@@ -17,6 +22,300 @@ const authUser = {
   name: 'Advisor One',
   email: 'advisor@example.com'
 };
+
+const completedStep1Data = {
+  accountRegistration: {
+    rrName: 'RR One',
+    rrNo: '1001',
+    customerNames: 'John Smith',
+    accountNo: 'ACCT-1',
+    retailRetirement: { retail: true, retirement: false }
+  },
+  typeOfAccount: {
+    primaryType: {
+      individual: true,
+      corporation: false,
+      corporatePensionProfitSharing: false,
+      custodial: false,
+      estate: false,
+      jointTenant: false,
+      limitedLiabilityCompany: false,
+      individualSingleMemberLlc: false,
+      soleProprietorship: false,
+      transferOnDeathIndividual: false,
+      transferOnDeathJoint: false,
+      trust: false,
+      nonprofitOrganization: false,
+      partnership: false,
+      exemptOrganization: false,
+      other: false
+    }
+  }
+};
+
+const completedStep2Data = {
+  initialSourceOfFunds: {
+    accountsReceivable: false,
+    incomeFromEarnings: true,
+    legalSettlement: false,
+    spouseParent: false,
+    accumulatedSavings: false,
+    inheritance: false,
+    lotteryGaming: false,
+    rentalIncome: false,
+    alimony: false,
+    insuranceProceeds: false,
+    pensionIraRetirementSavings: false,
+    saleOfBusiness: false,
+    gift: false,
+    investmentProceeds: false,
+    saleOfRealEstate: false,
+    other: false,
+    otherDetails: null
+  }
+};
+
+const completedStep1DataRequiresStep4 = {
+  ...completedStep1Data,
+  typeOfAccount: {
+    ...completedStep1Data.typeOfAccount,
+    primaryType: {
+      ...completedStep1Data.typeOfAccount.primaryType,
+      individual: false,
+      corporation: true
+    },
+    corporationDesignation: {
+      cCorp: true,
+      sCorp: false
+    }
+  }
+};
+
+function buildCompleteStep3EntityFields(): Step3Fields {
+  const fields = defaultStep3Fields();
+
+  fields.holder.kind = { person: false, entity: true };
+  fields.holder.name = 'Acme Trust LLC';
+  fields.holder.taxId.hasEin = { yes: false, no: true };
+  fields.holder.contact.email = 'entity@example.com';
+  fields.holder.contact.phones.mobile = '+1 555 555 5555';
+  fields.holder.legalAddress = {
+    line1: '123 Main St',
+    city: 'Austin',
+    stateProvince: 'TX',
+    postalCode: '78701',
+    country: 'US'
+  };
+  fields.holder.mailingDifferent = { yes: false, no: true };
+  fields.holder.citizenship.primary = ['US'];
+
+  fields.investmentKnowledge.general = {
+    limited: false,
+    moderate: true,
+    extensive: false,
+    none: false
+  };
+
+  for (const key of Object.keys(fields.investmentKnowledge.byType)) {
+    const typeKey = key as keyof Step3Fields['investmentKnowledge']['byType'];
+    fields.investmentKnowledge.byType[typeKey].knowledge = {
+      limited: false,
+      moderate: false,
+      extensive: false,
+      none: true
+    };
+    fields.investmentKnowledge.byType[typeKey].sinceYear = null;
+  }
+
+  fields.investmentKnowledge.byType.other.label = null;
+
+  fields.financialInformation.annualIncomeRange = {
+    fromBracket: '100k_250k',
+    toBracket: '250k_500k'
+  };
+  fields.financialInformation.netWorthExPrimaryResidenceRange = {
+    fromBracket: '250k_500k',
+    toBracket: '500k_1m'
+  };
+  fields.financialInformation.liquidNetWorthRange = {
+    fromBracket: '100k_250k',
+    toBracket: '250k_500k'
+  };
+  fields.financialInformation.taxBracket = {
+    bracket_0_15: false,
+    bracket_15_1_32: true,
+    bracket_32_1_50: false,
+    bracket_50_1_plus: false
+  };
+
+  fields.affiliations.employeeAdvisorFirm = { yes: false, no: true };
+  fields.affiliations.relatedAdvisorFirmEmployee = { yes: false, no: true };
+  fields.affiliations.employeeBrokerDealer = { yes: false, no: true };
+  fields.affiliations.relatedBrokerDealerEmployee = { yes: false, no: true };
+  fields.affiliations.maintainsOtherBrokerageAccounts = { yes: false, no: true };
+  fields.affiliations.exchangeOrFinraAffiliation = { yes: false, no: true };
+  fields.affiliations.seniorOfficerDirectorTenPercentPublicCompany = { yes: false, no: true };
+
+  return fields;
+}
+
+function buildCompleteStep4EntityFields(): Step4Fields {
+  const fields = defaultStep4Fields();
+
+  fields.holder.kind = { person: false, entity: true };
+  fields.holder.name = 'Acme Trust LLC';
+  fields.holder.taxId.hasEin = { yes: false, no: true };
+  fields.holder.contact.email = 'entity@example.com';
+  fields.holder.contact.phones.mobile = '+1 555 555 5555';
+  fields.holder.legalAddress = {
+    line1: '123 Main St',
+    city: 'Austin',
+    stateProvince: 'TX',
+    postalCode: '78701',
+    country: 'US'
+  };
+  fields.holder.mailingDifferent = { yes: false, no: true };
+  fields.holder.citizenship.primary = ['US'];
+
+  fields.investmentKnowledge.general = {
+    limited: false,
+    moderate: true,
+    extensive: false,
+    none: false
+  };
+
+  for (const key of Object.keys(fields.investmentKnowledge.byType)) {
+    const typeKey = key as keyof Step4Fields['investmentKnowledge']['byType'];
+    fields.investmentKnowledge.byType[typeKey].knowledge = {
+      limited: false,
+      moderate: false,
+      extensive: false,
+      none: true
+    };
+    fields.investmentKnowledge.byType[typeKey].sinceYear = null;
+  }
+
+  fields.investmentKnowledge.byType.other.label = null;
+
+  fields.financialInformation.annualIncomeRange = {
+    fromBracket: '100k_250k',
+    toBracket: '250k_500k'
+  };
+  fields.financialInformation.netWorthExPrimaryResidenceRange = {
+    fromBracket: '250k_500k',
+    toBracket: '500k_1m'
+  };
+  fields.financialInformation.liquidNetWorthRange = {
+    fromBracket: '100k_250k',
+    toBracket: '250k_500k'
+  };
+  fields.financialInformation.taxBracket = {
+    bracket_0_15: false,
+    bracket_15_1_32: true,
+    bracket_32_1_50: false,
+    bracket_50_1_plus: false
+  };
+
+  fields.affiliations.employeeAdvisorFirm = { yes: false, no: true };
+  fields.affiliations.relatedAdvisorFirmEmployee = { yes: false, no: true };
+  fields.affiliations.employeeBrokerDealer = { yes: false, no: true };
+  fields.affiliations.relatedBrokerDealerEmployee = { yes: false, no: true };
+  fields.affiliations.maintainsOtherBrokerageAccounts = { yes: false, no: true };
+  fields.affiliations.exchangeOrFinraAffiliation = { yes: false, no: true };
+  fields.affiliations.seniorOfficerDirectorTenPercentPublicCompany = { yes: false, no: true };
+
+  return fields;
+}
+
+function buildCompleteStep5Fields(): Step5Fields {
+  const fields = defaultStep5Fields();
+
+  fields.profile.riskExposure = {
+    low: false,
+    moderate: true,
+    speculation: false,
+    highRisk: false
+  };
+  fields.profile.accountObjectives = {
+    income: false,
+    longTermGrowth: true,
+    shortTermGrowth: false
+  };
+
+  fields.investments.fixedValues.marketIncome = {
+    equities: 10000,
+    options: 0,
+    fixedIncome: 25000,
+    mutualFunds: 5000,
+    unitInvestmentTrusts: 0,
+    exchangeTradedFunds: 12500
+  };
+  fields.investments.fixedValues.alternativesInsurance = {
+    realEstate: 30000,
+    insurance: 4000,
+    variableAnnuities: 1000,
+    fixedAnnuities: 2000,
+    preciousMetals: 500,
+    commoditiesFutures: 0
+  };
+  fields.investments.hasOther = { yes: false, no: true };
+  fields.investments.otherEntries.entries = [];
+
+  fields.horizonAndLiquidity.timeHorizon = {
+    fromYear: 2026,
+    toYear: 2034
+  };
+  fields.horizonAndLiquidity.liquidityNeeds = {
+    high: false,
+    medium: true,
+    low: false
+  };
+
+  return fields;
+}
+
+function buildCompleteStep6Fields(): Step6Fields {
+  const fields = defaultStep6Fields();
+
+  fields.trustedContact.decline = {
+    yes: true,
+    no: false
+  };
+
+  return fields;
+}
+
+function buildCompleteStep7Fields(requiresJointOwnerSignature: boolean): Step7Fields {
+  const fields = defaultStep7Fields();
+
+  fields.certifications.acceptances = {
+    attestationsAccepted: true,
+    taxpayerCertificationAccepted: true,
+    usPersonDefinitionAcknowledged: true
+  };
+
+  fields.signatures.accountOwner = {
+    typedSignature: 'John Smith',
+    printedName: 'John Smith',
+    date: '2026-02-27'
+  };
+
+  fields.signatures.financialProfessional = {
+    typedSignature: 'Advisor One',
+    printedName: 'Advisor One',
+    date: '2026-02-27'
+  };
+
+  if (requiresJointOwnerSignature) {
+    fields.signatures.jointAccountOwner = {
+      typedSignature: 'Jane Smith',
+      printedName: 'Jane Smith',
+      date: '2026-02-27'
+    };
+  }
+
+  return fields;
+}
 
 function createAuthCookie(): string {
   const token = createSessionToken(authUser.id, config.jwtSecret, config.jwtExpiresIn);
@@ -585,6 +884,740 @@ describe('client routes', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.fieldErrors['initialSourceOfFunds.otherDetails']).toContain('Please add details');
+  });
+
+  it('returns step 3 onboarding payload for owned client', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1Data,
+      step3CurrentQuestionIndex: 0,
+      step3Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-3')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step3.holder.kind');
+    expect(response.body.onboarding.step.fields.holder.kind.person).toBe(true);
+  });
+
+  it('saves step 3 answer patch and moves cursor', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1Data,
+      step3CurrentQuestionIndex: 0,
+      step3Data: null
+    });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1Data,
+      step3CurrentQuestionIndex: 1,
+      step3Data: {
+        holder: {
+          kind: { person: true, entity: false },
+          name: '',
+          taxId: { ssn: null, hasEin: { yes: false, no: false }, ein: null },
+          contact: {
+            email: '',
+            dateOfBirth: null,
+            specifiedAdult: null,
+            phones: { home: null, business: null, mobile: null }
+          },
+          legalAddress: {
+            line1: null,
+            city: null,
+            stateProvince: null,
+            postalCode: null,
+            country: null
+          },
+          mailingDifferent: { yes: false, no: false },
+          mailingAddress: {
+            line1: null,
+            city: null,
+            stateProvince: null,
+            postalCode: null,
+            country: null
+          },
+          citizenship: { primary: [], additional: [] },
+          gender: { male: false, female: false },
+          maritalStatus: {
+            single: false,
+            married: false,
+            divorced: false,
+            domesticPartner: false,
+            widower: false
+          },
+          employment: {
+            status: {
+              employed: false,
+              selfEmployed: false,
+              retired: false,
+              unemployed: false,
+              student: false
+            },
+            occupation: null,
+            yearsEmployed: null,
+            typeOfBusiness: null,
+            employerName: null,
+            employerAddress: {
+              line1: null,
+              city: null,
+              stateProvince: null,
+              postalCode: null,
+              country: null
+            }
+          }
+        }
+      }
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-3')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step3.holder.kind',
+        answer: { person: true, entity: false }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step3.holder.name');
+    expect(response.body.onboarding.step.fields.holder.kind.person).toBe(true);
+  });
+
+  it('returns step 4 onboarding payload when account type requires step 4', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1DataRequiresStep4,
+      step4CurrentQuestionIndex: 0,
+      step4Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-4')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step4.holder.kind');
+    expect(response.body.onboarding.step.fields.holder.kind.entity).toBe(true);
+  });
+
+  it('returns 400 for step 4 when account type does not require it', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1Data,
+      step4CurrentQuestionIndex: 0,
+      step4Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-4')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toContain('not required');
+  });
+
+  it('keeps step 3 status IN_PROGRESS when step 4 is required', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    const completeStep3 = buildCompleteStep3EntityFields();
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1DataRequiresStep4,
+      step3CurrentQuestionIndex: 0,
+      step3Data: completeStep3
+    });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1DataRequiresStep4,
+      step3CurrentQuestionIndex: 1,
+      step3Data: completeStep3
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-3')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step3.holder.name',
+        answer: 'Acme Trust LLC'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('IN_PROGRESS');
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: 'IN_PROGRESS'
+        })
+      })
+    );
+  });
+
+  it('keeps step 4 status IN_PROGRESS so step 5 remains the completion gate', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    const completeStep4 = buildCompleteStep4EntityFields();
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1DataRequiresStep4,
+      step4CurrentQuestionIndex: 0,
+      step4Data: completeStep4
+    });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1DataRequiresStep4,
+      step4CurrentQuestionIndex: 1,
+      step4Data: completeStep4
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-4')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step4.holder.name',
+        answer: 'Acme Trust LLC'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('IN_PROGRESS');
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: 'IN_PROGRESS'
+        })
+      })
+    );
+  });
+
+  it('returns step 5 onboarding payload', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step5CurrentQuestionIndex: 0,
+      step5Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-5')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step5.profile.riskExposure');
+  });
+
+  it('keeps step 5 POST status IN_PROGRESS', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    const completeStep5 = buildCompleteStep5Fields();
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step5CurrentQuestionIndex: 0,
+      step5Data: completeStep5
+    });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step5CurrentQuestionIndex: 1,
+      step5Data: completeStep5
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-5')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step5.profile.riskExposure',
+        answer: {
+          low: false,
+          moderate: true,
+          speculation: false,
+          highRisk: false
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('IN_PROGRESS');
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: 'IN_PROGRESS'
+        })
+      })
+    );
+  });
+
+  it('returns step 6 onboarding payload', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step6CurrentQuestionIndex: 0,
+      step6Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-6')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step6.trustedContact.decline');
+  });
+
+  it('keeps step 6 POST status IN_PROGRESS', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    const completeStep6 = buildCompleteStep6Fields();
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step6CurrentQuestionIndex: 0,
+      step6Data: completeStep6
+    });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step6CurrentQuestionIndex: 0,
+      step6Data: completeStep6
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-6')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step6.trustedContact.decline',
+        answer: {
+          yes: true,
+          no: false
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('IN_PROGRESS');
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: 'IN_PROGRESS'
+        })
+      })
+    );
+  });
+
+  it('returns step 7 onboarding payload with joint signature requirement when step 4 is required', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1Data: completedStep1DataRequiresStep4,
+      step3Data: null,
+      step4Data: null,
+      step7CurrentQuestionIndex: 0,
+      step7Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-7')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step7.certifications.acceptances');
+    expect(response.body.onboarding.step.requiresJointOwnerSignature).toBe(true);
+  });
+
+  it('allows step 7 POST to reach COMPLETED status', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    const completeStep3 = buildCompleteStep3EntityFields();
+    const completeStep4 = buildCompleteStep4EntityFields();
+    const completeStep5 = buildCompleteStep5Fields();
+    const completeStep6 = buildCompleteStep6Fields();
+    const completeStep7 = buildCompleteStep7Fields(true);
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1RrName: 'RR One',
+      step1RrNo: '1001',
+      step1CustomerNames: 'John Smith',
+      step1AccountNo: 'ACCT-1',
+      step1AccountType: { retail: true, retirement: false },
+      step1Data: completedStep1DataRequiresStep4,
+      step2Data: completedStep2Data,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step5Data: completeStep5,
+      step6Data: completeStep6,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'COMPLETED',
+      step1Data: completedStep1DataRequiresStep4,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-7')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step7.signatures.firm',
+        answer: {
+          financialProfessional: {
+            typedSignature: 'Advisor One',
+            printedName: 'Advisor One',
+            date: '2026-02-27'
+          },
+          supervisorPrincipal: {
+            typedSignature: null,
+            printedName: null,
+            date: null
+          }
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('COMPLETED');
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: 'COMPLETED'
+        })
+      })
+    );
+  });
+
+  it('returns resume route pointing to latest incomplete step', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findMany.mockResolvedValue([
+      {
+        id: 'client_1',
+        name: 'John Smith',
+        email: 'john@example.com',
+        phone: null,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        brokerLinks: [
+          {
+            role: 'PRIMARY',
+            broker: {
+              id: 'broker_1',
+              name: authUser.name,
+              email: authUser.email,
+              kind: 'SELF'
+            }
+          }
+        ],
+        formSelections: [{ form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } }],
+        investorProfileOnboarding: {
+          status: 'IN_PROGRESS',
+          step1RrName: 'RR One',
+          step1RrNo: '1001',
+          step1CustomerNames: 'John Smith',
+          step1AccountNo: 'ACCT-1',
+          step1AccountType: { retail: true, retirement: false },
+          step1Data: completedStep1Data,
+          step2Data: completedStep2Data,
+          step3Data: null
+        }
+      }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app).get('/api/clients').set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.clients[0].investorProfileResumeStepRoute).toBe(
+      '/clients/client_1/investor-profile/step-3'
+    );
+  });
+
+  it('returns resume route pointing to step 4 when required and incomplete', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findMany.mockResolvedValue([
+      {
+        id: 'client_1',
+        name: 'John Smith',
+        email: 'john@example.com',
+        phone: null,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        brokerLinks: [
+          {
+            role: 'PRIMARY',
+            broker: {
+              id: 'broker_1',
+              name: authUser.name,
+              email: authUser.email,
+              kind: 'SELF'
+            }
+          }
+        ],
+        formSelections: [{ form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } }],
+        investorProfileOnboarding: {
+          status: 'IN_PROGRESS',
+          step1RrName: 'RR One',
+          step1RrNo: '1001',
+          step1CustomerNames: 'John Smith',
+          step1AccountNo: 'ACCT-1',
+          step1AccountType: { retail: true, retirement: false },
+          step1Data: completedStep1DataRequiresStep4,
+          step2Data: completedStep2Data,
+          step3Data: buildCompleteStep3EntityFields(),
+          step4Data: null
+        }
+      }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app).get('/api/clients').set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.clients[0].investorProfileResumeStepRoute).toBe(
+      '/clients/client_1/investor-profile/step-4'
+    );
+  });
+
+  it('returns resume route pointing to step 5 when prior steps are complete', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findMany.mockResolvedValue([
+      {
+        id: 'client_1',
+        name: 'John Smith',
+        email: 'john@example.com',
+        phone: null,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        brokerLinks: [
+          {
+            role: 'PRIMARY',
+            broker: {
+              id: 'broker_1',
+              name: authUser.name,
+              email: authUser.email,
+              kind: 'SELF'
+            }
+          }
+        ],
+        formSelections: [{ form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } }],
+        investorProfileOnboarding: {
+          status: 'IN_PROGRESS',
+          step1RrName: 'RR One',
+          step1RrNo: '1001',
+          step1CustomerNames: 'John Smith',
+          step1AccountNo: 'ACCT-1',
+          step1AccountType: { retail: true, retirement: false },
+          step1Data: completedStep1Data,
+          step2Data: completedStep2Data,
+          step3Data: buildCompleteStep3EntityFields(),
+          step4Data: null,
+          step5Data: null
+        }
+      }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app).get('/api/clients').set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.clients[0].investorProfileResumeStepRoute).toBe(
+      '/clients/client_1/investor-profile/step-5'
+    );
+  });
+
+  it('returns resume route pointing to step 6 when step 5 is complete and step 6 is incomplete', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findMany.mockResolvedValue([
+      {
+        id: 'client_1',
+        name: 'John Smith',
+        email: 'john@example.com',
+        phone: null,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        brokerLinks: [
+          {
+            role: 'PRIMARY',
+            broker: {
+              id: 'broker_1',
+              name: authUser.name,
+              email: authUser.email,
+              kind: 'SELF'
+            }
+          }
+        ],
+        formSelections: [{ form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } }],
+        investorProfileOnboarding: {
+          status: 'IN_PROGRESS',
+          step1RrName: 'RR One',
+          step1RrNo: '1001',
+          step1CustomerNames: 'John Smith',
+          step1AccountNo: 'ACCT-1',
+          step1AccountType: { retail: true, retirement: false },
+          step1Data: completedStep1Data,
+          step2Data: completedStep2Data,
+          step3Data: buildCompleteStep3EntityFields(),
+          step4Data: null,
+          step5Data: buildCompleteStep5Fields(),
+          step6Data: null
+        }
+      }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app).get('/api/clients').set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.clients[0].investorProfileResumeStepRoute).toBe(
+      '/clients/client_1/investor-profile/step-6'
+    );
+  });
+
+  it('returns resume route pointing to step 7 when step 6 is complete and step 7 is incomplete', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findMany.mockResolvedValue([
+      {
+        id: 'client_1',
+        name: 'John Smith',
+        email: 'john@example.com',
+        phone: null,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        brokerLinks: [
+          {
+            role: 'PRIMARY',
+            broker: {
+              id: 'broker_1',
+              name: authUser.name,
+              email: authUser.email,
+              kind: 'SELF'
+            }
+          }
+        ],
+        formSelections: [{ form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } }],
+        investorProfileOnboarding: {
+          status: 'IN_PROGRESS',
+          step1RrName: 'RR One',
+          step1RrNo: '1001',
+          step1CustomerNames: 'John Smith',
+          step1AccountNo: 'ACCT-1',
+          step1AccountType: { retail: true, retirement: false },
+          step1Data: completedStep1Data,
+          step2Data: completedStep2Data,
+          step3Data: buildCompleteStep3EntityFields(),
+          step4Data: null,
+          step5Data: buildCompleteStep5Fields(),
+          step6Data: buildCompleteStep6Fields(),
+          step7Data: null
+        }
+      }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app).get('/api/clients').set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.clients[0].investorProfileResumeStepRoute).toBe(
+      '/clients/client_1/investor-profile/step-7'
+    );
   });
 
   it('blocks onboarding access for clients outside owner scope', async () => {

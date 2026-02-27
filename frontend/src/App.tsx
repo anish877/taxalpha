@@ -5,6 +5,11 @@ import { PublicOnlyRoute } from './components/PublicOnlyRoute';
 import { DashboardPage } from './pages/DashboardPage';
 import { InvestorProfileStep1Page } from './pages/InvestorProfileStep1Page';
 import { InvestorProfileStep2Page } from './pages/InvestorProfileStep2Page';
+import { InvestorProfileStep3Page } from './pages/InvestorProfileStep3Page';
+import { InvestorProfileStep4Page } from './pages/InvestorProfileStep4Page';
+import { InvestorProfileStep5Page } from './pages/InvestorProfileStep5Page';
+import { InvestorProfileStep6Page } from './pages/InvestorProfileStep6Page';
+import { InvestorProfileStep7Page } from './pages/InvestorProfileStep7Page';
 import { LandingPage } from './pages/LandingPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
@@ -53,6 +58,46 @@ export function App() {
             </ProtectedRoute>
           }
           path="/clients/:clientId/investor-profile/step-2"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <InvestorProfileStep3Page />
+            </ProtectedRoute>
+          }
+          path="/clients/:clientId/investor-profile/step-3"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <InvestorProfileStep4Page />
+            </ProtectedRoute>
+          }
+          path="/clients/:clientId/investor-profile/step-4"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <InvestorProfileStep5Page />
+            </ProtectedRoute>
+          }
+          path="/clients/:clientId/investor-profile/step-5"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <InvestorProfileStep6Page />
+            </ProtectedRoute>
+          }
+          path="/clients/:clientId/investor-profile/step-6"
+        />
+        <Route
+          element={
+            <ProtectedRoute>
+              <InvestorProfileStep7Page />
+            </ProtectedRoute>
+          }
+          path="/clients/:clientId/investor-profile/step-7"
         />
         <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>

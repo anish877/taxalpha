@@ -217,3 +217,19 @@ export function applyStep2Answer(fields: Step2Fields, questionId: Step2QuestionI
 
   return next;
 }
+
+export function validateStep2Completion(fields: Step2Fields): Record<string, string> {
+  const errors: Record<string, string> = {};
+  const normalized = stripOtherDetails(fields.initialSourceOfFunds);
+  const booleans = createBooleanMap(SOURCE_OF_FUNDS_KEYS, normalized);
+
+  if (countTrueFlags(booleans) === 0) {
+    errors['initialSourceOfFunds'] = 'Please select at least one source of funds.';
+  }
+
+  if (booleans.other && !normalized.otherDetails) {
+    errors['initialSourceOfFunds.otherDetails'] = 'Please add details for Other.';
+  }
+
+  return errors;
+}

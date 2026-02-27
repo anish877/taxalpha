@@ -189,7 +189,12 @@ export function DashboardPage() {
                               <button
                                 className="rounded-full bg-accent px-3 py-1 text-xs uppercase tracking-[0.14em] text-white transition hover:bg-accent/90"
                                 type="button"
-                                onClick={() => navigate(`/clients/${client.id}/investor-profile/step-1`)}
+                                onClick={() =>
+                                  navigate(
+                                    client.investorProfileResumeStepRoute ??
+                                      `/clients/${client.id}/investor-profile/step-1`
+                                  )
+                                }
                               >
                                 Continue
                               </button>

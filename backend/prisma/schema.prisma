@@ -112,6 +112,16 @@ model InvestorProfileOnboarding {
   step1Data                Json?
   step2CurrentQuestionIndex Int                            @default(0)
   step2Data                Json?
+  step3CurrentQuestionIndex Int                            @default(0)
+  step3Data                Json?
+  step4CurrentQuestionIndex Int                            @default(0)
+  step4Data                Json?
+  step5CurrentQuestionIndex Int                            @default(0)
+  step5Data                Json?
+  step6CurrentQuestionIndex Int                            @default(0)
+  step6Data                Json?
+  step7CurrentQuestionIndex Int                            @default(0)
+  step7Data                Json?
   createdAt                DateTime                        @default(now())
   updatedAt                DateTime                        @updatedAt
 

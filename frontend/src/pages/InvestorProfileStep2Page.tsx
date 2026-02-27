@@ -160,8 +160,8 @@ export function InvestorProfileStep2Page() {
         }
       );
 
-      pushToast('Step 2 saved. We can continue to the next section when ready.');
-      navigate('/dashboard', { replace: true });
+      pushToast('Step 2 saved. Continuing to Step 3.');
+      navigate(`/clients/${clientId}/investor-profile/step-3`, { replace: true });
     } catch (requestError) {
       if (requestError instanceof ApiError) {
         setFieldErrors(requestError.fieldErrors ?? {});
@@ -276,7 +276,7 @@ export function InvestorProfileStep2Page() {
                 disabled={saving || loading}
                 type="submit"
               >
-                {saving ? 'Saving...' : 'Save and Return'}
+                {saving ? 'Saving...' : 'Continue to Step 3'}
               </button>
 
               {loading && <span className="text-sm text-mute">Loading step...</span>}
