@@ -1,0 +1,10 @@
+node_modules
+.pnpm-store
+.env
+.env.*
+!.env.example
+backend/dist
+frontend/dist
+coverage
+backend/prisma/dev.db
+backend/prisma/dev.db-journal

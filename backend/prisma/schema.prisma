@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BrokerKind {
+  SELF
+  EXTERNAL
+}
+
+enum ClientBrokerRole {
+  PRIMARY
+  ADDITIONAL
+}
+
+enum InvestorProfileOnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  brokers Broker[]
+  clients Client[]
+}
+
+model Broker {
+  id          String     @id @default(cuid())
+  ownerUserId String
+  name        String
+  email       String
+  kind        BrokerKind
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  owner       User         @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  clientLinks ClientBroker[]
+
+  @@unique([ownerUserId, email])
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  ownerUserId String
+  name        String
+  email       String
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner                     User                      @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  brokerLinks               ClientBroker[]
+  formSelections            ClientFormSelection[]
+  investorProfileOnboarding InvestorProfileOnboarding?
+
+  @@unique([ownerUserId, email])
+}
+
+model ClientBroker {
+  clientId String
+  brokerId String
+  role     ClientBrokerRole
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  broker Broker @relation(fields: [brokerId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, brokerId])
+}
+
+model FormCatalog {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  title     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  formSelections ClientFormSelection[]
+}
+
+model ClientFormSelection {
+  clientId String
+  formId   String
+
+  client Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  form   FormCatalog @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, formId])
+}
+
+model InvestorProfileOnboarding {
+  id                       String                          @id @default(cuid())
+  clientId                 String                          @unique
+  status                   InvestorProfileOnboardingStatus @default(NOT_STARTED)
+  step1RrName              String?
+  step1RrNo                String?
+  step1CustomerNames       String?
+  step1AccountNo           String?
+  step1AccountType         Json?
+  step1CurrentQuestionIndex Int                            @default(0)
+  step1Data                Json?
+  createdAt                DateTime                        @default(now())
+  updatedAt                DateTime                        @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
