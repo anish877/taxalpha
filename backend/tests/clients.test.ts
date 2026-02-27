@@ -205,7 +205,7 @@ describe('client routes', () => {
     expect(response.body.fieldErrors.clientEmail).toBe('Client email already exists.');
   });
 
-  it('returns step 1 onboarding payload for owned client', async () => {
+  it('returns step 1 payload with visible question ids', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
     prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
@@ -216,7 +216,8 @@ describe('client routes', () => {
       step1CustomerNames: null,
       step1AccountNo: null,
       step1AccountType: { retirement: false, retail: false },
-      step1CurrentQuestionIndex: 0
+      step1CurrentQuestionIndex: 0,
+      step1Data: null
     });
 
     const app = createApp({
@@ -230,25 +231,23 @@ describe('client routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.onboarding.clientId).toBe('client_1');
-    expect(response.body.onboarding.status).toBe('NOT_STARTED');
-    expect(response.body.onboarding.step.fields.rrName).toBe('');
-    expect(response.body.onboarding.step.fields.accountType).toEqual({
-      retirement: false,
-      retail: false
-    });
+    expect(response.body.onboarding.step.currentQuestionId).toBe('rrName');
+    expect(response.body.onboarding.step.visibleQuestionIds).toContain('typeOfAccount.primaryType');
   });
 
-  it('saves RR Name and keeps onboarding in progress', async () => {
+  it('saves answer patch and moves cursor', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
     prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
     prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'NOT_STARTED',
       step1RrName: null,
       step1RrNo: null,
       step1CustomerNames: null,
       step1AccountNo: null,
       step1AccountType: { retirement: false, retail: false },
-      step1CurrentQuestionIndex: 0
+      step1CurrentQuestionIndex: 0,
+      step1Data: null
     });
     prisma.investorProfileOnboarding.upsert.mockResolvedValue({
       status: 'IN_PROGRESS',
@@ -257,7 +256,68 @@ describe('client routes', () => {
       step1CustomerNames: null,
       step1AccountNo: null,
       step1AccountType: { retirement: false, retail: false },
-      step1CurrentQuestionIndex: 1
+      step1CurrentQuestionIndex: 1,
+      step1Data: {
+        accountRegistration: {
+          rrName: 'Anish Suman',
+          rrNo: '',
+          customerNames: '',
+          accountNo: '',
+          retailRetirement: { retirement: false, retail: false }
+        },
+        typeOfAccount: {
+          primaryType: {
+            individual: false,
+            corporation: false,
+            corporatePensionProfitSharing: false,
+            custodial: false,
+            estate: false,
+            jointTenant: false,
+            limitedLiabilityCompany: false,
+            individualSingleMemberLlc: false,
+            soleProprietorship: false,
+            transferOnDeathIndividual: false,
+            transferOnDeathJoint: false,
+            trust: false,
+            nonprofitOrganization: false,
+            partnership: false,
+            exemptOrganization: false,
+            other: false
+          },
+          corporationDesignation: { cCorp: false, sCorp: false },
+          llcDesignation: { cCorp: false, sCorp: false, partnership: false },
+          trust: {
+            establishmentDate: null,
+            trustType: {
+              charitable: false,
+              living: false,
+              irrevocableLiving: false,
+              family: false,
+              revocable: false,
+              irrevocable: false,
+              testamentary: false
+            }
+          },
+          custodial: { custodialType: { ugma: false, utma: false }, gifts: [] },
+          joint: {
+            marriedToEachOther: { yes: false, no: false },
+            tenancyState: null,
+            numberOfTenants: null,
+            tenancyClause: {
+              communityProperty: false,
+              tenantsByEntirety: false,
+              communityPropertyWithRightsOfSurvivorship: false,
+              jointTenantsWithRightsOfSurvivorship: false,
+              tenantsInCommon: false
+            }
+          },
+          transferOnDeath: {
+            individualAgreementDate: null,
+            jointAgreementDate: null
+          },
+          otherDescription: null
+        }
+      }
     });
 
     const app = createApp({
@@ -268,18 +328,88 @@ describe('client routes', () => {
     const response = await request(app)
       .post('/api/clients/client_1/investor-profile/step-1')
       .set('Cookie', createAuthCookie())
-      .send({ rrName: 'Anish Suman', currentQuestionIndex: 1 });
+      .send({ questionId: 'rrName', answer: 'Anish Suman' });
 
     expect(response.status).toBe(200);
     expect(response.body.onboarding.status).toBe('IN_PROGRESS');
-    expect(response.body.onboarding.step.fields.rrName).toBe('Anish Suman');
-    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledTimes(1);
+    expect(response.body.onboarding.step.fields.accountRegistration.rrName).toBe('Anish Suman');
+    expect(response.body.onboarding.step.currentQuestionId).toBe('rrNo');
   });
 
-  it('rejects invalid account type when none or multiple options are selected', async () => {
+  it('rejects inactive branch question updates', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
     prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1RrName: 'A',
+      step1RrNo: 'B',
+      step1CustomerNames: 'C',
+      step1AccountNo: 'D',
+      step1AccountType: { retirement: true, retail: false },
+      step1CurrentQuestionIndex: 5,
+      step1Data: {
+        accountRegistration: {
+          rrName: 'A',
+          rrNo: 'B',
+          customerNames: 'C',
+          accountNo: 'D',
+          retailRetirement: { retirement: true, retail: false }
+        },
+        typeOfAccount: {
+          primaryType: {
+            individual: true,
+            corporation: false,
+            corporatePensionProfitSharing: false,
+            custodial: false,
+            estate: false,
+            jointTenant: false,
+            limitedLiabilityCompany: false,
+            individualSingleMemberLlc: false,
+            soleProprietorship: false,
+            transferOnDeathIndividual: false,
+            transferOnDeathJoint: false,
+            trust: false,
+            nonprofitOrganization: false,
+            partnership: false,
+            exemptOrganization: false,
+            other: false
+          },
+          corporationDesignation: { cCorp: false, sCorp: false },
+          llcDesignation: { cCorp: false, sCorp: false, partnership: false },
+          trust: {
+            establishmentDate: null,
+            trustType: {
+              charitable: false,
+              living: false,
+              irrevocableLiving: false,
+              family: false,
+              revocable: false,
+              irrevocable: false,
+              testamentary: false
+            }
+          },
+          custodial: { custodialType: { ugma: false, utma: false }, gifts: [] },
+          joint: {
+            marriedToEachOther: { yes: false, no: false },
+            tenancyState: null,
+            numberOfTenants: null,
+            tenancyClause: {
+              communityProperty: false,
+              tenantsByEntirety: false,
+              communityPropertyWithRightsOfSurvivorship: false,
+              jointTenantsWithRightsOfSurvivorship: false,
+              tenantsInCommon: false
+            }
+          },
+          transferOnDeath: {
+            individualAgreementDate: null,
+            jointAgreementDate: null
+          },
+          otherDescription: null
+        }
+      }
+    });
 
     const app = createApp({
       prismaClient: prisma as unknown as PrismaClient,
@@ -290,14 +420,171 @@ describe('client routes', () => {
       .post('/api/clients/client_1/investor-profile/step-1')
       .set('Cookie', createAuthCookie())
       .send({
-        accountType: {
-          retirement: false,
-          retail: false
+        questionId: 'typeOfAccount.corporationDesignation',
+        answer: {
+          cCorp: true,
+          sCorp: false
         }
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.fieldErrors.accountType).toBe('Select exactly one account type.');
+    expect(response.body.fieldErrors.questionId).toContain('not active');
+  });
+
+  it('requires trust establishment date when trust account type is selected', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1RrName: 'A',
+      step1RrNo: 'B',
+      step1CustomerNames: 'C',
+      step1AccountNo: 'D',
+      step1AccountType: { retirement: true, retail: false },
+      step1CurrentQuestionIndex: 7,
+      step1Data: {
+        accountRegistration: {
+          rrName: 'A',
+          rrNo: 'B',
+          customerNames: 'C',
+          accountNo: 'D',
+          retailRetirement: { retirement: true, retail: false }
+        },
+        typeOfAccount: {
+          primaryType: {
+            individual: false,
+            corporation: false,
+            corporatePensionProfitSharing: false,
+            custodial: false,
+            estate: false,
+            jointTenant: false,
+            limitedLiabilityCompany: false,
+            individualSingleMemberLlc: false,
+            soleProprietorship: false,
+            transferOnDeathIndividual: false,
+            transferOnDeathJoint: false,
+            trust: true,
+            nonprofitOrganization: false,
+            partnership: false,
+            exemptOrganization: false,
+            other: false
+          },
+          corporationDesignation: { cCorp: false, sCorp: false },
+          llcDesignation: { cCorp: false, sCorp: false, partnership: false },
+          trust: {
+            establishmentDate: null,
+            trustType: {
+              charitable: false,
+              living: false,
+              irrevocableLiving: false,
+              family: false,
+              revocable: false,
+              irrevocable: false,
+              testamentary: false
+            }
+          },
+          custodial: { custodialType: { ugma: false, utma: false }, gifts: [] },
+          joint: {
+            marriedToEachOther: { yes: false, no: false },
+            tenancyState: null,
+            numberOfTenants: null,
+            tenancyClause: {
+              communityProperty: false,
+              tenantsByEntirety: false,
+              communityPropertyWithRightsOfSurvivorship: false,
+              jointTenantsWithRightsOfSurvivorship: false,
+              tenantsInCommon: false
+            }
+          },
+          transferOnDeath: {
+            individualAgreementDate: null,
+            jointAgreementDate: null
+          },
+          otherDescription: null
+        }
+      }
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-1')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'typeOfAccount.trust.establishmentDate',
+        answer: ''
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.fieldErrors['typeOfAccount.trust.establishmentDate']).toContain('required');
+  });
+
+  it('returns step 2 onboarding payload for owned client', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step2CurrentQuestionIndex: 0,
+      step2Data: null
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/client_1/investor-profile/step-2')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.currentQuestionId).toBe('step2.initialSourceOfFunds');
+    expect(response.body.onboarding.step.fields.initialSourceOfFunds.accountsReceivable).toBe(false);
+  });
+
+  it('validates step 2 other details when other source is selected', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-2')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step2.initialSourceOfFunds',
+        answer: {
+          accountsReceivable: false,
+          incomeFromEarnings: false,
+          legalSettlement: false,
+          spouseParent: false,
+          accumulatedSavings: false,
+          inheritance: false,
+          lotteryGaming: false,
+          rentalIncome: false,
+          alimony: false,
+          insuranceProceeds: false,
+          pensionIraRetirementSavings: false,
+          saleOfBusiness: false,
+          gift: false,
+          investmentProceeds: false,
+          saleOfRealEstate: false,
+          other: true,
+          otherDetails: ''
+        }
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.fieldErrors['initialSourceOfFunds.otherDetails']).toContain('Please add details');
   });
 
   it('blocks onboarding access for clients outside owner scope', async () => {
@@ -313,7 +600,7 @@ describe('client routes', () => {
     const response = await request(app)
       .post('/api/clients/client_other/investor-profile/step-1')
       .set('Cookie', createAuthCookie())
-      .send({ rrName: 'Any Name' });
+      .send({ questionId: 'rrName', answer: 'Any Name' });
 
     expect(response.status).toBe(404);
   });

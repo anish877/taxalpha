@@ -2,14 +2,38 @@ import { ClientBrokerRole, InvestorProfileOnboardingStatus, Prisma } from '@pris
 import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
+import {
+  STEP_1_LABEL,
+  applyStep1Answer,
+  clampStep1QuestionIndex,
+  defaultStep1Fields,
+  getVisibleStep1QuestionIds,
+  isStep1QuestionId,
+  normalizeStep1Fields,
+  serializeStep1Fields,
+  type Step1Fields,
+  type Step1QuestionId,
+  validateStep1Answer
+} from '../lib/investor-profile-step1.js';
+import {
+  STEP_2_LABEL,
+  applyStep2Answer,
+  clampStep2QuestionIndex,
+  defaultStep2Fields,
+  getStep2QuestionIds,
+  isStep2QuestionId,
+  normalizeStep2Fields,
+  serializeStep2Fields,
+  type Step2Fields,
+  type Step2QuestionId,
+  validateStep2Answer
+} from '../lib/investor-profile-step2.js';
 import { HttpError } from '../lib/http-error.js';
 import { zodFieldErrors } from '../lib/validation.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
 const INVESTOR_PROFILE_FORM_CODE = 'INVESTOR_PROFILE';
-const STEP_1_LABEL = 'STEP 1. ACCOUNT REGISTRATION';
-const STEP_1_MAX_QUESTION_INDEX = 4;
 const phonePattern = /^[+\d()\-.\s]{7,20}$/;
 
 const createClientSchema = z.object({
@@ -40,47 +64,25 @@ const clientIdParamsSchema = z.object({
   clientId: z.string().trim().min(1)
 });
 
-const accountTypeSchema = z.object({
-  retirement: z.boolean(),
-  retail: z.boolean()
+const investorProfileStepOnePatchSchema = z.object({
+  questionId: z.string().trim().min(1),
+  answer: z.unknown(),
+  clientCursor: z
+    .object({
+      currentQuestionId: z.string().trim().min(1).optional()
+    })
+    .optional()
 });
 
-const investorProfileStepOneSchema = z
-  .object({
-    rrName: z.string().trim().min(1, 'RR Name is required.').optional(),
-    rrNo: z.string().trim().min(1, 'RR No. is required.').optional(),
-    customerNames: z.string().trim().min(1, 'Customer Name(s) is required.').optional(),
-    accountNo: z.string().trim().min(1, 'Account No. is required.').optional(),
-    accountType: accountTypeSchema.optional(),
-    currentQuestionIndex: z.number().int().min(0).max(STEP_1_MAX_QUESTION_INDEX).optional()
-  })
-  .superRefine((value, ctx) => {
-    const hasQuestionUpdate =
-      value.rrName !== undefined ||
-      value.rrNo !== undefined ||
-      value.customerNames !== undefined ||
-      value.accountNo !== undefined ||
-      value.accountType !== undefined;
-
-    if (!hasQuestionUpdate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['update'],
-        message: 'At least one question value is required.'
-      });
-    }
-
-    if (
-      value.accountType !== undefined &&
-      Number(value.accountType.retirement) + Number(value.accountType.retail) !== 1
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['accountType'],
-        message: 'Select exactly one account type.'
-      });
-    }
-  });
+const investorProfileStepTwoPatchSchema = z.object({
+  questionId: z.string().trim().min(1),
+  answer: z.unknown(),
+  clientCursor: z
+    .object({
+      currentQuestionId: z.string().trim().min(1).optional()
+    })
+    .optional()
+});
 
 const clientInclude = {
   brokerLinks: {
@@ -116,6 +118,23 @@ const clientInclude = {
 
 type HydratedClient = Prisma.ClientGetPayload<{ include: typeof clientInclude }>;
 
+type StepOneSelectableOnboarding = {
+  status: InvestorProfileOnboardingStatus;
+  step1RrName: string | null;
+  step1RrNo: string | null;
+  step1CustomerNames: string | null;
+  step1AccountNo: string | null;
+  step1AccountType: Prisma.JsonValue | null;
+  step1CurrentQuestionIndex: number;
+  step1Data: Prisma.JsonValue | null;
+};
+
+type StepTwoSelectableOnboarding = {
+  status: InvestorProfileOnboardingStatus;
+  step2CurrentQuestionIndex: number;
+  step2Data: Prisma.JsonValue | null;
+};
+
 interface Step1Response {
   onboarding: {
     clientId: string;
@@ -123,32 +142,27 @@ interface Step1Response {
     step: {
       key: 'STEP_1_ACCOUNT_REGISTRATION';
       label: string;
+      currentQuestionId: Step1QuestionId;
       currentQuestionIndex: number;
-      fields: {
-        rrName: string;
-        rrNo: string;
-        customerNames: string;
-        accountNo: string;
-        accountType: {
-          retirement: boolean;
-          retail: boolean;
-        };
-      };
+      visibleQuestionIds: Step1QuestionId[];
+      fields: Step1Fields;
     };
   };
 }
 
-interface AccountTypeValue {
-  retirement: boolean;
-  retail: boolean;
-}
-
-interface Step1FieldValue {
-  rrName: string;
-  rrNo: string;
-  customerNames: string;
-  accountNo: string;
-  accountType: AccountTypeValue;
+interface Step2Response {
+  onboarding: {
+    clientId: string;
+    status: InvestorProfileOnboardingStatus;
+    step: {
+      key: 'STEP_2_USA_PATRIOT_ACT_INFORMATION';
+      label: string;
+      currentQuestionId: Step2QuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: Step2QuestionId[];
+      fields: Step2Fields;
+    };
+  };
 }
 
 function normalizeEmail(email: string): string {
@@ -185,67 +199,35 @@ function toClientDto(client: HydratedClient) {
   };
 }
 
-function defaultAccountType(): AccountTypeValue {
-  return {
-    retirement: false,
-    retail: false
-  };
-}
-
-function normalizeAccountType(value: Prisma.JsonValue | null | undefined): AccountTypeValue {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return defaultAccountType();
-  }
-
-  const objectValue = value as Record<string, unknown>;
-  const retirement = typeof objectValue.retirement === 'boolean' ? objectValue.retirement : false;
-  const retail = typeof objectValue.retail === 'boolean' ? objectValue.retail : false;
+function createDefaultOnboardingPayload() {
+  const step1Defaults = defaultStep1Fields();
+  const step2Defaults = defaultStep2Fields();
 
   return {
-    retirement,
-    retail
-  };
+    step1RrName: step1Defaults.accountRegistration.rrName,
+    step1RrNo: step1Defaults.accountRegistration.rrNo,
+    step1CustomerNames: step1Defaults.accountRegistration.customerNames,
+    step1AccountNo: step1Defaults.accountRegistration.accountNo,
+    step1AccountType: step1Defaults.accountRegistration.retailRetirement,
+    step1CurrentQuestionIndex: 0,
+    step1Data: serializeStep1Fields(step1Defaults),
+    step2CurrentQuestionIndex: 0,
+    step2Data: serializeStep2Fields(step2Defaults)
+  } as const;
 }
 
-function clampQuestionIndex(value: number | null | undefined): number {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return 0;
-  }
+function toStepOneResponse(clientId: string, onboarding: StepOneSelectableOnboarding): Step1Response {
+  const fields = normalizeStep1Fields(onboarding.step1Data, {
+    step1RrName: onboarding.step1RrName,
+    step1RrNo: onboarding.step1RrNo,
+    step1CustomerNames: onboarding.step1CustomerNames,
+    step1AccountNo: onboarding.step1AccountNo,
+    step1AccountType: onboarding.step1AccountType
+  });
 
-  if (value < 0) {
-    return 0;
-  }
-
-  if (value > STEP_1_MAX_QUESTION_INDEX) {
-    return STEP_1_MAX_QUESTION_INDEX;
-  }
-
-  return value;
-}
-
-function buildStep1Data(fields: Step1FieldValue): Prisma.InputJsonValue {
-  return {
-    rrName: fields.rrName,
-    rrNo: fields.rrNo,
-    customerNames: fields.customerNames,
-    accountNo: fields.accountNo,
-    accountType: fields.accountType
-  };
-}
-
-function toStepOneResponse(
-  clientId: string,
-  onboarding: {
-    status: InvestorProfileOnboardingStatus;
-    step1RrName: string | null;
-    step1RrNo: string | null;
-    step1CustomerNames: string | null;
-    step1AccountNo: string | null;
-    step1AccountType: Prisma.JsonValue | null;
-    step1CurrentQuestionIndex: number;
-  }
-): Step1Response {
-  const accountType = normalizeAccountType(onboarding.step1AccountType);
+  const visibleQuestionIds = getVisibleStep1QuestionIds(fields);
+  const currentQuestionIndex = clampStep1QuestionIndex(onboarding.step1CurrentQuestionIndex, visibleQuestionIds);
+  const currentQuestionId = visibleQuestionIds[currentQuestionIndex] ?? visibleQuestionIds[0] ?? 'rrName';
 
   return {
     onboarding: {
@@ -254,14 +236,32 @@ function toStepOneResponse(
       step: {
         key: 'STEP_1_ACCOUNT_REGISTRATION',
         label: STEP_1_LABEL,
-        currentQuestionIndex: clampQuestionIndex(onboarding.step1CurrentQuestionIndex),
-        fields: {
-          rrName: onboarding.step1RrName ?? '',
-          rrNo: onboarding.step1RrNo ?? '',
-          customerNames: onboarding.step1CustomerNames ?? '',
-          accountNo: onboarding.step1AccountNo ?? '',
-          accountType
-        }
+        currentQuestionId,
+        currentQuestionIndex,
+        visibleQuestionIds,
+        fields
+      }
+    }
+  };
+}
+
+function toStepTwoResponse(clientId: string, onboarding: StepTwoSelectableOnboarding): Step2Response {
+  const fields = normalizeStep2Fields(onboarding.step2Data);
+  const visibleQuestionIds = [...getStep2QuestionIds()];
+  const currentQuestionIndex = clampStep2QuestionIndex(onboarding.step2CurrentQuestionIndex);
+  const currentQuestionId = visibleQuestionIds[currentQuestionIndex] ?? 'step2.initialSourceOfFunds';
+
+  return {
+    onboarding: {
+      clientId,
+      status: onboarding.status,
+      step: {
+        key: 'STEP_2_USA_PATRIOT_ACT_INFORMATION',
+        label: STEP_2_LABEL,
+        currentQuestionId,
+        currentQuestionIndex,
+        visibleQuestionIds,
+        fields
       }
     }
   };
@@ -432,19 +432,13 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           }
         });
 
+        const onboardingDefaults = createDefaultOnboardingPayload();
+
         await transactionClient.investorProfileOnboarding.create({
           data: {
             clientId: createdClient.id,
             status: InvestorProfileOnboardingStatus.NOT_STARTED,
-            step1AccountType: defaultAccountType(),
-            step1CurrentQuestionIndex: 0,
-            step1Data: buildStep1Data({
-              rrName: '',
-              rrNo: '',
-              customerNames: '',
-              accountNo: '',
-              accountType: defaultAccountType()
-            })
+            ...onboardingDefaults
           }
         });
 
@@ -507,21 +501,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
+      const onboardingDefaults = createDefaultOnboardingPayload();
+
       const onboarding = await deps.prisma.investorProfileOnboarding.upsert({
         where: { clientId },
         update: {},
         create: {
           clientId,
           status: InvestorProfileOnboardingStatus.NOT_STARTED,
-          step1AccountType: defaultAccountType(),
-          step1CurrentQuestionIndex: 0,
-          step1Data: buildStep1Data({
-            rrName: '',
-            rrNo: '',
-            customerNames: '',
-            accountNo: '',
-            accountType: defaultAccountType()
-          })
+          ...onboardingDefaults
         },
         select: {
           status: true,
@@ -530,7 +518,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           step1CustomerNames: true,
           step1AccountNo: true,
           step1AccountType: true,
-          step1CurrentQuestionIndex: true
+          step1CurrentQuestionIndex: true,
+          step1Data: true
         }
       });
 
@@ -548,7 +537,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       return;
     }
 
-    const parsedBody = investorProfileStepOneSchema.safeParse(request.body);
+    const parsedBody = investorProfileStepOnePatchSchema.safeParse(request.body);
 
     if (!parsedBody.success) {
       response.status(400).json({
@@ -558,9 +547,30 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       return;
     }
 
+    const questionIdValue = parsedBody.data.questionId;
+
+    if (!isStep1QuestionId(questionIdValue)) {
+      response.status(400).json({
+        message: 'Please correct the highlighted fields.',
+        fieldErrors: { questionId: 'Unsupported onboarding question.' }
+      });
+      return;
+    }
+
+    const questionId = questionIdValue as Step1QuestionId;
+
+    const answerValidation = validateStep1Answer(questionId, parsedBody.data.answer);
+
+    if (!answerValidation.success) {
+      response.status(400).json({
+        message: 'Please correct the highlighted fields.',
+        fieldErrors: answerValidation.fieldErrors
+      });
+      return;
+    }
+
     const authUser = request.authUser!;
     const clientId = parsedParams.data.clientId;
-    const updatePayload = parsedBody.data;
 
     try {
       const client = await deps.prisma.client.findFirst({
@@ -579,69 +589,66 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const existingOnboarding = await deps.prisma.investorProfileOnboarding.findUnique({
         where: { clientId },
         select: {
+          status: true,
           step1RrName: true,
           step1RrNo: true,
           step1CustomerNames: true,
           step1AccountNo: true,
           step1AccountType: true,
-          step1CurrentQuestionIndex: true
+          step1CurrentQuestionIndex: true,
+          step1Data: true
         }
       });
 
-      const mergedStepOne: Step1FieldValue = {
-        rrName: existingOnboarding?.step1RrName ?? '',
-        rrNo: existingOnboarding?.step1RrNo ?? '',
-        customerNames: existingOnboarding?.step1CustomerNames ?? '',
-        accountNo: existingOnboarding?.step1AccountNo ?? '',
-        accountType: normalizeAccountType(existingOnboarding?.step1AccountType)
-      };
+      const existingFields = normalizeStep1Fields(existingOnboarding?.step1Data, {
+        step1RrName: existingOnboarding?.step1RrName,
+        step1RrNo: existingOnboarding?.step1RrNo,
+        step1CustomerNames: existingOnboarding?.step1CustomerNames,
+        step1AccountNo: existingOnboarding?.step1AccountNo,
+        step1AccountType: existingOnboarding?.step1AccountType
+      });
 
-      if (updatePayload.rrName !== undefined) {
-        mergedStepOne.rrName = updatePayload.rrName.trim();
+      const visibleBefore = getVisibleStep1QuestionIds(existingFields);
+
+      if (!visibleBefore.includes(questionId)) {
+        response.status(400).json({
+          message: 'Please correct the highlighted fields.',
+          fieldErrors: {
+            questionId: 'This question is not active for the selected account path.'
+          }
+        });
+        return;
       }
 
-      if (updatePayload.rrNo !== undefined) {
-        mergedStepOne.rrNo = updatePayload.rrNo.trim();
-      }
+      const nextFields = applyStep1Answer(existingFields, questionId, answerValidation.value);
 
-      if (updatePayload.customerNames !== undefined) {
-        mergedStepOne.customerNames = updatePayload.customerNames.trim();
-      }
-
-      if (updatePayload.accountNo !== undefined) {
-        mergedStepOne.accountNo = updatePayload.accountNo.trim();
-      }
-
-      if (updatePayload.accountType !== undefined) {
-        mergedStepOne.accountType = updatePayload.accountType;
-      }
-
-      const currentQuestionIndex = clampQuestionIndex(
-        updatePayload.currentQuestionIndex ?? existingOnboarding?.step1CurrentQuestionIndex ?? 0
-      );
+      const visibleAfter = getVisibleStep1QuestionIds(nextFields);
+      const currentAnsweredIndex = visibleAfter.indexOf(questionId);
+      const safeAnsweredIndex = currentAnsweredIndex >= 0 ? currentAnsweredIndex : 0;
+      const nextIndex = Math.min(safeAnsweredIndex + 1, Math.max(visibleAfter.length - 1, 0));
 
       const onboarding = await deps.prisma.investorProfileOnboarding.upsert({
         where: { clientId },
         update: {
           status: InvestorProfileOnboardingStatus.IN_PROGRESS,
-          step1RrName: mergedStepOne.rrName,
-          step1RrNo: mergedStepOne.rrNo,
-          step1CustomerNames: mergedStepOne.customerNames,
-          step1AccountNo: mergedStepOne.accountNo,
-          step1AccountType: mergedStepOne.accountType,
-          step1CurrentQuestionIndex: currentQuestionIndex,
-          step1Data: buildStep1Data(mergedStepOne)
+          step1RrName: nextFields.accountRegistration.rrName,
+          step1RrNo: nextFields.accountRegistration.rrNo,
+          step1CustomerNames: nextFields.accountRegistration.customerNames,
+          step1AccountNo: nextFields.accountRegistration.accountNo,
+          step1AccountType: nextFields.accountRegistration.retailRetirement,
+          step1CurrentQuestionIndex: nextIndex,
+          step1Data: serializeStep1Fields(nextFields)
         },
         create: {
           clientId,
           status: InvestorProfileOnboardingStatus.IN_PROGRESS,
-          step1RrName: mergedStepOne.rrName,
-          step1RrNo: mergedStepOne.rrNo,
-          step1CustomerNames: mergedStepOne.customerNames,
-          step1AccountNo: mergedStepOne.accountNo,
-          step1AccountType: mergedStepOne.accountType,
-          step1CurrentQuestionIndex: currentQuestionIndex,
-          step1Data: buildStep1Data(mergedStepOne)
+          step1RrName: nextFields.accountRegistration.rrName,
+          step1RrNo: nextFields.accountRegistration.rrNo,
+          step1CustomerNames: nextFields.accountRegistration.customerNames,
+          step1AccountNo: nextFields.accountRegistration.accountNo,
+          step1AccountType: nextFields.accountRegistration.retailRetirement,
+          step1CurrentQuestionIndex: nextIndex,
+          step1Data: serializeStep1Fields(nextFields)
         },
         select: {
           status: true,
@@ -650,11 +657,156 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           step1CustomerNames: true,
           step1AccountNo: true,
           step1AccountType: true,
-          step1CurrentQuestionIndex: true
+          step1CurrentQuestionIndex: true,
+          step1Data: true
         }
       });
 
       response.json(toStepOneResponse(clientId, onboarding));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get('/:clientId/investor-profile/step-2', requireAuth(deps), async (request, response, next) => {
+    const parsedParams = clientIdParamsSchema.safeParse(request.params);
+
+    if (!parsedParams.success) {
+      response.status(400).json({ message: 'Invalid client identifier.' });
+      return;
+    }
+
+    const authUser = request.authUser!;
+    const clientId = parsedParams.data.clientId;
+
+    try {
+      const client = await deps.prisma.client.findFirst({
+        where: {
+          id: clientId,
+          ownerUserId: authUser.id
+        },
+        select: { id: true }
+      });
+
+      if (!client) {
+        response.status(404).json({ message: 'Client not found.' });
+        return;
+      }
+
+      const onboardingDefaults = createDefaultOnboardingPayload();
+
+      const onboarding = await deps.prisma.investorProfileOnboarding.upsert({
+        where: { clientId },
+        update: {},
+        create: {
+          clientId,
+          status: InvestorProfileOnboardingStatus.NOT_STARTED,
+          ...onboardingDefaults
+        },
+        select: {
+          status: true,
+          step2CurrentQuestionIndex: true,
+          step2Data: true
+        }
+      });
+
+      response.json(toStepTwoResponse(clientId, onboarding));
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/:clientId/investor-profile/step-2', requireAuth(deps), async (request, response, next) => {
+    const parsedParams = clientIdParamsSchema.safeParse(request.params);
+
+    if (!parsedParams.success) {
+      response.status(400).json({ message: 'Invalid client identifier.' });
+      return;
+    }
+
+    const parsedBody = investorProfileStepTwoPatchSchema.safeParse(request.body);
+
+    if (!parsedBody.success) {
+      response.status(400).json({
+        message: 'Please correct the highlighted fields.',
+        fieldErrors: zodFieldErrors(parsedBody.error)
+      });
+      return;
+    }
+
+    const questionIdValue = parsedBody.data.questionId;
+
+    if (!isStep2QuestionId(questionIdValue)) {
+      response.status(400).json({
+        message: 'Please correct the highlighted fields.',
+        fieldErrors: { questionId: 'Unsupported onboarding question.' }
+      });
+      return;
+    }
+
+    const questionId = questionIdValue as Step2QuestionId;
+    const answerValidation = validateStep2Answer(questionId, parsedBody.data.answer);
+
+    if (!answerValidation.success) {
+      response.status(400).json({
+        message: 'Please correct the highlighted fields.',
+        fieldErrors: answerValidation.fieldErrors
+      });
+      return;
+    }
+
+    const authUser = request.authUser!;
+    const clientId = parsedParams.data.clientId;
+
+    try {
+      const client = await deps.prisma.client.findFirst({
+        where: {
+          id: clientId,
+          ownerUserId: authUser.id
+        },
+        select: { id: true }
+      });
+
+      if (!client) {
+        response.status(404).json({ message: 'Client not found.' });
+        return;
+      }
+
+      const existingOnboarding = await deps.prisma.investorProfileOnboarding.findUnique({
+        where: { clientId },
+        select: {
+          status: true,
+          step2CurrentQuestionIndex: true,
+          step2Data: true
+        }
+      });
+
+      const existingFields = normalizeStep2Fields(existingOnboarding?.step2Data);
+      const nextFields = applyStep2Answer(existingFields, questionId, answerValidation.value);
+      const nextIndex = clampStep2QuestionIndex(0);
+
+      const onboarding = await deps.prisma.investorProfileOnboarding.upsert({
+        where: { clientId },
+        update: {
+          status: InvestorProfileOnboardingStatus.IN_PROGRESS,
+          step2CurrentQuestionIndex: nextIndex,
+          step2Data: serializeStep2Fields(nextFields)
+        },
+        create: {
+          clientId,
+          status: InvestorProfileOnboardingStatus.IN_PROGRESS,
+          ...createDefaultOnboardingPayload(),
+          step2CurrentQuestionIndex: nextIndex,
+          step2Data: serializeStep2Fields(nextFields)
+        },
+        select: {
+          status: true,
+          step2CurrentQuestionIndex: true,
+          step2Data: true
+        }
+      });
+
+      response.json(toStepTwoResponse(clientId, onboarding));
     } catch (error) {
       next(error);
     }

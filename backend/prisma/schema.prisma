@@ -110,6 +110,8 @@ model InvestorProfileOnboarding {
   step1AccountType         Json?
   step1CurrentQuestionIndex Int                            @default(0)
   step1Data                Json?
+  step2CurrentQuestionIndex Int                            @default(0)
+  step2Data                Json?
   createdAt                DateTime                        @default(now())
   updatedAt                DateTime                        @updatedAt
 
