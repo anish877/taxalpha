@@ -33,7 +33,7 @@ export function verifySessionToken(token: string, secret: string): SessionPayloa
 export function setSessionCookie(response: Response, token: string, isProduction: boolean): void {
   response.cookie(AUTH_COOKIE_NAME, token, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     secure: isProduction,
     maxAge: SESSION_MAX_AGE_MS,
     path: '/'
@@ -43,7 +43,7 @@ export function setSessionCookie(response: Response, token: string, isProduction
 export function clearSessionCookie(response: Response, isProduction: boolean): void {
   response.clearCookie(AUTH_COOKIE_NAME, {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     secure: isProduction,
     path: '/'
   });
