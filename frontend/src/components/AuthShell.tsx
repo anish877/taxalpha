@@ -22,9 +22,9 @@ export function AuthShell({
     <main className="min-h-screen bg-fog px-6 py-10">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-3xl border border-black/10 bg-paper shadow-panel lg:grid-cols-[1.2fr_1fr]">
-          <section className="hidden bg-black px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
+          <section className="hidden bg-[radial-gradient(circle_at_top_left,rgba(29,78,216,0.28),rgba(0,0,0,1)_58%)] px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-white/60">TaxAlpha</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-white/70">TaxAlpha</p>
               <h1 className="mt-4 text-4xl font-light leading-tight tracking-tight">
                 Investor onboarding, built for thoughtful advisors.
               </h1>
@@ -39,7 +39,7 @@ export function AuthShell({
             <div className="mt-8">{children}</div>
             <p className="mt-6 text-sm text-mute">
               {switchLabel}{' '}
-              <Link className="text-ink underline underline-offset-4" to={switchTo}>
+              <Link className="text-accent underline underline-offset-4" to={switchTo}>
                 {switchText}
               </Link>
             </p>

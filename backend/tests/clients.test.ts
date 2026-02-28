@@ -9,6 +9,10 @@ import { defaultStep4Fields, type Step4Fields } from '../src/lib/investor-profil
 import { defaultStep5Fields, type Step5Fields } from '../src/lib/investor-profile-step5.js';
 import { defaultStep6Fields, type Step6Fields } from '../src/lib/investor-profile-step6.js';
 import { defaultStep7Fields, type Step7Fields } from '../src/lib/investor-profile-step7.js';
+import { defaultBaiv506cStep1Fields } from '../src/lib/baiv-506c-step1.js';
+import { defaultBaiv506cStep2Fields } from '../src/lib/baiv-506c-step2.js';
+import { defaultSfcStep1Fields } from '../src/lib/statement-of-financial-condition-step1.js';
+import { defaultSfcStep2Fields } from '../src/lib/statement-of-financial-condition-step2.js';
 
 const config = {
   nodeEnv: 'test' as const,
@@ -328,13 +332,25 @@ function createMockPrisma() {
       findUnique: vi.fn()
     },
     formCatalog: {
-      findFirst: vi.fn()
+      findMany: vi.fn()
     },
     client: {
       findMany: vi.fn(),
       findFirst: vi.fn()
     },
     investorProfileOnboarding: {
+      findUnique: vi.fn(),
+      upsert: vi.fn()
+    },
+    statementOfFinancialConditionOnboarding: {
+      findUnique: vi.fn(),
+      upsert: vi.fn()
+    },
+    brokerageAlternativeInvestmentOrderDisclosureOnboarding: {
+      findUnique: vi.fn(),
+      upsert: vi.fn()
+    },
+    brokerageAccreditedInvestorVerificationOnboarding: {
       findUnique: vi.fn(),
       upsert: vi.fn()
     },
@@ -358,7 +374,7 @@ describe('client routes', () => {
     const prisma = createMockPrisma();
 
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.formCatalog.findFirst.mockResolvedValue({ id: 'form_investor' });
+    prisma.formCatalog.findMany.mockResolvedValue([{ id: 'form_investor', code: 'INVESTOR_PROFILE' }]);
 
     const tx = {
       client: {
@@ -397,7 +413,8 @@ describe('client routes', () => {
             investorProfileOnboarding: {
               status: 'NOT_STARTED',
               step1RrName: null
-            }
+            },
+            statementOfFinancialConditionOnboarding: null
           }),
         create: vi.fn().mockResolvedValue({ id: 'client_1' })
       },
@@ -422,10 +439,13 @@ describe('client routes', () => {
         createMany: vi.fn().mockResolvedValue({ count: 2 })
       },
       clientFormSelection: {
-        create: vi.fn().mockResolvedValue({ clientId: 'client_1', formId: 'form_investor' })
+        createMany: vi.fn().mockResolvedValue({ count: 1 })
       },
       investorProfileOnboarding: {
         create: vi.fn().mockResolvedValue({ id: 'onboarding_1' })
+      },
+      statementOfFinancialConditionOnboarding: {
+        create: vi.fn()
       }
     };
 
@@ -457,11 +477,276 @@ describe('client routes', () => {
     expect(tx.broker.upsert).toHaveBeenCalledTimes(1);
   });
 
+  it('creates a client with optional SFC onboarding when selected', async () => {
+    const prisma = createMockPrisma();
+
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.formCatalog.findMany.mockResolvedValue([
+      { id: 'form_investor', code: 'INVESTOR_PROFILE' },
+      { id: 'form_sfc', code: 'SFC' }
+    ]);
+
+    const tx = {
+      client: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({
+            id: 'client_1',
+            name: 'John Smith',
+            email: 'john@example.com',
+            phone: '+1 222 333 4444',
+            createdAt: new Date('2025-01-01T00:00:00.000Z'),
+            brokerLinks: [
+              {
+                role: 'PRIMARY',
+                broker: {
+                  id: 'broker_self',
+                  name: authUser.name,
+                  email: authUser.email,
+                  kind: 'SELF'
+                }
+              }
+            ],
+            formSelections: [
+              { form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } },
+              { form: { id: 'form_sfc', code: 'SFC', title: 'Statement of Financial Condition' } }
+            ],
+            investorProfileOnboarding: {
+              status: 'NOT_STARTED',
+              step1RrName: null
+            },
+            statementOfFinancialConditionOnboarding: {
+              status: 'NOT_STARTED',
+              step1Data: null,
+              step2Data: null
+            }
+          }),
+        create: vi.fn().mockResolvedValue({ id: 'client_1' })
+      },
+      broker: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'broker_self',
+          ownerUserId: authUser.id,
+          name: authUser.name,
+          email: authUser.email,
+          kind: 'SELF'
+        }),
+        create: vi.fn(),
+        upsert: vi.fn()
+      },
+      clientBroker: {
+        createMany: vi.fn().mockResolvedValue({ count: 1 })
+      },
+      clientFormSelection: {
+        createMany: vi.fn().mockResolvedValue({ count: 2 })
+      },
+      investorProfileOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'onboarding_1' })
+      },
+      statementOfFinancialConditionOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'sfc_onboarding_1' })
+      }
+    };
+
+    prisma.$transaction.mockImplementation(async (callback: (trx: typeof tx) => Promise<unknown>) => callback(tx));
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        clientPhone: '+1 222 333 4444',
+        additionalBrokers: [],
+        selectedFormCodes: ['INVESTOR_PROFILE', 'SFC']
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.client.hasInvestorProfile).toBe(true);
+    expect(response.body.client.hasStatementOfFinancialCondition).toBe(true);
+    expect(tx.clientFormSelection.createMany).toHaveBeenCalled();
+    expect(tx.statementOfFinancialConditionOnboarding.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          clientId: 'client_1',
+          status: 'NOT_STARTED'
+        })
+      })
+    );
+  });
+
+  it('creates a client with optional BAIODF onboarding when selected', async () => {
+    const prisma = createMockPrisma();
+
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.formCatalog.findMany.mockResolvedValue([
+      { id: 'form_investor', code: 'INVESTOR_PROFILE' },
+      { id: 'form_baiodf', code: 'BAIODF' }
+    ]);
+
+    const tx = {
+      client: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({
+            id: 'client_1',
+            name: 'John Smith',
+            email: 'john@example.com',
+            phone: '+1 222 333 4444',
+            createdAt: new Date('2025-01-01T00:00:00.000Z'),
+            brokerLinks: [
+              {
+                role: 'PRIMARY',
+                broker: {
+                  id: 'broker_self',
+                  name: authUser.name,
+                  email: authUser.email,
+                  kind: 'SELF'
+                }
+              }
+            ],
+            formSelections: [
+              { form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } },
+              {
+                form: {
+                  id: 'form_baiodf',
+                  code: 'BAIODF',
+                  title: 'Brokerage Alternative Investment Order and Disclosure Form'
+                }
+              }
+            ],
+            investorProfileOnboarding: {
+              status: 'NOT_STARTED',
+              step1RrName: null
+            },
+            statementOfFinancialConditionOnboarding: null,
+            baiodfOnboarding: {
+              status: 'NOT_STARTED',
+              step1Data: null,
+              step2Data: null,
+              step3Data: null
+            }
+          }),
+        create: vi.fn().mockResolvedValue({ id: 'client_1' })
+      },
+      broker: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'broker_self',
+          ownerUserId: authUser.id,
+          name: authUser.name,
+          email: authUser.email,
+          kind: 'SELF'
+        }),
+        create: vi.fn(),
+        upsert: vi.fn()
+      },
+      clientBroker: {
+        createMany: vi.fn().mockResolvedValue({ count: 1 })
+      },
+      clientFormSelection: {
+        createMany: vi.fn().mockResolvedValue({ count: 2 })
+      },
+      investorProfileOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'onboarding_1' })
+      },
+      statementOfFinancialConditionOnboarding: {
+        create: vi.fn()
+      },
+      brokerageAlternativeInvestmentOrderDisclosureOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'baiodf_onboarding_1' })
+      }
+    };
+
+    prisma.$transaction.mockImplementation(async (callback: (trx: typeof tx) => Promise<unknown>) => callback(tx));
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        clientPhone: '+1 222 333 4444',
+        additionalBrokers: [],
+        selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF']
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.client.hasInvestorProfile).toBe(true);
+    expect(response.body.client.hasBaiodf).toBe(true);
+    expect(tx.clientFormSelection.createMany).toHaveBeenCalled();
+    expect(tx.brokerageAlternativeInvestmentOrderDisclosureOnboarding.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          clientId: 'client_1',
+          status: 'NOT_STARTED'
+        })
+      })
+    );
+  });
+
+  it('rejects unsupported selected form codes', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        selectedFormCodes: ['INVESTOR_PROFILE', 'UNKNOWN_FORM']
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.fieldErrors.selectedFormCodes).toContain('Unsupported form code(s): UNKNOWN_FORM');
+    expect(prisma.formCatalog.findMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects inactive or missing selected form codes', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.formCatalog.findMany.mockResolvedValue([{ id: 'form_investor', code: 'INVESTOR_PROFILE' }]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        selectedFormCodes: ['INVESTOR_PROFILE', 'SFC']
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.fieldErrors.selectedFormCodes).toContain('Unavailable form code(s): SFC');
+  });
+
   it('rejects duplicate client email in same user workspace', async () => {
     const prisma = createMockPrisma();
 
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.formCatalog.findFirst.mockResolvedValue({ id: 'form_investor' });
+    prisma.formCatalog.findMany.mockResolvedValue([{ id: 'form_investor', code: 'INVESTOR_PROFILE' }]);
 
     const tx = {
       client: {
@@ -477,9 +762,12 @@ describe('client routes', () => {
         createMany: vi.fn()
       },
       clientFormSelection: {
-        create: vi.fn()
+        createMany: vi.fn()
       },
       investorProfileOnboarding: {
+        create: vi.fn()
+      },
+      statementOfFinancialConditionOnboarding: {
         create: vi.fn()
       }
     };
@@ -1272,7 +1560,11 @@ describe('client routes', () => {
   it('returns step 7 onboarding payload with joint signature requirement when step 4 is required', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      formSelections: [{ form: { code: 'INVESTOR_PROFILE' } }],
+      statementOfFinancialConditionOnboarding: null
+    });
     prisma.investorProfileOnboarding.upsert.mockResolvedValue({
       status: 'IN_PROGRESS',
       step1Data: completedStep1DataRequiresStep4,
@@ -1299,7 +1591,11 @@ describe('client routes', () => {
   it('allows step 7 POST to reach COMPLETED status', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      formSelections: [{ form: { code: 'INVESTOR_PROFILE' } }],
+      statementOfFinancialConditionOnboarding: null
+    });
     const completeStep3 = buildCompleteStep3EntityFields();
     const completeStep4 = buildCompleteStep4EntityFields();
     const completeStep5 = buildCompleteStep5Fields();
@@ -1362,6 +1658,193 @@ describe('client routes', () => {
           status: 'COMPLETED'
         })
       })
+    );
+  });
+
+  it('returns step 7 nextRouteAfterCompletion when SFC is selected and incomplete', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      formSelections: [{ form: { code: 'INVESTOR_PROFILE' } }, { form: { code: 'SFC' } }],
+      statementOfFinancialConditionOnboarding: {
+        step1Data: null,
+        step2Data: null
+      }
+    });
+
+    const completeStep3 = buildCompleteStep3EntityFields();
+    const completeStep4 = buildCompleteStep4EntityFields();
+    const completeStep5 = buildCompleteStep5Fields();
+    const completeStep6 = buildCompleteStep6Fields();
+    const completeStep7 = buildCompleteStep7Fields(true);
+
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1RrName: 'RR One',
+      step1RrNo: '1001',
+      step1CustomerNames: 'John Smith',
+      step1AccountNo: 'ACCT-1',
+      step1AccountType: { retail: true, retirement: false },
+      step1Data: completedStep1DataRequiresStep4,
+      step2Data: completedStep2Data,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step5Data: completeStep5,
+      step6Data: completeStep6,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'COMPLETED',
+      step1Data: completedStep1DataRequiresStep4,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-7')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step7.signatures.firm',
+        answer: {
+          financialProfessional: {
+            typedSignature: 'Advisor One',
+            printedName: 'Advisor One',
+            date: '2026-02-27'
+          },
+          supervisorPrincipal: {
+            typedSignature: null,
+            printedName: null,
+            date: null
+          }
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('COMPLETED');
+    expect(response.body.onboarding.step.nextRouteAfterCompletion).toBe(
+      '/clients/client_1/statement-of-financial-condition/step-1'
+    );
+  });
+
+  it('returns step 7 nextRouteAfterCompletion for BAIODF when SFC is complete and BAIODF is pending', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+
+    const sfcStep1 = defaultSfcStep1Fields();
+    sfcStep1.accountRegistration = {
+      rrName: 'RR One',
+      rrNo: '1001',
+      customerNames: 'John Smith'
+    };
+
+    const sfcStep2 = defaultSfcStep2Fields();
+    sfcStep2.acknowledgements = {
+      attestDataAccurateComplete: true,
+      agreeReportMaterialChanges: true,
+      understandMayNeedRecertification: true,
+      understandMayNeedSupportingDocumentation: true,
+      understandInfoUsedForBestInterestRecommendations: true
+    };
+    sfcStep2.signatures.accountOwner = {
+      typedSignature: 'John Smith',
+      printedName: 'John Smith',
+      date: '2026-02-27'
+    };
+    sfcStep2.signatures.jointAccountOwner = {
+      typedSignature: 'Jane Smith',
+      printedName: 'Jane Smith',
+      date: '2026-02-27'
+    };
+    sfcStep2.signatures.financialProfessional = {
+      typedSignature: 'Advisor One',
+      printedName: 'Advisor One',
+      date: '2026-02-27'
+    };
+
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      formSelections: [
+        { form: { code: 'INVESTOR_PROFILE' } },
+        { form: { code: 'SFC' } },
+        { form: { code: 'BAIODF' } }
+      ],
+      statementOfFinancialConditionOnboarding: {
+        step1Data: sfcStep1,
+        step2Data: sfcStep2
+      },
+      baiodfOnboarding: null
+    });
+
+    const completeStep3 = buildCompleteStep3EntityFields();
+    const completeStep4 = buildCompleteStep4EntityFields();
+    const completeStep5 = buildCompleteStep5Fields();
+    const completeStep6 = buildCompleteStep6Fields();
+    const completeStep7 = buildCompleteStep7Fields(true);
+
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1RrName: 'RR One',
+      step1RrNo: '1001',
+      step1CustomerNames: 'John Smith',
+      step1AccountNo: 'ACCT-1',
+      step1AccountType: { retail: true, retirement: false },
+      step1Data: completedStep1DataRequiresStep4,
+      step2Data: completedStep2Data,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step5Data: completeStep5,
+      step6Data: completeStep6,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'COMPLETED',
+      step1Data: completedStep1DataRequiresStep4,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-7')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step7.signatures.firm',
+        answer: {
+          financialProfessional: {
+            typedSignature: 'Advisor One',
+            printedName: 'Advisor One',
+            date: '2026-02-27'
+          },
+          supervisorPrincipal: {
+            typedSignature: null,
+            printedName: null,
+            date: null
+          }
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.status).toBe('COMPLETED');
+    expect(response.body.onboarding.step.nextRouteAfterCompletion).toBe(
+      '/clients/client_1/brokerage-alternative-investment-order-disclosure/step-1'
     );
   });
 
@@ -1617,6 +2100,252 @@ describe('client routes', () => {
     expect(response.status).toBe(200);
     expect(response.body.clients[0].investorProfileResumeStepRoute).toBe(
       '/clients/client_1/investor-profile/step-7'
+    );
+  });
+
+  it('creates a client with optional BAIV onboarding when selected', async () => {
+    const prisma = createMockPrisma();
+
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.formCatalog.findMany.mockResolvedValue([
+      { id: 'form_investor', code: 'INVESTOR_PROFILE' },
+      { id: 'form_baiv', code: 'BAIV_506C' }
+    ]);
+
+    const tx = {
+      client: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({
+            id: 'client_1',
+            name: 'John Smith',
+            email: 'john@example.com',
+            phone: null,
+            createdAt: new Date('2025-01-01T00:00:00.000Z'),
+            brokerLinks: [
+              {
+                role: 'PRIMARY',
+                broker: {
+                  id: 'broker_self',
+                  name: authUser.name,
+                  email: authUser.email,
+                  kind: 'SELF'
+                }
+              }
+            ],
+            formSelections: [
+              { form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } },
+              {
+                form: {
+                  id: 'form_baiv',
+                  code: 'BAIV_506C',
+                  title: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)'
+                }
+              }
+            ],
+            investorProfileOnboarding: {
+              status: 'NOT_STARTED',
+              step1RrName: null
+            },
+            statementOfFinancialConditionOnboarding: null,
+            baiodfOnboarding: null,
+            baiv506cOnboarding: {
+              status: 'NOT_STARTED',
+              step1Data: null,
+              step2Data: null
+            }
+          }),
+        create: vi.fn().mockResolvedValue({ id: 'client_1' })
+      },
+      broker: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'broker_self',
+          ownerUserId: authUser.id,
+          name: authUser.name,
+          email: authUser.email,
+          kind: 'SELF'
+        }),
+        create: vi.fn(),
+        upsert: vi.fn()
+      },
+      clientBroker: {
+        createMany: vi.fn().mockResolvedValue({ count: 1 })
+      },
+      clientFormSelection: {
+        createMany: vi.fn().mockResolvedValue({ count: 2 })
+      },
+      investorProfileOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'onboarding_1' })
+      },
+      statementOfFinancialConditionOnboarding: {
+        create: vi.fn()
+      },
+      brokerageAlternativeInvestmentOrderDisclosureOnboarding: {
+        create: vi.fn()
+      },
+      brokerageAccreditedInvestorVerificationOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'baiv_onboarding_1' })
+      }
+    };
+
+    prisma.$transaction.mockImplementation(async (callback: (trx: typeof tx) => Promise<unknown>) => callback(tx));
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        additionalBrokers: [],
+        selectedFormCodes: ['INVESTOR_PROFILE', 'BAIV_506C']
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.client.hasBaiv506c).toBe(true);
+    expect(tx.brokerageAccreditedInvestorVerificationOnboarding.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          clientId: 'client_1',
+          status: 'NOT_STARTED'
+        })
+      })
+    );
+  });
+
+  it('returns step 7 nextRouteAfterCompletion for BAIV when BAIV is selected and pending', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      formSelections: [{ form: { code: 'INVESTOR_PROFILE' } }, { form: { code: 'BAIV_506C' } }],
+      statementOfFinancialConditionOnboarding: null,
+      baiodfOnboarding: null,
+      baiv506cOnboarding: null
+    });
+
+    const completeStep3 = buildCompleteStep3EntityFields();
+    const completeStep4 = buildCompleteStep4EntityFields();
+    const completeStep5 = buildCompleteStep5Fields();
+    const completeStep6 = buildCompleteStep6Fields();
+    const completeStep7 = buildCompleteStep7Fields(true);
+
+    prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
+      status: 'IN_PROGRESS',
+      step1RrName: 'RR One',
+      step1RrNo: '1001',
+      step1CustomerNames: 'John Smith',
+      step1AccountNo: 'ACCT-1',
+      step1AccountType: { retail: true, retirement: false },
+      step1Data: completedStep1DataRequiresStep4,
+      step2Data: completedStep2Data,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step5Data: completeStep5,
+      step6Data: completeStep6,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    prisma.investorProfileOnboarding.upsert.mockResolvedValue({
+      status: 'COMPLETED',
+      step1Data: completedStep1DataRequiresStep4,
+      step3Data: completeStep3,
+      step4Data: completeStep4,
+      step7CurrentQuestionIndex: 2,
+      step7Data: completeStep7
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/investor-profile/step-7')
+      .set('Cookie', createAuthCookie())
+      .send({
+        questionId: 'step7.signatures.firm',
+        answer: {
+          financialProfessional: {
+            typedSignature: 'Advisor One',
+            printedName: 'Advisor One',
+            date: '2026-02-27'
+          },
+          supervisorPrincipal: {
+            typedSignature: null,
+            printedName: null,
+            date: null
+          }
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.onboarding.step.nextRouteAfterCompletion).toBe(
+      '/clients/client_1/brokerage-accredited-investor-verification/step-1'
+    );
+  });
+
+  it('includes BAIV status and resume route fields in clients DTO', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.client.findMany.mockResolvedValue([
+      {
+        id: 'client_1',
+        name: 'John Smith',
+        email: 'john@example.com',
+        phone: null,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        brokerLinks: [
+          {
+            role: 'PRIMARY',
+            broker: {
+              id: 'broker_1',
+              name: authUser.name,
+              email: authUser.email,
+              kind: 'SELF'
+            }
+          }
+        ],
+        formSelections: [
+          { form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } },
+          {
+            form: {
+              id: 'form_baiv',
+              code: 'BAIV_506C',
+              title: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)'
+            }
+          }
+        ],
+        investorProfileOnboarding: null,
+        statementOfFinancialConditionOnboarding: null,
+        baiodfOnboarding: null,
+        baiv506cOnboarding: {
+          status: 'IN_PROGRESS',
+          step1Data: defaultBaiv506cStep1Fields(),
+          step2Data: defaultBaiv506cStep2Fields()
+        }
+      }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app).get('/api/clients').set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.clients[0].hasBaiv506c).toBe(true);
+    expect(response.body.clients[0].baiv506cOnboardingStatus).toBe('IN_PROGRESS');
+    expect(response.body.clients[0].baiv506cResumeStepRoute).toBe(
+      '/clients/client_1/brokerage-accredited-investor-verification/step-1'
     );
   });
 

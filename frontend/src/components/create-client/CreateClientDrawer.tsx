@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ApiError, apiRequest } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
@@ -42,12 +42,27 @@ export function CreateClientDrawer({
     () => forms.find((form) => form.code === 'INVESTOR_PROFILE') ?? null,
     [forms]
   );
+  const statementOfFinancialConditionForm = useMemo(
+    () => forms.find((form) => form.code === 'SFC') ?? null,
+    [forms]
+  );
+  const baiodfForm = useMemo(
+    () => forms.find((form) => form.code === 'BAIODF') ?? null,
+    [forms]
+  );
+  const baiv506cForm = useMemo(
+    () => forms.find((form) => form.code === 'BAIV_506C') ?? null,
+    [forms]
+  );
 
   const [step, setStep] = useState(0);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [additionalBrokers, setAdditionalBrokers] = useState<AdditionalBrokerInput[]>([]);
+  const [includeStatementOfFinancialCondition, setIncludeStatementOfFinancialCondition] = useState(false);
+  const [includeBaiodf, setIncludeBaiodf] = useState(false);
+  const [includeBaiv506c, setIncludeBaiv506c] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +76,7 @@ export function CreateClientDrawer({
       return 'Broker Selection';
     }
 
-    return 'Investor Profile';
+    return 'Form Selection';
   }, [step]);
 
   const brokerSectionError =
@@ -78,6 +93,9 @@ export function CreateClientDrawer({
       setClientEmail('');
       setClientPhone('');
       setAdditionalBrokers([]);
+      setIncludeStatementOfFinancialCondition(false);
+      setIncludeBaiodf(false);
+      setIncludeBaiv506c(false);
       setErrors({});
       setSubmitError(null);
       setIsSubmitting(false);
@@ -124,6 +142,28 @@ export function CreateClientDrawer({
     if (!investorProfileForm) {
       setErrors({ investorProfileForm: 'Investor Profile form is unavailable.' });
       setSubmitError('Investor Profile form is unavailable. Please seed forms and refresh.');
+      return false;
+    }
+
+    if (includeStatementOfFinancialCondition && !statementOfFinancialConditionForm) {
+      setErrors({ statementOfFinancialConditionForm: 'Statement of Financial Condition form is unavailable.' });
+      setSubmitError('Statement of Financial Condition form is unavailable. Please seed forms and refresh.');
+      return false;
+    }
+
+    if (includeBaiodf && !baiodfForm) {
+      setErrors({ baiodfForm: 'Brokerage Alternative Investment Order and Disclosure Form is unavailable.' });
+      setSubmitError(
+        'Brokerage Alternative Investment Order and Disclosure Form is unavailable. Please seed forms and refresh.'
+      );
+      return false;
+    }
+
+    if (includeBaiv506c && !baiv506cForm) {
+      setErrors({ baiv506cForm: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c) is unavailable.' });
+      setSubmitError(
+        'Brokerage Accredited Investor Verification Form for SEC Rule 506(c) is unavailable. Please seed forms and refresh.'
+      );
       return false;
     }
 
@@ -174,9 +214,7 @@ export function CreateClientDrawer({
     );
   };
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     if (step !== 2) {
       handleNext();
       return;
@@ -198,7 +236,13 @@ export function CreateClientDrawer({
         additionalBrokers: additionalBrokers.map((broker) => ({
           name: broker.name.trim(),
           email: broker.email.trim()
-        }))
+        })),
+        selectedFormCodes: [
+          'INVESTOR_PROFILE',
+          ...(includeStatementOfFinancialCondition ? ['SFC'] : []),
+          ...(includeBaiodf ? ['BAIODF'] : []),
+          ...(includeBaiv506c ? ['BAIV_506C'] : [])
+        ]
       };
 
       const response = await apiRequest<{ client: ClientRecord }>('/api/clients', {
@@ -269,7 +313,12 @@ export function CreateClientDrawer({
           </div>
         </header>
 
-        <form className="flex flex-1 flex-col overflow-hidden" onSubmit={handleSubmit}>
+        <form
+          className="flex flex-1 flex-col overflow-hidden"
+          onSubmit={(event) => {
+            event.preventDefault();
+          }}
+        >
           <section className="flex-1 overflow-y-auto px-6 py-6 sm:px-8">
             {step === 0 && (
               <div className="space-y-5">
@@ -392,18 +441,109 @@ export function CreateClientDrawer({
             {step === 2 && (
               <div className="space-y-5">
                 <div className="rounded-2xl border border-accent/25 bg-accentSoft px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-accent">Selected Form</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-accent">Required Form</p>
                   <p className="mt-2 text-xl font-light text-ink">
                     {investorProfileForm?.title ?? 'Investor Profile'}
                   </p>
                   <p className="mt-2 text-sm text-mute">
-                    This client will start onboarding with Investor Profile Step 1 after creation.
+                    Investor Profile is always included and starts immediately after client creation.
                   </p>
                 </div>
 
-                {errors.investorProfileForm && (
+                <button
+                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                    includeStatementOfFinancialCondition
+                      ? 'border-accent bg-accentSoft'
+                      : 'border-line bg-paper hover:border-black/35'
+                  } ${!statementOfFinancialConditionForm ? 'cursor-not-allowed opacity-60' : ''}`}
+                  disabled={!statementOfFinancialConditionForm}
+                  type="button"
+                  onClick={() => {
+                    setIncludeStatementOfFinancialCondition((current) => !current);
+                    setErrors((current) => {
+                      const next = { ...current };
+                      delete next.statementOfFinancialConditionForm;
+                      delete next.selectedFormCodes;
+                      return next;
+                    });
+                  }}
+                >
+                  <p className="text-xs uppercase tracking-[0.2em] text-mute">Optional Form</p>
+                  <p className="mt-2 text-xl font-light text-ink">
+                    {statementOfFinancialConditionForm?.title ?? 'Statement of Financial Condition'}
+                  </p>
+                  <p className="mt-2 text-sm text-mute">
+                    {includeStatementOfFinancialCondition
+                      ? 'Selected. After Investor Profile Step 7, onboarding continues to Statement of Financial Condition.'
+                      : 'Not selected. Toggle on to include this two-step financial condition form.'}
+                  </p>
+                </button>
+
+                <button
+                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                    includeBaiodf ? 'border-accent bg-accentSoft' : 'border-line bg-paper hover:border-black/35'
+                  } ${!baiodfForm ? 'cursor-not-allowed opacity-60' : ''}`}
+                  disabled={!baiodfForm}
+                  type="button"
+                  onClick={() => {
+                    setIncludeBaiodf((current) => !current);
+                    setErrors((current) => {
+                      const next = { ...current };
+                      delete next.baiodfForm;
+                      delete next.selectedFormCodes;
+                      return next;
+                    });
+                  }}
+                >
+                  <p className="text-xs uppercase tracking-[0.2em] text-mute">Optional Form</p>
+                  <p className="mt-2 text-xl font-light text-ink">
+                    {baiodfForm?.title ?? 'Brokerage Alternative Investment Order and Disclosure Form'}
+                  </p>
+                  <p className="mt-2 text-sm text-mute">
+                    {includeBaiodf
+                      ? 'Selected. If SFC is selected, BAIODF starts after SFC completes. If SFC is not selected, BAIODF starts after Investor Profile Step 7.'
+                      : 'Not selected. Toggle on to include this three-step BAIODF flow.'}
+                  </p>
+                </button>
+
+                <button
+                  className={`w-full rounded-2xl border p-4 text-left transition ${
+                    includeBaiv506c ? 'border-accent bg-accentSoft' : 'border-line bg-paper hover:border-black/35'
+                  } ${!baiv506cForm ? 'cursor-not-allowed opacity-60' : ''}`}
+                  disabled={!baiv506cForm}
+                  type="button"
+                  onClick={() => {
+                    setIncludeBaiv506c((current) => !current);
+                    setErrors((current) => {
+                      const next = { ...current };
+                      delete next.baiv506cForm;
+                      delete next.selectedFormCodes;
+                      return next;
+                    });
+                  }}
+                >
+                  <p className="text-xs uppercase tracking-[0.2em] text-mute">Optional Form</p>
+                  <p className="mt-2 text-xl font-light text-ink">
+                    {baiv506cForm?.title ?? 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)'}
+                  </p>
+                  <p className="mt-2 text-sm text-mute">
+                    {includeBaiv506c
+                      ? 'Selected. Starts after BAIODF if selected; otherwise after prior selected forms.'
+                      : 'Not selected. Toggle on to include this two-step accredited investor verification flow.'}
+                  </p>
+                </button>
+
+                {(errors.investorProfileForm ||
+                  errors.statementOfFinancialConditionForm ||
+                  errors.baiodfForm ||
+                  errors.baiv506cForm ||
+                  errors.selectedFormCodes) && (
                   <p className="rounded-xl border border-black/15 bg-black px-3 py-2 text-xs text-white">
-                    {errors.investorProfileForm}
+                    {errors.investorProfileForm ??
+                      errors.statementOfFinancialConditionForm ??
+                      errors.baiodfForm ??
+                      errors.baiv506cForm ??
+                      errors.selectedFormCodes}
                   </p>
                 )}
               </div>
@@ -439,7 +579,10 @@ export function CreateClientDrawer({
                 <button
                   className="rounded-full bg-accent px-5 py-2 text-sm text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/50"
                   disabled={isSubmitting}
-                  type="submit"
+                  type="button"
+                  onClick={() => {
+                    void handleSubmit();
+                  }}
                 >
                   {isSubmitting ? 'Creating...' : 'Create Client'}
                 </button>

@@ -57,8 +57,13 @@ describe('auth routes', () => {
       kind: 'SELF'
     });
 
-    const cookies = response.get('set-cookie') ?? [];
-    expect(cookies.some((cookie) => cookie.includes(`${AUTH_COOKIE_NAME}=`))).toBe(true);
+    const rawCookies = response.get('set-cookie');
+    const cookies = Array.isArray(rawCookies)
+      ? rawCookies
+      : typeof rawCookies === 'string'
+        ? [rawCookies]
+        : [];
+    expect(cookies.some((cookie: string) => cookie.includes(`${AUTH_COOKIE_NAME}=`))).toBe(true);
   });
 
   it('rejects signin with wrong password', async () => {

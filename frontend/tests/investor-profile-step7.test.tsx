@@ -170,6 +170,121 @@ describe('InvestorProfileStep7Page', () => {
     });
   });
 
+  it('navigates to SFC route when nextRouteAfterCompletion is provided', async () => {
+    const user = userEvent.setup();
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return new Response(
+          JSON.stringify({
+            user: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      if (
+        url.includes('/api/clients/client_1/investor-profile/step-7') &&
+        (!init || !init.method || init.method === 'GET')
+      ) {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'IN_PROGRESS',
+              step: {
+                key: 'STEP_7_SIGNATURES',
+                label: 'STEP 7. SIGNATURES',
+                currentQuestionId: 'step7.certifications.acceptances',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['step7.certifications.acceptances'],
+                requiresJointOwnerSignature: false,
+                nextRouteAfterCompletion: null,
+                fields: baseStep7Fields
+              }
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/investor-profile/step-7') && init?.method === 'POST') {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'COMPLETED',
+              step: {
+                key: 'STEP_7_SIGNATURES',
+                label: 'STEP 7. SIGNATURES',
+                currentQuestionId: 'step7.certifications.acceptances',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['step7.certifications.acceptances'],
+                requiresJointOwnerSignature: false,
+                nextRouteAfterCompletion: '/clients/client_1/statement-of-financial-condition/step-1',
+                fields: baseStep7Fields
+              }
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      if (url.endsWith('/api/clients') && (!init || !init.method || init.method === 'GET')) {
+        return new Response(JSON.stringify({ clients: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/investor-profile/step-7');
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Please confirm required attestations and certifications.')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    for (const checkbox of checkboxes) {
+      await user.click(checkbox);
+    }
+
+    await user.click(screen.getByRole('button', { name: 'Save and Return' }));
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/clients/client_1/statement-of-financial-condition/step-1');
+    });
+  });
+
   it('renders conditional joint owner signature fields and submits account owner block', async () => {
     const user = userEvent.setup();
 

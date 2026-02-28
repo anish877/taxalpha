@@ -77,7 +77,7 @@ export function SignUpPage() {
         <label className="block">
           <span className="mb-2 block text-sm text-mute">Full Name</span>
           <input
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light text-ink outline-none ring-black transition focus:border-black focus:ring-1"
+            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light text-ink outline-none ring-accent transition focus:border-accent focus:ring-1"
             placeholder="Your name"
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -88,7 +88,7 @@ export function SignUpPage() {
         <label className="block">
           <span className="mb-2 block text-sm text-mute">Email</span>
           <input
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light text-ink outline-none ring-black transition focus:border-black focus:ring-1"
+            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light text-ink outline-none ring-accent transition focus:border-accent focus:ring-1"
             placeholder="you@example.com"
             type="email"
             value={email}
@@ -100,7 +100,7 @@ export function SignUpPage() {
         <label className="block">
           <span className="mb-2 block text-sm text-mute">Password</span>
           <input
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light text-ink outline-none ring-black transition focus:border-black focus:ring-1"
+            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light text-ink outline-none ring-accent transition focus:border-accent focus:ring-1"
             placeholder="At least 8 characters"
             type="password"
             value={password}
@@ -112,7 +112,7 @@ export function SignUpPage() {
         {error && <p className="rounded-xl border border-black/15 bg-black px-3 py-2 text-sm text-white">{error}</p>}
 
         <button
-          className="w-full rounded-full bg-black px-4 py-3 text-sm uppercase tracking-[0.18em] text-white transition hover:bg-black/90 disabled:cursor-not-allowed disabled:bg-black/50"
+          className="w-full rounded-full bg-accent px-4 py-3 text-sm uppercase tracking-[0.18em] text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/50"
           disabled={submitting}
           type="submit"
         >

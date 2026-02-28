@@ -156,8 +156,29 @@ export function DashboardPage() {
                   </thead>
                   <tbody>
                     {clients.map((client) => {
-                      const showContinue =
+                      const investorIncomplete =
                         client.hasInvestorProfile && client.investorProfileOnboardingStatus !== 'COMPLETED';
+                      const sfcIncomplete =
+                        client.hasStatementOfFinancialCondition &&
+                        client.statementOfFinancialConditionOnboardingStatus !== 'COMPLETED';
+                      const baiodfIncomplete =
+                        client.hasBaiodf && client.baiodfOnboardingStatus !== 'COMPLETED';
+                      const baiv506cIncomplete =
+                        client.hasBaiv506c && client.baiv506cOnboardingStatus !== 'COMPLETED';
+                      const showContinue =
+                        investorIncomplete || sfcIncomplete || baiodfIncomplete || baiv506cIncomplete;
+                      const continueRoute = investorIncomplete
+                        ? client.investorProfileResumeStepRoute ?? `/clients/${client.id}/investor-profile/step-1`
+                        : sfcIncomplete
+                          ? client.statementOfFinancialConditionResumeStepRoute ??
+                          `/clients/${client.id}/statement-of-financial-condition/step-1`
+                          : baiodfIncomplete
+                            ? client.baiodfResumeStepRoute ??
+                            `/clients/${client.id}/brokerage-alternative-investment-order-disclosure/step-1`
+                            : baiv506cIncomplete
+                              ? client.baiv506cResumeStepRoute ??
+                              `/clients/${client.id}/brokerage-accredited-investor-verification/step-1`
+                              : null;
 
                       return (
                         <tr key={client.id} className="border-t border-line/70">
@@ -181,6 +202,13 @@ export function DashboardPage() {
                             <p className="mt-1 text-xs text-mute">
                               {client.selectedForms.map((form) => form.title).join(', ')}
                             </p>
+                            <button
+                              className="mt-3 rounded-full border border-line px-3 py-1 text-xs uppercase tracking-[0.14em] text-ink transition hover:border-black"
+                              type="button"
+                              onClick={() => navigate(`/clients/${client.id}/forms`)}
+                            >
+                              Workspace
+                            </button>
                           </td>
                           <td className="px-4 py-3 align-top">
                             {!client.hasInvestorProfile ? (
@@ -189,12 +217,7 @@ export function DashboardPage() {
                               <button
                                 className="rounded-full bg-accent px-3 py-1 text-xs uppercase tracking-[0.14em] text-white transition hover:bg-accent/90"
                                 type="button"
-                                onClick={() =>
-                                  navigate(
-                                    client.investorProfileResumeStepRoute ??
-                                      `/clients/${client.id}/investor-profile/step-1`
-                                  )
-                                }
+                                onClick={() => continueRoute && navigate(continueRoute)}
                               >
                                 Continue
                               </button>

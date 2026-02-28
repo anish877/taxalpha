@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 
 export function LandingPage() {
   return (
@@ -27,7 +27,7 @@ export function LandingPage() {
         <section className="max-w-3xl py-14 sm:py-24">
           <p className="text-xs uppercase tracking-[0.2em] text-accent">Investor Intake, Simplified</p>
           <h1 className="mt-6 text-4xl font-light leading-[1.06] tracking-tight text-ink sm:text-6xl">
-            Human-first onboarding for advisors and investor documentation.
+            Investor onboarding workspace
           </h1>
           <p className="mt-6 max-w-2xl text-base font-light leading-relaxed text-mute sm:text-lg">
             Build clients, assign brokers, and progress onboarding one thoughtful step at a time.
@@ -55,3 +55,5 @@ export function LandingPage() {
     </main>
   );
 }
+
+

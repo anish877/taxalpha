@@ -7,8 +7,11 @@ import { getRuntimeConfig } from './config/env.js';
 import { HttpError } from './lib/http-error.js';
 import { prisma } from './lib/prisma.js';
 import { createAuthRouter } from './routes/auth.js';
+import { createBaiv506cRouter } from './routes/baiv-506c.js';
+import { createBaiodfRouter } from './routes/baiodf.js';
 import { createClientsRouter } from './routes/clients.js';
 import { createFormsRouter } from './routes/forms.js';
+import { createStatementOfFinancialConditionRouter } from './routes/statement-of-financial-condition.js';
 import type { RuntimeConfig } from './types/deps.js';
 
 interface CreateAppOptions {
@@ -37,6 +40,9 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/auth', createAuthRouter({ prisma: prismaClient, config }));
   app.use('/api/forms', createFormsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientsRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createStatementOfFinancialConditionRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createBaiodfRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createBaiv506cRouter({ prisma: prismaClient, config }));
 
   app.use('/api/*', (_request, response) => {
     response.status(404).json({ message: 'Endpoint not found.' });

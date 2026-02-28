@@ -23,6 +23,24 @@ enum InvestorProfileOnboardingStatus {
   COMPLETED
 }
 
+enum StatementOfFinancialConditionOnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum BrokerageAccreditedInvestorVerificationOnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -63,6 +81,9 @@ model Client {
   brokerLinks               ClientBroker[]
   formSelections            ClientFormSelection[]
   investorProfileOnboarding InvestorProfileOnboarding?
+  statementOfFinancialConditionOnboarding StatementOfFinancialConditionOnboarding?
+  baiodfOnboarding BrokerageAlternativeInvestmentOrderDisclosureOnboarding?
+  baiv506cOnboarding BrokerageAccreditedInvestorVerificationOnboarding?
 
   @@unique([ownerUserId, email])
 }
@@ -124,6 +145,50 @@ model InvestorProfileOnboarding {
   step7Data                Json?
   createdAt                DateTime                        @default(now())
   updatedAt                DateTime                        @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model StatementOfFinancialConditionOnboarding {
+  id                        String                                          @id @default(cuid())
+  clientId                  String                                          @unique
+  status                    StatementOfFinancialConditionOnboardingStatus   @default(NOT_STARTED)
+  step1CurrentQuestionIndex Int                                             @default(0)
+  step1Data                 Json?
+  step2CurrentQuestionIndex Int                                             @default(0)
+  step2Data                 Json?
+  createdAt                 DateTime                                        @default(now())
+  updatedAt                 DateTime                                        @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model BrokerageAlternativeInvestmentOrderDisclosureOnboarding {
+  id                        String                                                              @id @default(cuid())
+  clientId                  String                                                              @unique
+  status                    BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus       @default(NOT_STARTED)
+  step1CurrentQuestionIndex Int                                                                 @default(0)
+  step1Data                 Json?
+  step2CurrentQuestionIndex Int                                                                 @default(0)
+  step2Data                 Json?
+  step3CurrentQuestionIndex Int                                                                 @default(0)
+  step3Data                 Json?
+  createdAt                 DateTime                                                            @default(now())
+  updatedAt                 DateTime                                                            @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model BrokerageAccreditedInvestorVerificationOnboarding {
+  id                        String                                                       @id @default(cuid())
+  clientId                  String                                                       @unique
+  status                    BrokerageAccreditedInvestorVerificationOnboardingStatus      @default(NOT_STARTED)
+  step1CurrentQuestionIndex Int                                                          @default(0)
+  step1Data                 Json?
+  step2CurrentQuestionIndex Int                                                          @default(0)
+  step2Data                 Json?
+  createdAt                 DateTime                                                     @default(now())
+  updatedAt                 DateTime                                                     @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }

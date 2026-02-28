@@ -2128,13 +2128,22 @@ export function InvestorProfileStep4Page() {
     <main className="min-h-screen bg-fog text-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pb-10 pt-8 sm:px-12 sm:pt-10">
         <header className="flex items-center justify-between">
-          <button
-            className="rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.16em] text-mute transition hover:border-black hover:text-ink"
-            type="button"
-            onClick={() => navigate(clientId ? `/clients/${clientId}/investor-profile/step-3` : '/dashboard')}
-          >
-            Back to Step 3
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.16em] text-mute transition hover:border-black hover:text-ink"
+              type="button"
+              onClick={() => navigate(clientId ? `/clients/${clientId}/investor-profile/step-3` : '/dashboard')}
+            >
+              Back to Step 3
+            </button>
+            <button
+              className="rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.16em] text-mute transition hover:border-black hover:text-ink"
+              type="button"
+              onClick={() => navigate('/dashboard')}
+            >
+              Dashboard
+            </button>
+          </div>
           <p className="text-xs uppercase tracking-[0.2em] text-mute">
             {visibleQuestionIds.length > 0
               ? `Question ${currentQuestionIndex + 1} / ${visibleQuestionIds.length}`

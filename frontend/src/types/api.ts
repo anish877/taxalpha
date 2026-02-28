@@ -17,6 +17,9 @@ export interface FormCatalogItem {
 }
 
 export type InvestorProfileOnboardingStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+export type StatementOfFinancialConditionOnboardingStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+export type BaiodfOnboardingStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+export type Baiv506cOnboardingStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface ClientRecord {
   id: string;
@@ -30,6 +33,15 @@ export interface ClientRecord {
   hasInvestorProfile: boolean;
   investorProfileOnboardingStatus: InvestorProfileOnboardingStatus;
   investorProfileResumeStepRoute: string | null;
+  hasStatementOfFinancialCondition: boolean;
+  statementOfFinancialConditionOnboardingStatus: StatementOfFinancialConditionOnboardingStatus;
+  statementOfFinancialConditionResumeStepRoute: string | null;
+  hasBaiodf: boolean;
+  baiodfOnboardingStatus: BaiodfOnboardingStatus;
+  baiodfResumeStepRoute: string | null;
+  hasBaiv506c: boolean;
+  baiv506cOnboardingStatus: Baiv506cOnboardingStatus;
+  baiv506cResumeStepRoute: string | null;
 }
 
 export interface InvestorProfileStepOneResponse {
@@ -884,6 +896,7 @@ export interface InvestorProfileStepSevenResponse {
       visibleQuestionIds: InvestorProfileStepSevenQuestionId[];
       fields: InvestorProfileStepSevenFields;
       requiresJointOwnerSignature: boolean;
+      nextRouteAfterCompletion: string | null;
     };
   };
 }
@@ -910,6 +923,539 @@ export interface InvestorProfileStepSevenQuestionConfig {
     description?: string;
   }>;
   fieldErrorKey?: string;
+}
+
+export type StatementOfFinancialConditionStepOneQuestionId =
+  | 'step1.accountRegistration'
+  | 'step1.liquidNonQualifiedAssets'
+  | 'step1.liabilities'
+  | 'step1.illiquidNonQualifiedAssets'
+  | 'step1.liquidQualifiedAssets'
+  | 'step1.incomeSummary'
+  | 'step1.illiquidQualifiedAssets';
+
+export interface StatementOfFinancialConditionStepOneFields {
+  accountRegistration: {
+    rrName: string;
+    rrNo: string;
+    customerNames: string;
+  };
+  liquidNonQualifiedAssets: {
+    cashMoneyMarketsCds: number;
+    brokerageNonManaged: number;
+    managedAccounts: number;
+    mutualFundsDirect: number;
+    annuitiesLessSurrenderCharges: number;
+    cashValueLifeInsurance: number;
+    otherBusinessAssetsCollectibles: number;
+  };
+  liabilities: {
+    mortgagePrimaryResidence: number;
+    mortgagesSecondaryInvestment: number;
+    homeEquityLoans: number;
+    creditCards: number;
+    otherLiabilities: number;
+  };
+  illiquidNonQualifiedAssets: {
+    primaryResidence: number;
+    investmentRealEstate: number;
+    privateBusiness: number;
+  };
+  liquidQualifiedAssets: {
+    cashMoneyMarketsCds: number;
+    retirementPlans: number;
+    brokerageNonManaged: number;
+    managedAccounts: number;
+    mutualFundsDirect: number;
+    annuities: number;
+  };
+  incomeSummary: {
+    salaryCommissions: number;
+    investmentIncome: number;
+    pension: number;
+    socialSecurity: number;
+    netRentalIncome: number;
+    other: number;
+  };
+  illiquidQualifiedAssets: {
+    purchaseAmountValue: number;
+  };
+}
+
+export interface StatementOfFinancialConditionStepOneTotals {
+  totalLiabilities: number;
+  totalLiquidAssets: number;
+  totalLiquidQualifiedAssets: number;
+  totalAnnualIncome: number;
+  totalIlliquidAssetsEquity: number;
+  totalAssetsLessPrimaryResidence: number;
+  totalNetWorthAssetsLessPrimaryResidenceLiabilities: number;
+  totalIlliquidSecurities: number;
+  totalNetWorth: number;
+  totalPotentialLiquidity: number;
+  totalIlliquidQualifiedAssets: number;
+}
+
+export interface StatementOfFinancialConditionStepOneResponse {
+  onboarding: {
+    clientId: string;
+    status: StatementOfFinancialConditionOnboardingStatus;
+    step: {
+      key: 'STEP_1_FINANCIALS';
+      label: string;
+      currentQuestionId: StatementOfFinancialConditionStepOneQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: StatementOfFinancialConditionStepOneQuestionId[];
+      fields: StatementOfFinancialConditionStepOneFields;
+      totals: StatementOfFinancialConditionStepOneTotals;
+    };
+  };
+}
+
+export interface StatementOfFinancialConditionStepOneUpdateRequest {
+  questionId: StatementOfFinancialConditionStepOneQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: StatementOfFinancialConditionStepOneQuestionId;
+  };
+}
+
+export interface StatementOfFinancialConditionStepOneQuestionConfig {
+  key: StatementOfFinancialConditionStepOneQuestionId;
+  title: string;
+  helper: string;
+  type: 'account-registration-block' | 'amount-grid-block';
+  fieldErrorKey?: string;
+}
+
+export type StatementOfFinancialConditionStepTwoQuestionId =
+  | 'step2.notes'
+  | 'step2.acknowledgements'
+  | 'step2.signatures.accountOwners'
+  | 'step2.signatures.firm';
+
+export interface StatementOfFinancialConditionStepTwoFields {
+  notes: {
+    notes: string | null;
+    additionalNotes: string | null;
+  };
+  acknowledgements: {
+    attestDataAccurateComplete: boolean;
+    agreeReportMaterialChanges: boolean;
+    understandMayNeedRecertification: boolean;
+    understandMayNeedSupportingDocumentation: boolean;
+    understandInfoUsedForBestInterestRecommendations: boolean;
+  };
+  signatures: {
+    accountOwner: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    jointAccountOwner: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    financialProfessional: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    registeredPrincipal: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+  };
+}
+
+export interface StatementOfFinancialConditionStepTwoResponse {
+  onboarding: {
+    clientId: string;
+    status: StatementOfFinancialConditionOnboardingStatus;
+    step: {
+      key: 'STEP_2_FINALIZATION';
+      label: string;
+      currentQuestionId: StatementOfFinancialConditionStepTwoQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: StatementOfFinancialConditionStepTwoQuestionId[];
+      fields: StatementOfFinancialConditionStepTwoFields;
+      requiresJointOwnerSignature: boolean;
+      nextRouteAfterCompletion: string | null;
+    };
+  };
+}
+
+export interface StatementOfFinancialConditionStepTwoUpdateRequest {
+  questionId: StatementOfFinancialConditionStepTwoQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: StatementOfFinancialConditionStepTwoQuestionId;
+  };
+}
+
+export interface StatementOfFinancialConditionStepTwoQuestionConfig {
+  key: StatementOfFinancialConditionStepTwoQuestionId;
+  title: string;
+  helper: string;
+  type: 'notes-block' | 'acknowledgements-block' | 'account-owner-signatures-block' | 'firm-signatures-block';
+  fieldErrorKey?: string;
+}
+
+export type BaiodfStepOneQuestionId = 'step1.accountRegistration' | 'step1.orderBasics';
+
+export interface BaiodfStepOneFields {
+  accountRegistration: {
+    rrName: string;
+    rrNo: string;
+    customerNames: string;
+  };
+  orderBasics: {
+    proposedPrincipalAmount: number;
+    qualifiedAccount: {
+      yes: boolean;
+      no: boolean;
+    };
+    qualifiedAccountRmdCertification: boolean;
+    solicitedTrade: {
+      yes: boolean;
+      no: boolean;
+    };
+    taxAdvantagePurchase: {
+      yes: boolean;
+      no: boolean;
+    };
+  };
+}
+
+export interface BaiodfStepOneResponse {
+  onboarding: {
+    clientId: string;
+    status: BaiodfOnboardingStatus;
+    step: {
+      key: 'STEP_1_CUSTOMER_ACCOUNT_INFORMATION';
+      label: string;
+      currentQuestionId: BaiodfStepOneQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: BaiodfStepOneQuestionId[];
+      fields: BaiodfStepOneFields;
+    };
+  };
+}
+
+export interface BaiodfStepOneUpdateRequest {
+  questionId: BaiodfStepOneQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: BaiodfStepOneQuestionId;
+  };
+}
+
+export interface BaiodfStepOneQuestionConfig {
+  key: BaiodfStepOneQuestionId;
+  title: string;
+  helper: string;
+  type: 'account-registration-block' | 'order-basics-block';
+  fieldErrorKey?: string;
+}
+
+export type BaiodfStepTwoQuestionId =
+  | 'step2.custodianAndProduct'
+  | 'step2.existingAltPositions'
+  | 'step2.netWorthAndConcentration';
+
+export interface BaiodfStepTwoFields {
+  custodianAndProduct: {
+    custodian: {
+      firstClearing: boolean;
+      direct: boolean;
+      mainStar: boolean;
+      cnb: boolean;
+      kingdomTrust: boolean;
+      other: boolean;
+    };
+    custodianOther: string | null;
+    nameOfProduct: string;
+    sponsorIssuer: string;
+    dateOfPpm: string | null;
+    datePpmSent: string | null;
+  };
+  existingAltPositions: {
+    existingIlliquidAltPositions: number;
+    existingSemiLiquidAltPositions: number;
+    existingTaxAdvantageAltPositions: number;
+  };
+  netWorthAndConcentration: {
+    totalNetWorth: number;
+    liquidNetWorth: number;
+  };
+}
+
+export interface BaiodfStepTwoConcentrations {
+  existingIlliquidAltConcentrationPercent: number;
+  existingSemiLiquidAltConcentrationPercent: number;
+  existingTaxAdvantageAltConcentrationPercent: number;
+  totalConcentrationPercent: number;
+}
+
+export interface BaiodfStepTwoResponse {
+  onboarding: {
+    clientId: string;
+    status: BaiodfOnboardingStatus;
+    step: {
+      key: 'STEP_2_CUSTOMER_ORDER_INFORMATION';
+      label: string;
+      currentQuestionId: BaiodfStepTwoQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: BaiodfStepTwoQuestionId[];
+      fields: BaiodfStepTwoFields;
+      concentrations: BaiodfStepTwoConcentrations;
+    };
+  };
+}
+
+export interface BaiodfStepTwoUpdateRequest {
+  questionId: BaiodfStepTwoQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: BaiodfStepTwoQuestionId;
+  };
+}
+
+export interface BaiodfStepTwoQuestionConfig {
+  key: BaiodfStepTwoQuestionId;
+  title: string;
+  helper: string;
+  type: 'custodian-product-block' | 'existing-alt-positions-block' | 'net-worth-concentration-block';
+  fieldErrorKey?: string;
+}
+
+export type BaiodfStepThreeQuestionId =
+  | 'step3.acknowledgements'
+  | 'step3.signatures.accountOwners'
+  | 'step3.signatures.financialProfessional';
+
+export interface BaiodfStepThreeFields {
+  acknowledgements: {
+    illiquidLongTerm: boolean;
+    reviewedProspectusOrPpm: boolean;
+    understandFeesAndExpenses: boolean;
+    noPublicMarket: boolean;
+    limitedRedemptionAndSaleRisk: boolean;
+    speculativeMayLoseInvestment: boolean;
+    distributionsMayVaryOrStop: boolean;
+    meetsSuitabilityStandards: boolean;
+    featuresRisksDiscussed: boolean;
+    meetsFinancialGoalsAndAccurate: boolean;
+  };
+  signatures: {
+    accountOwner: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    jointAccountOwner: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    financialProfessional: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+  };
+}
+
+export interface BaiodfStepThreeResponse {
+  onboarding: {
+    clientId: string;
+    status: BaiodfOnboardingStatus;
+    step: {
+      key: 'STEP_3_DISCLOSURES_AND_SIGNATURES';
+      label: string;
+      currentQuestionId: BaiodfStepThreeQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: BaiodfStepThreeQuestionId[];
+      fields: BaiodfStepThreeFields;
+      requiresJointOwnerSignature: boolean;
+      nextRouteAfterCompletion: string | null;
+    };
+  };
+}
+
+export interface BaiodfStepThreeUpdateRequest {
+  questionId: BaiodfStepThreeQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: BaiodfStepThreeQuestionId;
+  };
+}
+
+export interface BaiodfStepThreeQuestionConfig {
+  key: BaiodfStepThreeQuestionId;
+  title: string;
+  helper: string;
+  type: 'acknowledgements-block' | 'account-owner-signatures-block' | 'financial-professional-signature-block';
+  fieldErrorKey?: string;
+}
+
+export type Baiv506cStepOneQuestionId = 'step1.accountRegistration';
+
+export interface Baiv506cStepOneFields {
+  accountRegistration: {
+    rrName: string;
+    rrNo: string;
+    customerNames: string;
+  };
+}
+
+export interface Baiv506cStepOneResponse {
+  onboarding: {
+    clientId: string;
+    status: Baiv506cOnboardingStatus;
+    step: {
+      key: 'STEP_1_CLIENT_ACCOUNT_INFORMATION';
+      label: string;
+      currentQuestionId: Baiv506cStepOneQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: Baiv506cStepOneQuestionId[];
+      fields: Baiv506cStepOneFields;
+    };
+  };
+}
+
+export interface Baiv506cStepOneUpdateRequest {
+  questionId: Baiv506cStepOneQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: Baiv506cStepOneQuestionId;
+  };
+}
+
+export interface Baiv506cStepOneQuestionConfig {
+  key: Baiv506cStepOneQuestionId;
+  title: string;
+  helper: string;
+  type: 'account-registration-block';
+  fieldErrorKey?: string;
+}
+
+export type Baiv506cStepTwoQuestionId =
+  | 'step2.acknowledgements'
+  | 'step2.signatures.accountOwners'
+  | 'step2.signatures.financialProfessional';
+
+export interface Baiv506cStepTwoFields {
+  acknowledgements: {
+    rule506cGuidelineAcknowledged: boolean;
+    secRuleReviewedAndUnderstood: boolean;
+    incomeOrNetWorthVerified: boolean;
+    documentationReviewed: boolean;
+  };
+  signatures: {
+    accountOwner: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    jointAccountOwner: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+    financialProfessional: {
+      typedSignature: string | null;
+      printedName: string | null;
+      date: string | null;
+    };
+  };
+}
+
+export interface Baiv506cStepTwoResponse {
+  onboarding: {
+    clientId: string;
+    status: Baiv506cOnboardingStatus;
+    step: {
+      key: 'STEP_2_ACKNOWLEDGEMENTS_AND_SIGNATURES';
+      label: string;
+      currentQuestionId: Baiv506cStepTwoQuestionId;
+      currentQuestionIndex: number;
+      visibleQuestionIds: Baiv506cStepTwoQuestionId[];
+      fields: Baiv506cStepTwoFields;
+      requiresJointOwnerSignature: boolean;
+      nextRouteAfterCompletion: string | null;
+    };
+  };
+}
+
+export interface Baiv506cStepTwoUpdateRequest {
+  questionId: Baiv506cStepTwoQuestionId;
+  answer: unknown;
+  clientCursor?: {
+    currentQuestionId?: Baiv506cStepTwoQuestionId;
+  };
+}
+
+export interface Baiv506cStepTwoQuestionConfig {
+  key: Baiv506cStepTwoQuestionId;
+  title: string;
+  helper: string;
+  type: 'acknowledgements-block' | 'account-owner-signatures-block' | 'financial-professional-signature-block';
+  fieldErrorKey?: string;
+}
+
+export interface FormWorkspaceItem {
+  code: string;
+  title: string;
+  selected: boolean;
+  onboardingStatus:
+    | InvestorProfileOnboardingStatus
+    | StatementOfFinancialConditionOnboardingStatus
+    | BaiodfOnboardingStatus
+    | Baiv506cOnboardingStatus
+    | null;
+  resumeRoute: string | null;
+  viewRoute: string | null;
+  editRoute: string | null;
+  totalSteps: number | null;
+}
+
+export interface FormWorkspaceRecord {
+  clientId: string;
+  clientName: string;
+  forms: FormWorkspaceItem[];
+}
+
+export interface SelectClientFormsRequest {
+  formCodes: string[];
+}
+
+export interface SelectClientFormsResponse {
+  addedFormCodes: string[];
+  nextOnboardingRoute: string | null;
+  workspace: FormWorkspaceRecord;
+}
+
+export type ReviewStepResponse =
+  | (InvestorProfileStepOneResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (InvestorProfileStepTwoResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (InvestorProfileStepThreeResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (InvestorProfileStepFourResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (InvestorProfileStepFiveResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (InvestorProfileStepSixResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (InvestorProfileStepSevenResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (StatementOfFinancialConditionStepOneResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (StatementOfFinancialConditionStepTwoResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (BaiodfStepOneResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (BaiodfStepTwoResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (BaiodfStepThreeResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (Baiv506cStepOneResponse & { review?: { stepNumber: number; totalSteps: number } })
+  | (Baiv506cStepTwoResponse & { review?: { stepNumber: number; totalSteps: number } });
+
+export interface ReviewStepUpdateRequest {
+  fields: unknown;
 }
 
 export interface ApiFieldErrors {
