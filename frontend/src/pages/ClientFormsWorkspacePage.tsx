@@ -140,6 +140,26 @@ export function ClientFormsWorkspacePage() {
     return workspace.forms.filter((form) => stagedCodes.has(form.code)).map((form) => form.title);
   }, [stagedCodes, workspace]);
 
+  const stagedAvailableCodes = useMemo(() => {
+    if (!workspace) {
+      return [] as string[];
+    }
+
+    return workspace.forms
+      .filter((form) => stagedCodes.has(form.code) && !form.selected)
+      .map((form) => form.code);
+  }, [stagedCodes, workspace]);
+
+  const stagedCompletedCodes = useMemo(() => {
+    if (!workspace) {
+      return [] as string[];
+    }
+
+    return workspace.forms
+      .filter((form) => stagedCodes.has(form.code) && form.selected && form.onboardingStatus === 'COMPLETED')
+      .map((form) => form.code);
+  }, [stagedCodes, workspace]);
+
   const sortedForms = useMemo(() => {
     if (!workspace) {
       return [] as FormWorkspaceItem[];
@@ -177,8 +197,8 @@ export function ClientFormsWorkspacePage() {
     });
   };
 
-  const handleOnboard = async () => {
-    if (!clientId || stagedCodes.size === 0 || submitting) {
+  const handleSubmitFormCodes = async (formCodes: string[], action: 'onboard' | 'sync') => {
+    if (!clientId || formCodes.length === 0 || submitting) {
       return;
     }
 
@@ -190,12 +210,25 @@ export function ClientFormsWorkspacePage() {
         `/api/clients/${clientId}/forms/select`,
         {
           method: 'POST',
-          body: JSON.stringify({ formCodes: [...stagedCodes] })
+          body: JSON.stringify({ formCodes })
         }
       );
 
       setWorkspace(response.workspace);
-      setStagedCodes(new Set());
+      setStagedCodes((current) => {
+        const next = new Set(current);
+        for (const formCode of formCodes) {
+          next.delete(formCode);
+        }
+        return next;
+      });
+      if (action === 'sync') {
+        pushToast(
+          `Sent ${formCodes.length} form${formCodes.length > 1 ? 's' : ''} to n8n.`
+        );
+        return;
+      }
+
       pushToast(
         response.addedFormCodes.length > 0
           ? `${response.addedFormCodes.length} form${response.addedFormCodes.length > 1 ? 's' : ''} added.`
@@ -276,16 +309,30 @@ export function ClientFormsWorkspacePage() {
                   ))}
                 </div>
               </div>
-              <button
-                className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-xs uppercase tracking-[0.14em] text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/45 shadow-sm"
-                disabled={submitting}
-                type="button"
-                onClick={() => {
-                  void handleOnboard();
-                }}
-              >
-                {submitting ? 'Starting...' : `Onboard (${stagedCount})`}
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  className="shrink-0 rounded-full border border-line bg-white px-5 py-2.5 text-xs uppercase tracking-[0.14em] text-ink transition hover:border-black disabled:cursor-not-allowed disabled:opacity-45 shadow-sm"
+                  disabled={submitting || stagedAvailableCodes.length === 0}
+                  type="button"
+                  onClick={() => {
+                    void handleSubmitFormCodes(stagedAvailableCodes, 'onboard');
+                  }}
+                >
+                  {submitting && stagedAvailableCodes.length > 0 ? 'Working...' : `Onboard (${stagedAvailableCodes.length})`}
+                </button>
+                <button
+                  className="shrink-0 rounded-full bg-accent px-5 py-2.5 text-xs uppercase tracking-[0.14em] text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/45 shadow-sm"
+                  disabled={submitting || stagedCompletedCodes.length === 0}
+                  type="button"
+                  onClick={() => {
+                    void handleSubmitFormCodes(stagedCompletedCodes, 'sync');
+                  }}
+                >
+                  {submitting && stagedCompletedCodes.length > 0
+                    ? 'Working...'
+                    : `Send to n8n (${stagedCompletedCodes.length})`}
+                </button>
+              </div>
             </div>
           </section>
         )}
@@ -328,6 +375,16 @@ export function ClientFormsWorkspacePage() {
                             {form.selected ? 'Selected for onboarding' : 'Available to add'}
                           </p>
                         </div>
+                        <label className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-[10px] uppercase tracking-[0.16em] text-ink shadow-sm">
+                          <input
+                            checked={isStaged}
+                            className="h-4 w-4 rounded border-line text-accent focus:ring-accent"
+                            type="checkbox"
+                            aria-label={`Select ${form.title}`}
+                            onChange={() => handleToggleStage(form.code)}
+                          />
+                          Select
+                        </label>
                       </div>
 
                       <div className="mt-6 flex items-center justify-between border-b border-line pb-3 text-xs">
@@ -350,18 +407,23 @@ export function ClientFormsWorkspacePage() {
 
                     <div className="mt-6 flex flex-wrap items-center gap-2">
                       {!form.selected ? (
-                        <button
-                          className={`w-full rounded-full border px-4 py-2 text-[10px] uppercase tracking-[0.2em] transition ${isStaged
+                        <p
+                          className={`w-full rounded-2xl border px-4 py-3 text-center text-[10px] uppercase tracking-[0.18em] ${isStaged
                             ? 'border-accent bg-accent/10 text-accent'
-                            : 'border-line bg-white text-ink hover:border-black'
+                            : 'border-line bg-white text-mute'
                             }`}
-                          type="button"
-                          onClick={() => handleToggleStage(form.code)}
                         >
-                          {isStaged ? 'Added to Stage' : 'Add to Stage'}
-                        </button>
+                          Available to add
+                        </p>
                       ) : (
                         <div className="flex w-full flex-col gap-2">
+                          {isStaged && (
+                            <p className="w-full rounded-2xl border border-accent bg-accent/10 px-4 py-3 text-center text-[10px] uppercase tracking-[0.18em] text-accent">
+                              {form.onboardingStatus === 'COMPLETED'
+                                ? 'Selected for n8n sync'
+                                : 'Selected for onboarding'}
+                            </p>
+                          )}
                           <div className="flex w-full gap-2">
                             <button
                               className="flex-1 rounded-full border border-line bg-transparent px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-ink transition hover:border-black disabled:cursor-not-allowed disabled:opacity-50"
@@ -406,4 +468,3 @@ export function ClientFormsWorkspacePage() {
     </main>
   );
 }
-

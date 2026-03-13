@@ -90,7 +90,7 @@ describe('Client form review page', () => {
       expect(screen.getByRole('button', { name: 'Acknowledgements' })).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Form Review')).toBeInTheDocument();
+    expect(screen.getByText('Form Review • View Mode')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Acknowledgements' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Signatures' })).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole('button', { name: 'Signatures' }));
@@ -206,7 +206,7 @@ describe('Client form review page', () => {
     await user.click(screen.getByRole('button', { name: 'Acknowledgements' }));
     const checklistCheckboxes = screen.getAllByRole('checkbox');
     await user.click(checklistCheckboxes[0]);
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Save Step' }));
 
     await waitFor(() => {
       const postCall = fetchMock.mock.calls.find(

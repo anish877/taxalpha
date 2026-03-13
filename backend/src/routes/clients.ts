@@ -152,6 +152,11 @@ import {
   serializeBaiv506cStep2Fields,
   validateBaiv506cStep2Completion
 } from '../lib/baiv-506c-step2.js';
+import {
+  INVESTOR_PROFILE_ADDITIONAL_HOLDER_FORM_CODE,
+  INVESTOR_PROFILE_FORM_CODE as WEBHOOK_INVESTOR_PROFILE_FORM_CODE,
+  syncFormsToN8n
+} from '../lib/form-webhook-sync.js';
 import { HttpError } from '../lib/http-error.js';
 import { zodFieldErrors } from '../lib/validation.js';
 import { requireAuth } from '../middleware/require-auth.js';
@@ -941,6 +946,16 @@ function getNextRouteAfterInvestorProfileCompletion(params: {
 
 function getSelectedFormCodes(client: HydratedClient): Set<string> {
   return new Set(client.formSelections.map((selection) => selection.form.code));
+}
+
+function getWebhookSyncFormCodes(formCodes: string[]): string[] {
+  const next = [...formCodes];
+
+  if (formCodes.includes(WEBHOOK_INVESTOR_PROFILE_FORM_CODE)) {
+    next.push(INVESTOR_PROFILE_ADDITIONAL_HOLDER_FORM_CODE);
+  }
+
+  return [...new Set(next)];
 }
 
 function getOnboardingStatusForForm(
@@ -2031,9 +2046,28 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
 
       const payload: SelectClientFormsResponse = {
         addedFormCodes: formsToAdd.map((form) => form.code),
-        nextOnboardingRoute: getNextOnboardingRouteForClient(hydratedClient),
+        nextOnboardingRoute:
+          formsToAdd.length > 0
+            ? getNextOnboardingRouteForClient(
+                hydratedClient,
+                new Set(formsToAdd.map((form) => form.code))
+              )
+            : null,
         workspace: toFormWorkspaceRecord(hydratedClient, activeForms)
       };
+
+      const formCodesToSync = requestedCodes.filter((code) =>
+        hydratedClient.formSelections.some((selection) => selection.form.code === code)
+      );
+
+      if (formCodesToSync.length > 0) {
+        await syncFormsToN8n({
+          client: hydratedClient,
+          formCodes: getWebhookSyncFormCodes(formCodesToSync),
+          advisorName: authUser.name,
+          config: deps.config.n8nWebhooks
+        });
+      }
 
       response.json(payload);
     } catch (error) {

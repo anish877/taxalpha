@@ -9,7 +9,15 @@ const config = {
   nodeEnv: 'test' as const,
   frontendUrl: 'http://localhost:5173',
   jwtSecret: 'test_secret_test_secret_test_secret_1234',
-  jwtExpiresIn: '7d'
+  jwtExpiresIn: '7d',
+  n8nWebhooks: {
+    investorProfileUrl: 'https://example.com/investor-profile',
+    investorProfileAdditionalHolderUrl: 'https://example.com/additional-holder',
+    statementOfFinancialConditionUrl: 'https://example.com/sfc',
+    baiodfUrl: 'https://example.com/baiodf',
+    baiv506cUrl: 'https://example.com/baiv-506c',
+    timeoutMs: 5000
+  }
 };
 
 const authUser = {
@@ -128,6 +136,13 @@ describe('forms workspace routes', () => {
 
   it('selects staged forms and returns next onboarding route in standard sequence', async () => {
     const prisma = createMockPrisma();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 200
+      })
+    );
+
+    vi.stubGlobal('fetch', fetchMock);
     prisma.user.findUnique.mockResolvedValue(authUser);
 
     prisma.client.findFirst
@@ -833,5 +848,125 @@ describe('forms workspace routes', () => {
     expect(response.body.nextOnboardingRoute).toBe('/clients/client_1/statement-of-financial-condition/step-1');
     expect(tx.clientFormSelection.createMany).toHaveBeenCalledTimes(1);
     expect(tx.statementOfFinancialConditionOnboarding.upsert).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    const [webhookUrl, requestInit] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const payload = JSON.parse(String(requestInit.body));
+
+    expect(webhookUrl).toBe('https://example.com/sfc');
+    expect(payload.metadata.formCode).toBe('SFC');
+    expect(payload.fields.step1.employmentStatus.current).toBeNull();
+    expect(payload.fields.step2.signatures.accountOwner.typedSignature).toBeNull();
+  });
+
+  it('syncs investor profile and additional holder payloads when investor profile is selected', async () => {
+    const prisma = createMockPrisma();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 200
+      })
+    );
+
+    vi.stubGlobal('fetch', fetchMock);
+    prisma.user.findUnique.mockResolvedValue(authUser);
+
+    prisma.client.findFirst
+      .mockResolvedValueOnce({
+        id: 'client_1',
+        name: 'Client One',
+        email: 'client@example.com',
+        phone: null,
+        formSelections: [],
+        brokerLinks: [],
+        investorProfileOnboarding: null,
+        statementOfFinancialConditionOnboarding: null,
+        baiodfOnboarding: null,
+        baiv506cOnboarding: null
+      })
+      .mockResolvedValueOnce({
+        id: 'client_1',
+        name: 'Client One',
+        email: 'client@example.com',
+        phone: null,
+        formSelections: [{ form: { id: 'form_1', code: 'INVESTOR_PROFILE', title: 'Investor Profile' } }],
+        brokerLinks: [],
+        investorProfileOnboarding: {
+          status: 'NOT_STARTED',
+          step1RrName: null,
+          step1RrNo: null,
+          step1CustomerNames: null,
+          step1AccountNo: null,
+          step1AccountType: null,
+          step1Data: null,
+          step2Data: null,
+          step3Data: null,
+          step4Data: null,
+          step5Data: null,
+          step6Data: null,
+          step7Data: null
+        },
+        statementOfFinancialConditionOnboarding: null,
+        baiodfOnboarding: null,
+        baiv506cOnboarding: null
+      });
+
+    prisma.formCatalog.findMany
+      .mockResolvedValueOnce([{ id: 'form_1', code: 'INVESTOR_PROFILE' }])
+      .mockResolvedValueOnce([
+        { code: 'INVESTOR_PROFILE', title: 'Investor Profile' },
+        { code: 'SFC', title: 'Statement of Financial Condition' },
+        {
+          code: 'BAIODF',
+          title: 'Brokerage Alternative Investment Order and Disclosure Form'
+        },
+        {
+          code: 'BAIV_506C',
+          title: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)'
+        }
+      ]);
+
+    const tx = {
+      clientFormSelection: {
+        createMany: vi.fn().mockResolvedValue({ count: 1 })
+      },
+      investorProfileOnboarding: {
+        upsert: vi.fn().mockResolvedValue({ id: 'investor_onboarding_1' })
+      },
+      statementOfFinancialConditionOnboarding: {
+        upsert: vi.fn()
+      },
+      brokerageAlternativeInvestmentOrderDisclosureOnboarding: {
+        upsert: vi.fn()
+      },
+      brokerageAccreditedInvestorVerificationOnboarding: {
+        upsert: vi.fn()
+      }
+    };
+
+    prisma.$transaction.mockImplementation(async (callback: (trx: typeof tx) => Promise<unknown>) =>
+      callback(tx)
+    );
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients/client_1/forms/select')
+      .set('Cookie', createAuthCookie())
+      .send({ formCodes: ['INVESTOR_PROFILE'] });
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://example.com/investor-profile');
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://example.com/additional-holder');
+
+    const investorPayload = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body));
+    const additionalHolderPayload = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
+
+    expect(investorPayload.fields.step1.accountRegistration.rrName).toBeNull();
+    expect(additionalHolderPayload.metadata.sourceFormCode).toBe('INVESTOR_PROFILE');
+    expect(additionalHolderPayload.fields.holder.name).toBeNull();
   });
 });

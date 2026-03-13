@@ -15,7 +15,15 @@ const config = {
   nodeEnv: 'test' as const,
   frontendUrl: 'http://localhost:5173',
   jwtSecret: 'test_secret_test_secret_test_secret_1234',
-  jwtExpiresIn: '7d'
+  jwtExpiresIn: '7d',
+  n8nWebhooks: {
+    investorProfileUrl: null,
+    investorProfileAdditionalHolderUrl: null,
+    statementOfFinancialConditionUrl: null,
+    baiodfUrl: null,
+    baiv506cUrl: null,
+    timeoutMs: 5000
+  }
 };
 
 const authUser = {

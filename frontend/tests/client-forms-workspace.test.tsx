@@ -7,7 +7,7 @@ import { AuthProvider } from '../src/context/AuthContext';
 import { ToastProvider } from '../src/context/ToastContext';
 
 describe('Client forms workspace', () => {
-  it('stages a form and starts onboarding from the workspace', async () => {
+  it('stages a completed form from the workspace', async () => {
     const user = userEvent.setup();
 
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -157,12 +157,33 @@ describe('Client forms workspace', () => {
       if (url.includes('/api/clients/client_1/forms/select')) {
         return new Response(
           JSON.stringify({
-            addedFormCodes: ['BAIV_506C'],
-            nextOnboardingRoute: '/clients/client_1/brokerage-accredited-investor-verification/step-1',
+            addedFormCodes: [],
+            nextOnboardingRoute: null,
             workspace: {
               clientId: 'client_1',
               clientName: 'Client One',
-              forms: []
+              forms: [
+                {
+                  code: 'INVESTOR_PROFILE',
+                  title: 'Investor Profile',
+                  selected: true,
+                  onboardingStatus: 'COMPLETED',
+                  resumeRoute: '/clients/client_1/investor-profile/step-7',
+                  viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
+                  editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
+                  totalSteps: 7
+                },
+                {
+                  code: 'BAIV_506C',
+                  title: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)',
+                  selected: false,
+                  onboardingStatus: null,
+                  resumeRoute: null,
+                  viewRoute: null,
+                  editRoute: null,
+                  totalSteps: 2
+                }
+              ]
             }
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -216,18 +237,23 @@ describe('Client forms workspace', () => {
       expect(screen.getByText('Client One')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('button', { name: 'Forms' }));
+    await user.click(screen.getByRole('button', { name: 'Workspace' }));
 
     await waitFor(() => {
       expect(window.location.pathname).toBe('/clients/client_1/forms');
-      expect(screen.getByText('Client Forms Workspace')).toBeInTheDocument();
+      expect(screen.getByText('Client Workspace')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Client One' })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('button', { name: 'Add' }));
-    await user.click(screen.getByRole('button', { name: 'Onboard (1 Selected Forms)' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Select Investor Profile' }));
+    await user.click(screen.getByRole('button', { name: 'Send to n8n (1)' }));
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe('/clients/client_1/brokerage-accredited-investor-verification/step-1');
+      const postCall = fetchMock.mock.calls.find(
+        ([url, init]) => String(url).includes('/api/clients/client_1/forms/select') && init?.method === 'POST'
+      );
+      expect(postCall).toBeTruthy();
+      expect(window.location.pathname).toBe('/clients/client_1/forms');
     });
   });
 });
