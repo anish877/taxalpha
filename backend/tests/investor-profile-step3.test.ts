@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyStep3Answer,
+  applyStep3Prefill,
   defaultStep3Fields,
   getVisibleStep3QuestionIds,
   validateStep3Answer,
@@ -233,6 +234,84 @@ describe('investor-profile-step3', () => {
 
     expect(disclosureCleared.affiliations.advisorEmployeeName).toBeNull();
     expect(disclosureCleared.affiliations.advisorEmployeeRelationship).toBeNull();
+  });
+
+  it('prefills holder defaults from the client record without overwriting existing values', () => {
+    const fields = defaultStep3Fields();
+
+    const prefilled = applyStep3Prefill(fields, {
+      defaultKind: 'entity',
+      contactEmail: 'client@example.com',
+      contactMobile: '+1 555 555 5555'
+    });
+
+    expect(prefilled.holder.kind).toEqual({ person: false, entity: true });
+    expect(prefilled.holder.contact.email).toBe('client@example.com');
+    expect(prefilled.holder.contact.phones.mobile).toBe('+1 555 555 5555');
+
+    const existing = defaultStep3Fields();
+    existing.holder.kind = { person: true, entity: false };
+    existing.holder.contact.email = 'existing@example.com';
+    existing.holder.contact.phones.mobile = '+1 111 111 1111';
+
+    const unchanged = applyStep3Prefill(existing, {
+      defaultKind: 'entity',
+      contactEmail: 'client@example.com',
+      contactMobile: '+1 555 555 5555'
+    });
+
+    expect(unchanged.holder.kind).toEqual({ person: true, entity: false });
+    expect(unchanged.holder.contact.email).toBe('existing@example.com');
+    expect(unchanged.holder.contact.phones.mobile).toBe('+1 111 111 1111');
+  });
+
+  it('copies the legal address into mailing when mailingDifferent becomes yes and mailing is empty', () => {
+    const fields = defaultStep3Fields();
+    fields.holder.legalAddress = {
+      line1: '123 Main St',
+      city: 'Austin',
+      stateProvince: 'TX',
+      postalCode: '78701',
+      country: 'US'
+    };
+
+    const next = applyStep3Answer(fields, 'step3.holder.mailingDifferent', {
+      yes: true,
+      no: false
+    });
+
+    expect(next.holder.mailingAddress).toEqual(fields.holder.legalAddress);
+  });
+
+  it('does not overwrite an existing mailing address when mailingDifferent becomes yes', () => {
+    const fields = defaultStep3Fields();
+    fields.holder.legalAddress = {
+      line1: '123 Main St',
+      city: 'Austin',
+      stateProvince: 'TX',
+      postalCode: '78701',
+      country: 'US'
+    };
+    fields.holder.mailingAddress = {
+      line1: 'PO Box 9',
+      city: 'Dallas',
+      stateProvince: 'TX',
+      postalCode: '75201',
+      country: 'US'
+    };
+
+    const next = applyStep3Answer(fields, 'step3.holder.mailingDifferent', {
+      yes: true,
+      no: false
+    });
+
+    expect(next.holder.mailingAddress).toEqual({
+      line1: 'PO Box 9',
+      city: 'Dallas',
+      stateProvince: 'TX',
+      postalCode: '75201',
+      country: 'US'
+    });
   });
 
   it('validates since-year answer when knowledge path is active', () => {

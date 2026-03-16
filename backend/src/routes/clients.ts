@@ -12,6 +12,7 @@ import { z } from 'zod';
 import {
   STEP_1_LABEL,
   applyStep1Answer,
+  applyStep1Prefill,
   clampStep1QuestionIndex,
   defaultStep1Fields,
   getVisibleStep1QuestionIds,
@@ -41,6 +42,7 @@ import {
 import {
   STEP_3_LABEL,
   applyStep3Answer,
+  applyStep3Prefill,
   clampStep3QuestionIndex,
   defaultStep3Fields,
   getVisibleStep3QuestionIds,
@@ -55,6 +57,7 @@ import {
 import {
   STEP_4_LABEL,
   applyStep4Answer,
+  applyStep4Prefill,
   clampStep4QuestionIndex,
   defaultStep4Fields,
   getVisibleStep4QuestionIds,
@@ -689,20 +692,50 @@ function getStep7ValidationContext(step1Data: Prisma.JsonValue | null | undefine
   };
 }
 
-function applyHolderKindDefault<T extends { holder: { kind: { person: boolean; entity: boolean } } }>(
-  fields: T,
-  defaultKind: 'person' | 'entity'
-): T {
-  if (Object.values(fields.holder.kind).some(Boolean)) {
-    return fields;
-  }
+function getStep1FieldsWithAutofill(params: {
+  step1Data: Prisma.JsonValue | null | undefined;
+  step1RrName?: string | null;
+  step1RrNo?: string | null;
+  step1CustomerNames?: string | null;
+  step1AccountNo?: string | null;
+  step1AccountType?: Prisma.JsonValue | null;
+  clientName?: string | null;
+}): Step1Fields {
+  return applyStep1Prefill(
+    normalizeStep1Fields(params.step1Data ?? null, {
+      step1RrName: params.step1RrName ?? null,
+      step1RrNo: params.step1RrNo ?? null,
+      step1CustomerNames: params.step1CustomerNames ?? null,
+      step1AccountNo: params.step1AccountNo ?? null,
+      step1AccountType: params.step1AccountType ?? null,
+      clientName: params.clientName ?? null
+    }),
+    {
+      customerNames: params.clientName ?? null
+    }
+  );
+}
 
-  const next = structuredClone(fields);
-  next.holder.kind = {
-    person: defaultKind === 'person',
-    entity: defaultKind === 'entity'
-  };
-  return next;
+function getStep3FieldsWithAutofill(params: {
+  step1Data: Prisma.JsonValue | null | undefined;
+  step3Data: Prisma.JsonValue | null | undefined;
+  clientEmail?: string | null;
+  clientPhone?: string | null;
+}): Step3Fields {
+  return applyStep3Prefill(normalizeStep3Fields(params.step3Data ?? null), {
+    defaultKind: inferDefaultHolderKindFromStep1(params.step1Data ?? null),
+    contactEmail: params.clientEmail ?? null,
+    contactMobile: params.clientPhone ?? null
+  });
+}
+
+function getStep4FieldsWithAutofill(params: {
+  step1Data: Prisma.JsonValue | null | undefined;
+  step4Data: Prisma.JsonValue | null | undefined;
+}): Step4Fields {
+  return applyStep4Prefill(normalizeStep4Fields(params.step4Data ?? null), {
+    defaultKind: inferDefaultHolderKindFromStep1(params.step1Data ?? null)
+  });
 }
 
 function getInvestorProfileResumeStepRoute(client: HydratedClient): string | null {
@@ -717,12 +750,14 @@ function getInvestorProfileResumeStepRoute(client: HydratedClient): string | nul
     return `${base}/step-1`;
   }
 
-  const step1Fields = normalizeStep1Fields(onboarding.step1Data, {
+  const step1Fields = getStep1FieldsWithAutofill({
+    step1Data: onboarding.step1Data,
     step1RrName: onboarding.step1RrName,
     step1RrNo: onboarding.step1RrNo,
     step1CustomerNames: onboarding.step1CustomerNames,
     step1AccountNo: onboarding.step1AccountNo,
-    step1AccountType: onboarding.step1AccountType
+    step1AccountType: onboarding.step1AccountType,
+    clientName: client.name
   });
 
   if (Object.keys(validateStep1Completion(step1Fields)).length > 0) {
@@ -734,18 +769,22 @@ function getInvestorProfileResumeStepRoute(client: HydratedClient): string | nul
     return `${base}/step-2`;
   }
 
-  const step3DefaultKind = inferDefaultHolderKindFromStep1(onboarding.step1Data);
-  const step3Fields = applyHolderKindDefault(normalizeStep3Fields(onboarding.step3Data), step3DefaultKind);
+  const step3Fields = getStep3FieldsWithAutofill({
+    step1Data: onboarding.step1Data,
+    step3Data: onboarding.step3Data,
+    clientEmail: client.email,
+    clientPhone: client.phone
+  });
 
   if (Object.keys(validateStep3Completion(step3Fields)).length > 0) {
     return `${base}/step-3`;
   }
 
   if (isStep4RequiredFromStep1(onboarding.step1Data)) {
-    const step4Fields = applyHolderKindDefault(
-      normalizeStep4Fields(onboarding.step4Data),
-      step3DefaultKind
-    );
+    const step4Fields = getStep4FieldsWithAutofill({
+      step1Data: onboarding.step1Data,
+      step4Data: onboarding.step4Data
+    });
 
     if (Object.keys(validateStep4Completion(step4Fields)).length > 0) {
       return `${base}/step-4`;
@@ -1312,13 +1351,19 @@ function createDefaultBaiv506cOnboardingPayload() {
   } as const;
 }
 
-function toStepOneResponse(clientId: string, onboarding: StepOneSelectableOnboarding): Step1Response {
-  const fields = normalizeStep1Fields(onboarding.step1Data, {
+function toStepOneResponse(
+  clientId: string,
+  onboarding: StepOneSelectableOnboarding,
+  clientName: string | null = null
+): Step1Response {
+  const fields = getStep1FieldsWithAutofill({
+    step1Data: onboarding.step1Data,
     step1RrName: onboarding.step1RrName,
     step1RrNo: onboarding.step1RrNo,
     step1CustomerNames: onboarding.step1CustomerNames,
     step1AccountNo: onboarding.step1AccountNo,
-    step1AccountType: onboarding.step1AccountType
+    step1AccountType: onboarding.step1AccountType,
+    clientName
   });
 
   const visibleQuestionIds = getVisibleStep1QuestionIds(fields);
@@ -1363,9 +1408,17 @@ function toStepTwoResponse(clientId: string, onboarding: StepTwoSelectableOnboar
   };
 }
 
-function toStepThreeResponse(clientId: string, onboarding: StepThreeSelectableOnboarding): Step3Response {
-  const defaultKind = inferDefaultHolderKindFromStep1(onboarding.step1Data);
-  const fields = applyHolderKindDefault(normalizeStep3Fields(onboarding.step3Data), defaultKind);
+function toStepThreeResponse(
+  clientId: string,
+  onboarding: StepThreeSelectableOnboarding,
+  clientContact: { email?: string | null; phone?: string | null } = {}
+): Step3Response {
+  const fields = getStep3FieldsWithAutofill({
+    step1Data: onboarding.step1Data,
+    step3Data: onboarding.step3Data,
+    clientEmail: clientContact.email ?? null,
+    clientPhone: clientContact.phone ?? null
+  });
   const visibleQuestionIds = getVisibleStep3QuestionIds(fields);
   const currentQuestionIndex = clampStep3QuestionIndex(onboarding.step3CurrentQuestionIndex, visibleQuestionIds);
   const currentQuestionId = visibleQuestionIds[currentQuestionIndex] ?? visibleQuestionIds[0] ?? 'step3.holder.kind';
@@ -1389,8 +1442,10 @@ function toStepThreeResponse(clientId: string, onboarding: StepThreeSelectableOn
 }
 
 function toStepFourResponse(clientId: string, onboarding: StepFourSelectableOnboarding): Step4Response {
-  const defaultKind = inferDefaultHolderKindFromStep1(onboarding.step1Data);
-  const fields = applyHolderKindDefault(normalizeStep4Fields(onboarding.step4Data), defaultKind);
+  const fields = getStep4FieldsWithAutofill({
+    step1Data: onboarding.step1Data,
+    step4Data: onboarding.step4Data
+  });
   const visibleQuestionIds = getVisibleStep4QuestionIds(fields);
   const currentQuestionIndex = clampStep4QuestionIndex(onboarding.step4CurrentQuestionIndex, visibleQuestionIds);
   const currentQuestionId = visibleQuestionIds[currentQuestionIndex] ?? visibleQuestionIds[0] ?? 'step4.holder.kind';
@@ -1515,6 +1570,9 @@ function toNullableJsonInput(
 }
 
 function computeInvestorProfileCompletionStatus(input: {
+  clientName?: string | null | undefined;
+  clientEmail?: string | null | undefined;
+  clientPhone?: string | null | undefined;
   step1RrName: string | null | undefined;
   step1RrNo: string | null | undefined;
   step1CustomerNames: string | null | undefined;
@@ -1528,17 +1586,26 @@ function computeInvestorProfileCompletionStatus(input: {
   step6Data: Prisma.JsonValue | null | undefined;
   step7Data: Prisma.JsonValue | null | undefined;
 }): InvestorProfileOnboardingStatus {
-  const step1Fields = normalizeStep1Fields(input.step1Data ?? null, {
+  const step1Fields = getStep1FieldsWithAutofill({
+    step1Data: input.step1Data ?? null,
     step1RrName: input.step1RrName ?? null,
     step1RrNo: input.step1RrNo ?? null,
     step1CustomerNames: input.step1CustomerNames ?? null,
     step1AccountNo: input.step1AccountNo ?? null,
-    step1AccountType: input.step1AccountType ?? null
+    step1AccountType: input.step1AccountType ?? null,
+    clientName: input.clientName ?? null
   });
   const step2Fields = normalizeStep2Fields(input.step2Data ?? null);
-  const step3DefaultKind = inferDefaultHolderKindFromStep1(input.step1Data ?? null);
-  const step3Fields = applyHolderKindDefault(normalizeStep3Fields(input.step3Data ?? null), step3DefaultKind);
-  const step4Fields = applyHolderKindDefault(normalizeStep4Fields(input.step4Data ?? null), step3DefaultKind);
+  const step3Fields = getStep3FieldsWithAutofill({
+    step1Data: input.step1Data ?? null,
+    step3Data: input.step3Data ?? null,
+    clientEmail: input.clientEmail ?? null,
+    clientPhone: input.clientPhone ?? null
+  });
+  const step4Fields = getStep4FieldsWithAutofill({
+    step1Data: input.step1Data ?? null,
+    step4Data: input.step4Data ?? null
+  });
   const step5Fields = normalizeStep5Fields(input.step5Data ?? null);
   const step6Fields = normalizeStep6Fields(input.step6Data ?? null);
   const step7Context = getStep7ValidationContext(input.step1Data ?? null);
@@ -1576,6 +1643,7 @@ function toInvestorReviewResponse(
   clientId: string,
   stepNumber: number,
   onboarding: InvestorProfileReviewSelectableOnboarding,
+  clientContact: { name?: string | null; email?: string | null; phone?: string | null },
   advisorName: string,
   nextRouteAfterCompletion: string | null
 ) {
@@ -1591,7 +1659,7 @@ function toInvestorReviewResponse(
           step1AccountType: onboarding.step1AccountType,
           step1CurrentQuestionIndex: onboarding.step1CurrentQuestionIndex,
           step1Data: onboarding.step1Data
-        }),
+        }, clientContact.name ?? null),
         stepNumber
       );
     case 2:
@@ -1610,7 +1678,7 @@ function toInvestorReviewResponse(
           step1Data: onboarding.step1Data,
           step3CurrentQuestionIndex: onboarding.step3CurrentQuestionIndex,
           step3Data: onboarding.step3Data
-        }),
+        }, { email: clientContact.email ?? null, phone: clientContact.phone ?? null }),
         stepNumber
       );
     case 4:
@@ -2344,7 +2412,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           id: clientId,
           ownerUserId: authUser.id
         },
-        select: { id: true }
+        select: {
+          id: true,
+          name: true
+        }
       });
 
       if (!client) {
@@ -2374,7 +2445,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json(toStepOneResponse(clientId, onboarding));
+      response.json(toStepOneResponse(clientId, onboarding, client.name));
     } catch (error) {
       next(error);
     }
@@ -2429,7 +2500,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           id: clientId,
           ownerUserId: authUser.id
         },
-        select: { id: true }
+        select: {
+          id: true,
+          name: true
+        }
       });
 
       if (!client) {
@@ -2451,12 +2525,14 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      const existingFields = normalizeStep1Fields(existingOnboarding?.step1Data, {
+      const existingFields = getStep1FieldsWithAutofill({
+        step1Data: existingOnboarding?.step1Data,
         step1RrName: existingOnboarding?.step1RrName,
         step1RrNo: existingOnboarding?.step1RrNo,
         step1CustomerNames: existingOnboarding?.step1CustomerNames,
         step1AccountNo: existingOnboarding?.step1AccountNo,
-        step1AccountType: existingOnboarding?.step1AccountType
+        step1AccountType: existingOnboarding?.step1AccountType,
+        clientName: client.name
       });
 
       const visibleBefore = getVisibleStep1QuestionIds(existingFields);
@@ -2513,7 +2589,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json(toStepOneResponse(clientId, onboarding));
+      response.json(toStepOneResponse(clientId, onboarding, client.name));
     } catch (error) {
       next(error);
     }
@@ -2682,6 +2758,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         },
         select: {
           id: true,
+          email: true,
+          phone: true,
           formSelections: {
             select: {
               form: {
@@ -2736,7 +2814,12 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json(toStepThreeResponse(clientId, onboarding));
+      response.json(
+        toStepThreeResponse(clientId, onboarding, {
+          email: client.email,
+          phone: client.phone
+        })
+      );
     } catch (error) {
       next(error);
     }
@@ -2782,6 +2865,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         },
         select: {
           id: true,
+          email: true,
+          phone: true,
           formSelections: {
             select: {
               form: {
@@ -2828,11 +2913,12 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      const defaultKind = inferDefaultHolderKindFromStep1(existingOnboarding?.step1Data);
-      const existingFields = applyHolderKindDefault(
-        normalizeStep3Fields(existingOnboarding?.step3Data),
-        defaultKind
-      );
+      const existingFields = getStep3FieldsWithAutofill({
+        step1Data: existingOnboarding?.step1Data,
+        step3Data: existingOnboarding?.step3Data,
+        clientEmail: client.email,
+        clientPhone: client.phone
+      });
       const visibleBefore = getVisibleStep3QuestionIds(existingFields);
 
       if (!visibleBefore.includes(questionId)) {
@@ -2884,7 +2970,12 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json(toStepThreeResponse(clientId, onboarding));
+      response.json(
+        toStepThreeResponse(clientId, onboarding, {
+          email: client.email,
+          phone: client.phone
+        })
+      );
     } catch (error) {
       next(error);
     }
@@ -2909,6 +3000,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         },
         select: {
           id: true,
+          name: true,
+          email: true,
+          phone: true,
           formSelections: {
             select: {
               form: {
@@ -3016,6 +3110,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         },
         select: {
           id: true,
+          name: true,
+          email: true,
+          phone: true,
           formSelections: {
             select: {
               form: {
@@ -3069,11 +3166,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const defaultKind = inferDefaultHolderKindFromStep1(existingOnboarding?.step1Data);
-      const existingFields = applyHolderKindDefault(
-        normalizeStep4Fields(existingOnboarding?.step4Data),
-        defaultKind
-      );
+      const existingFields = getStep4FieldsWithAutofill({
+        step1Data: existingOnboarding?.step1Data,
+        step4Data: existingOnboarding?.step4Data
+      });
       const visibleBefore = getVisibleStep4QuestionIds(existingFields);
 
       if (!visibleBefore.includes(questionId)) {
@@ -3473,6 +3569,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         },
         select: {
           id: true,
+          name: true,
+          email: true,
+          phone: true,
           formSelections: {
             select: {
               form: {
@@ -3594,6 +3693,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         },
         select: {
           id: true,
+          name: true,
+          email: true,
+          phone: true,
           formSelections: {
             select: {
               form: {
@@ -3681,23 +3783,26 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const nextIndex = Math.min(safeAnsweredIndex + 1, Math.max(visibleAfter.length - 1, 0));
 
       const step7CompletionErrors = validateStep7Completion(nextFields, context);
-      const step1Fields = normalizeStep1Fields(existingOnboarding?.step1Data, {
+      const step1Fields = getStep1FieldsWithAutofill({
+        step1Data: existingOnboarding?.step1Data,
         step1RrName: existingOnboarding?.step1RrName,
         step1RrNo: existingOnboarding?.step1RrNo,
         step1CustomerNames: existingOnboarding?.step1CustomerNames,
         step1AccountNo: existingOnboarding?.step1AccountNo,
-        step1AccountType: existingOnboarding?.step1AccountType
+        step1AccountType: existingOnboarding?.step1AccountType,
+        clientName: client.name
       });
       const step2Fields = normalizeStep2Fields(existingOnboarding?.step2Data);
-      const step3DefaultKind = inferDefaultHolderKindFromStep1(existingOnboarding?.step1Data);
-      const step3Fields = applyHolderKindDefault(
-        normalizeStep3Fields(existingOnboarding?.step3Data),
-        step3DefaultKind
-      );
-      const step4Fields = applyHolderKindDefault(
-        normalizeStep4Fields(existingOnboarding?.step4Data),
-        step3DefaultKind
-      );
+      const step3Fields = getStep3FieldsWithAutofill({
+        step1Data: existingOnboarding?.step1Data,
+        step3Data: existingOnboarding?.step3Data,
+        clientEmail: client.email,
+        clientPhone: client.phone
+      });
+      const step4Fields = getStep4FieldsWithAutofill({
+        step1Data: existingOnboarding?.step1Data,
+        step4Data: existingOnboarding?.step4Data
+      });
       const step5Fields = normalizeStep5Fields(existingOnboarding?.step5Data);
       const step6Fields = normalizeStep6Fields(existingOnboarding?.step6Data);
 
@@ -3787,6 +3892,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           },
           select: {
             id: true,
+            name: true,
+            email: true,
+            phone: true,
             formSelections: {
               select: {
                 form: {
@@ -3863,7 +3971,18 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             : null;
 
         response.json(
-          toInvestorReviewResponse(clientId, stepNumber, onboarding, authUser.name, nextRouteAfterCompletion)
+          toInvestorReviewResponse(
+            clientId,
+            stepNumber,
+            onboarding,
+            {
+              name: client.name,
+              email: client.email,
+              phone: client.phone
+            },
+            authUser.name,
+            nextRouteAfterCompletion
+          )
         );
       } catch (error) {
         next(error);
@@ -3902,6 +4021,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           },
           select: {
             id: true,
+            name: true,
+            email: true,
+            phone: true,
             formSelections: {
               select: {
                 form: {
@@ -3982,12 +4104,14 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         let stepFieldErrors: Record<string, string> = {};
 
         if (stepNumber === 1) {
-          const fields = normalizeStep1Fields(parsedBody.data.fields as Prisma.JsonValue, {
+          const fields = getStep1FieldsWithAutofill({
+            step1Data: parsedBody.data.fields as Prisma.JsonValue,
             step1RrName: currentStep1RrName,
             step1RrNo: currentStep1RrNo,
             step1CustomerNames: currentStep1CustomerNames,
             step1AccountNo: currentStep1AccountNo,
-            step1AccountType: currentStep1AccountType
+            step1AccountType: currentStep1AccountType,
+            clientName: client.name
           });
           stepFieldErrors = validateStep1Completion(fields);
 
@@ -4002,19 +4126,19 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           stepFieldErrors = validateStep2Completion(fields);
           nextStep2Data = serializeStep2Fields(fields) as Prisma.JsonValue;
         } else if (stepNumber === 3) {
-          const defaultKind = inferDefaultHolderKindFromStep1(nextStep1Data);
-          const fields = applyHolderKindDefault(
-            normalizeStep3Fields(parsedBody.data.fields as Prisma.JsonValue),
-            defaultKind
-          );
+          const fields = getStep3FieldsWithAutofill({
+            step1Data: nextStep1Data,
+            step3Data: parsedBody.data.fields as Prisma.JsonValue,
+            clientEmail: client.email,
+            clientPhone: client.phone
+          });
           stepFieldErrors = validateStep3Completion(fields);
           nextStep3Data = serializeStep3Fields(fields) as Prisma.JsonValue;
         } else if (stepNumber === 4) {
-          const defaultKind = inferDefaultHolderKindFromStep1(nextStep1Data);
-          const fields = applyHolderKindDefault(
-            normalizeStep4Fields(parsedBody.data.fields as Prisma.JsonValue),
-            defaultKind
-          );
+          const fields = getStep4FieldsWithAutofill({
+            step1Data: nextStep1Data,
+            step4Data: parsedBody.data.fields as Prisma.JsonValue
+          });
           stepFieldErrors = isStep4RequiredFromStep1(nextStep1Data) ? validateStep4Completion(fields) : {};
           nextStep4Data = serializeStep4Fields(fields) as Prisma.JsonValue;
         } else if (stepNumber === 5) {
@@ -4041,6 +4165,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
 
         const nextStatus = computeInvestorProfileCompletionStatus({
+          clientName: client.name,
+          clientEmail: client.email,
+          clientPhone: client.phone,
           step1RrName: nextStep1RrName,
           step1RrNo: nextStep1RrNo,
           step1CustomerNames: nextStep1CustomerNames,
@@ -4137,7 +4264,18 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             : null;
 
         response.json(
-          toInvestorReviewResponse(clientId, stepNumber, onboarding, authUser.name, nextRouteAfterCompletion)
+          toInvestorReviewResponse(
+            clientId,
+            stepNumber,
+            onboarding,
+            {
+              name: client.name,
+              email: client.email,
+              phone: client.phone
+            },
+            authUser.name,
+            nextRouteAfterCompletion
+          )
         );
       } catch (error) {
         next(error);

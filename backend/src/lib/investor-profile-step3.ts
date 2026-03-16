@@ -273,6 +273,12 @@ export interface Step3Fields {
   };
 }
 
+export interface Step3PrefillContext {
+  defaultKind?: 'person' | 'entity';
+  contactEmail?: string | null;
+  contactMobile?: string | null;
+}
+
 interface ValidationSuccess<T> {
   success: true;
   value: T;
@@ -709,6 +715,22 @@ function sanitizeStep3Fields(fields: Step3Fields): Step3Fields {
   }
 
   return next;
+}
+
+function isAddressEmpty(address: Step3Address): boolean {
+  return !address.line1 && !address.city && !address.stateProvince && !address.postalCode && !address.country;
+}
+
+function copyLegalAddressToMailingIfNeeded(fields: Step3Fields): void {
+  if (getSingleSelection(fields.holder.mailingDifferent, YES_NO_KEYS) !== 'yes') {
+    return;
+  }
+
+  if (!isAddressEmpty(fields.holder.mailingAddress)) {
+    return;
+  }
+
+  fields.holder.mailingAddress = structuredClone(fields.holder.legalAddress);
 }
 
 function validateSingleChoiceMap<K extends string>(
@@ -1556,6 +1578,27 @@ export function normalizeStep3Fields(step3Data: Prisma.JsonValue | null | undefi
   };
 
   return sanitizeStep3Fields(normalized);
+}
+
+export function applyStep3Prefill(fields: Step3Fields, context: Step3PrefillContext): Step3Fields {
+  const next = sanitizeStep3Fields(fields);
+
+  if (!Object.values(next.holder.kind).some(Boolean) && context.defaultKind) {
+    next.holder.kind = {
+      person: context.defaultKind === 'person',
+      entity: context.defaultKind === 'entity'
+    };
+  }
+
+  if (!next.holder.contact.email && normalizeNullableString(context.contactEmail)) {
+    next.holder.contact.email = context.contactEmail!.trim();
+  }
+
+  if (!next.holder.contact.phones.mobile && normalizeNullableString(context.contactMobile)) {
+    next.holder.contact.phones.mobile = context.contactMobile!.trim();
+  }
+
+  return sanitizeStep3Fields(next);
 }
 
 export function serializeStep3Fields(fields: Step3Fields): Prisma.InputJsonValue {
@@ -2536,6 +2579,10 @@ export function applyStep3Answer(fields: Step3Fields, questionId: Step3QuestionI
         next.investmentKnowledge.byType[investmentSinceYearType].sinceYear = answer as number;
       }
     }
+  }
+
+  if (questionId === 'step3.holder.mailingDifferent') {
+    copyLegalAddressToMailingIfNeeded(next);
   }
 
   return sanitizeStep3Fields(next);

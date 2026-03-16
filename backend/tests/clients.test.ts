@@ -803,7 +803,10 @@ describe('client routes', () => {
   it('returns step 1 payload with visible question ids', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      name: 'Client One'
+    });
     prisma.investorProfileOnboarding.upsert.mockResolvedValue({
       status: 'NOT_STARTED',
       step1RrName: null,
@@ -828,12 +831,16 @@ describe('client routes', () => {
     expect(response.body.onboarding.clientId).toBe('client_1');
     expect(response.body.onboarding.step.currentQuestionId).toBe('rrName');
     expect(response.body.onboarding.step.visibleQuestionIds).toContain('typeOfAccount.primaryType');
+    expect(response.body.onboarding.step.fields.accountRegistration.customerNames).toBe('Client One');
   });
 
   it('saves answer patch and moves cursor', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      name: 'Client One'
+    });
     prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
       status: 'NOT_STARTED',
       step1RrName: null,
@@ -929,6 +936,18 @@ describe('client routes', () => {
     expect(response.body.onboarding.status).toBe('IN_PROGRESS');
     expect(response.body.onboarding.step.fields.accountRegistration.rrName).toBe('Anish Suman');
     expect(response.body.onboarding.step.currentQuestionId).toBe('rrNo');
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          step1CustomerNames: 'Client One',
+          step1Data: expect.objectContaining({
+            accountRegistration: expect.objectContaining({
+              customerNames: 'Client One'
+            })
+          })
+        })
+      })
+    );
   });
 
   it('rejects inactive branch question updates', async () => {
@@ -1185,7 +1204,11 @@ describe('client routes', () => {
   it('returns step 3 onboarding payload for owned client', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      email: 'client@example.com',
+      phone: '+1 555 555 5555'
+    });
     prisma.investorProfileOnboarding.upsert.mockResolvedValue({
       status: 'IN_PROGRESS',
       step1Data: completedStep1Data,
@@ -1205,12 +1228,18 @@ describe('client routes', () => {
     expect(response.status).toBe(200);
     expect(response.body.onboarding.step.currentQuestionId).toBe('step3.holder.kind');
     expect(response.body.onboarding.step.fields.holder.kind.person).toBe(true);
+    expect(response.body.onboarding.step.fields.holder.contact.email).toBe('client@example.com');
+    expect(response.body.onboarding.step.fields.holder.contact.phones.mobile).toBe('+1 555 555 5555');
   });
 
   it('saves step 3 answer patch and moves cursor', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.client.findFirst.mockResolvedValue({ id: 'client_1' });
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      email: 'client@example.com',
+      phone: '+1 555 555 5555'
+    });
     prisma.investorProfileOnboarding.findUnique.mockResolvedValue({
       status: 'IN_PROGRESS',
       step1Data: completedStep1Data,
@@ -1296,6 +1325,22 @@ describe('client routes', () => {
     expect(response.status).toBe(200);
     expect(response.body.onboarding.step.currentQuestionId).toBe('step3.holder.name');
     expect(response.body.onboarding.step.fields.holder.kind.person).toBe(true);
+    expect(prisma.investorProfileOnboarding.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          step3Data: expect.objectContaining({
+            holder: expect.objectContaining({
+              contact: expect.objectContaining({
+                email: 'client@example.com',
+                phones: expect.objectContaining({
+                  mobile: '+1 555 555 5555'
+                })
+              })
+            })
+          })
+        })
+      })
+    );
   });
 
   it('returns step 4 onboarding payload when account type requires step 4', async () => {

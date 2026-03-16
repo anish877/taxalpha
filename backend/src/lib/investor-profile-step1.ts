@@ -125,6 +125,11 @@ export interface Step1LegacyColumns {
   step1CustomerNames?: string | null;
   step1AccountNo?: string | null;
   step1AccountType?: Prisma.JsonValue | null;
+  clientName?: string | null;
+}
+
+export interface Step1PrefillContext {
+  customerNames?: string | null;
 }
 
 interface ValidationSuccess<T> {
@@ -306,6 +311,7 @@ export function normalizeStep1Fields(
         normalizeNullableString(accountRegistration.customerNames) ??
         normalizeNullableString(root.customerNames) ??
         normalizeNullableString(legacyColumns.step1CustomerNames) ??
+        normalizeNullableString(legacyColumns.clientName) ??
         defaults.accountRegistration.customerNames,
       accountNo:
         normalizeNullableString(accountRegistration.accountNo) ??
@@ -367,6 +373,16 @@ export function normalizeStep1Fields(
   }
 
   return normalized;
+}
+
+export function applyStep1Prefill(fields: Step1Fields, context: Step1PrefillContext): Step1Fields {
+  const next = structuredClone(fields);
+
+  if (!isNonEmptyString(next.accountRegistration.customerNames) && normalizeNullableString(context.customerNames)) {
+    next.accountRegistration.customerNames = context.customerNames!.trim();
+  }
+
+  return next;
 }
 
 export function serializeStep1Fields(fields: Step1Fields): Prisma.InputJsonValue {

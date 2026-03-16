@@ -273,6 +273,10 @@ export interface Step4Fields {
   };
 }
 
+export interface Step4PrefillContext {
+  defaultKind?: 'person' | 'entity';
+}
+
 interface ValidationSuccess<T> {
   success: true;
   value: T;
@@ -709,6 +713,22 @@ function sanitizeStep4Fields(fields: Step4Fields): Step4Fields {
   }
 
   return next;
+}
+
+function isAddressEmpty(address: Step4Address): boolean {
+  return !address.line1 && !address.city && !address.stateProvince && !address.postalCode && !address.country;
+}
+
+function copyLegalAddressToMailingIfNeeded(fields: Step4Fields): void {
+  if (getSingleSelection(fields.holder.mailingDifferent, YES_NO_KEYS) !== 'yes') {
+    return;
+  }
+
+  if (!isAddressEmpty(fields.holder.mailingAddress)) {
+    return;
+  }
+
+  fields.holder.mailingAddress = structuredClone(fields.holder.legalAddress);
 }
 
 function validateSingleChoiceMap<K extends string>(
@@ -1556,6 +1576,19 @@ export function normalizeStep4Fields(Step4Data: Prisma.JsonValue | null | undefi
   };
 
   return sanitizeStep4Fields(normalized);
+}
+
+export function applyStep4Prefill(fields: Step4Fields, context: Step4PrefillContext): Step4Fields {
+  const next = sanitizeStep4Fields(fields);
+
+  if (!Object.values(next.holder.kind).some(Boolean) && context.defaultKind) {
+    next.holder.kind = {
+      person: context.defaultKind === 'person',
+      entity: context.defaultKind === 'entity'
+    };
+  }
+
+  return sanitizeStep4Fields(next);
 }
 
 export function serializeStep4Fields(fields: Step4Fields): Prisma.InputJsonValue {
@@ -2536,6 +2569,10 @@ export function applyStep4Answer(fields: Step4Fields, questionId: Step4QuestionI
         next.investmentKnowledge.byType[investmentSinceYearType].sinceYear = answer as number;
       }
     }
+  }
+
+  if (questionId === 'step4.holder.mailingDifferent') {
+    copyLegalAddressToMailingIfNeeded(next);
   }
 
   return sanitizeStep4Fields(next);

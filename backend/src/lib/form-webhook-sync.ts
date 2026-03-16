@@ -27,10 +27,14 @@ import {
   normalizeBaiodfStep3Fields
 } from './baiodf-step3.js';
 import { HttpError } from './http-error.js';
-import { normalizeStep1Fields, type PrimaryTypeKey } from './investor-profile-step1.js';
+import {
+  applyStep1Prefill,
+  normalizeStep1Fields,
+  type PrimaryTypeKey
+} from './investor-profile-step1.js';
 import { normalizeStep2Fields } from './investor-profile-step2.js';
-import { normalizeStep3Fields } from './investor-profile-step3.js';
-import { normalizeStep4Fields } from './investor-profile-step4.js';
+import { applyStep3Prefill, normalizeStep3Fields } from './investor-profile-step3.js';
+import { applyStep4Prefill, normalizeStep4Fields } from './investor-profile-step4.js';
 import { normalizeStep5Fields } from './investor-profile-step5.js';
 import { normalizeStep6Fields } from './investor-profile-step6.js';
 import { applyStep7Prefill, normalizeStep7Fields } from './investor-profile-step7.js';
@@ -168,22 +172,6 @@ function isStep4RequiredFromStep1(step1Data: Prisma.JsonValue | null | undefined
   return STEP4_REQUIRED_ACCOUNT_TYPES.has(selected[0]);
 }
 
-function applyHolderKindDefault<T extends { holder: { kind: { person: boolean; entity: boolean } } }>(
-  fields: T,
-  defaultKind: 'person' | 'entity'
-): T {
-  if (Object.values(fields.holder.kind).some(Boolean)) {
-    return fields;
-  }
-
-  const next = structuredClone(fields);
-  next.holder.kind = {
-    person: defaultKind === 'person',
-    entity: defaultKind === 'entity'
-  };
-  return next;
-}
-
 function resolveSignatureBlock(
   ...sources: Array<SignatureBlock | null | undefined>
 ): SignatureBlock {
@@ -235,13 +223,19 @@ function createPayload(metadata: FormWebhookMetadata, fields: unknown): FormWebh
 }
 
 function getInvestorStep1Fields(client: FormWebhookClientSnapshot) {
-  return normalizeStep1Fields(client.investorProfileOnboarding?.step1Data ?? null, {
-    step1RrName: client.investorProfileOnboarding?.step1RrName ?? null,
-    step1RrNo: client.investorProfileOnboarding?.step1RrNo ?? null,
-    step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null,
-    step1AccountNo: client.investorProfileOnboarding?.step1AccountNo ?? null,
-    step1AccountType: client.investorProfileOnboarding?.step1AccountType ?? null
-  });
+  return applyStep1Prefill(
+    normalizeStep1Fields(client.investorProfileOnboarding?.step1Data ?? null, {
+      step1RrName: client.investorProfileOnboarding?.step1RrName ?? null,
+      step1RrNo: client.investorProfileOnboarding?.step1RrNo ?? null,
+      step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null,
+      step1AccountNo: client.investorProfileOnboarding?.step1AccountNo ?? null,
+      step1AccountType: client.investorProfileOnboarding?.step1AccountType ?? null,
+      clientName: client.name
+    }),
+    {
+      customerNames: client.name
+    }
+  );
 }
 
 function createBaseMetadata(
@@ -292,13 +286,19 @@ function buildInvestorProfilePayload(
 ): FormWebhookPayload {
   const step1Fields = getInvestorStep1Fields(client);
   const step3DefaultKind = inferDefaultHolderKindFromStep1(client.investorProfileOnboarding?.step1Data ?? null);
-  const step3Fields = applyHolderKindDefault(
+  const step3Fields = applyStep3Prefill(
     normalizeStep3Fields(client.investorProfileOnboarding?.step3Data ?? null),
-    step3DefaultKind
+    {
+      defaultKind: step3DefaultKind,
+      contactEmail: client.email,
+      contactMobile: client.phone
+    }
   );
-  const step4Fields = applyHolderKindDefault(
+  const step4Fields = applyStep4Prefill(
     normalizeStep4Fields(client.investorProfileOnboarding?.step4Data ?? null),
-    step3DefaultKind
+    {
+      defaultKind: step3DefaultKind
+    }
   );
   const step7Fields = applyStep7Prefill(
     normalizeStep7Fields(client.investorProfileOnboarding?.step7Data ?? null),
@@ -336,9 +336,11 @@ function buildAdditionalHolderPayload(
   backendPublicUrl: string
 ): FormWebhookPayload {
   const defaultKind = inferDefaultHolderKindFromStep1(client.investorProfileOnboarding?.step1Data ?? null);
-  const step4Fields = applyHolderKindDefault(
+  const step4Fields = applyStep4Prefill(
     normalizeStep4Fields(client.investorProfileOnboarding?.step4Data ?? null),
-    defaultKind
+    {
+      defaultKind
+    }
   );
 
   return {

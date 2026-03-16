@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyStep4Answer,
+  applyStep4Prefill,
   defaultStep4Fields,
   getVisibleStep4QuestionIds,
   validateStep4Answer,
@@ -175,6 +176,68 @@ describe('investor-profile-step4', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('prefills the default holder kind without overwriting an existing selection', () => {
+    const fields = defaultStep4Fields();
+
+    const prefilled = applyStep4Prefill(fields, { defaultKind: 'entity' });
+    expect(prefilled.holder.kind).toEqual({ person: false, entity: true });
+
+    const existing = defaultStep4Fields();
+    existing.holder.kind = { person: true, entity: false };
+
+    const unchanged = applyStep4Prefill(existing, { defaultKind: 'entity' });
+    expect(unchanged.holder.kind).toEqual({ person: true, entity: false });
+  });
+
+  it('copies the legal address into mailing when mailingDifferent becomes yes and mailing is empty', () => {
+    const fields = defaultStep4Fields();
+    fields.holder.legalAddress = {
+      line1: '123 Main St',
+      city: 'Austin',
+      stateProvince: 'TX',
+      postalCode: '78701',
+      country: 'US'
+    };
+
+    const next = applyStep4Answer(fields, 'step4.holder.mailingDifferent', {
+      yes: true,
+      no: false
+    });
+
+    expect(next.holder.mailingAddress).toEqual(fields.holder.legalAddress);
+  });
+
+  it('does not overwrite an existing mailing address when mailingDifferent becomes yes', () => {
+    const fields = defaultStep4Fields();
+    fields.holder.legalAddress = {
+      line1: '123 Main St',
+      city: 'Austin',
+      stateProvince: 'TX',
+      postalCode: '78701',
+      country: 'US'
+    };
+    fields.holder.mailingAddress = {
+      line1: 'PO Box 9',
+      city: 'Dallas',
+      stateProvince: 'TX',
+      postalCode: '75201',
+      country: 'US'
+    };
+
+    const next = applyStep4Answer(fields, 'step4.holder.mailingDifferent', {
+      yes: true,
+      no: false
+    });
+
+    expect(next.holder.mailingAddress).toEqual({
+      line1: 'PO Box 9',
+      city: 'Dallas',
+      stateProvince: 'TX',
+      postalCode: '75201',
+      country: 'US'
+    });
   });
 
   it('allows completion without gov ID when requirement context is unknown', () => {
