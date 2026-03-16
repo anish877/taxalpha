@@ -9,11 +9,13 @@ export interface N8nWebhookConfig {
   baiodfUrl: string | null;
   baiv506cUrl: string | null;
   timeoutMs: number;
+  callbackSecret?: string | null;
 }
 
 export interface RuntimeConfig {
   nodeEnv: NodeEnvironment;
   frontendUrl: string;
+  backendPublicUrl?: string;
   jwtSecret: string;
   jwtExpiresIn: string;
   n8nWebhooks: N8nWebhookConfig;

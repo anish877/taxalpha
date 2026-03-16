@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { ApiError, apiRequest } from '../api/client';
 import { CreateClientDrawer } from '../components/create-client/CreateClientDrawer';
 import { useAuth } from '../context/AuthContext';
+import { usePdfUpdates } from '../context/PdfUpdatesContext';
 import { useToast } from '../context/ToastContext';
 import type { ClientRecord, FormCatalogItem } from '../types/api';
 
 export function DashboardPage() {
   const { user, signOut } = useAuth();
   const { pushToast } = useToast();
+  const { subscribe } = usePdfUpdates();
   const navigate = useNavigate();
 
   const [clients, setClients] = useState<ClientRecord[]>([]);
@@ -63,6 +65,12 @@ export function DashboardPage() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    return subscribe(() => {
+      void loadData();
+    });
+  }, [loadData, subscribe]);
 
   const handleSignOut = async () => {
     await signOut();

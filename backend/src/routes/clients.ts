@@ -157,6 +157,7 @@ import {
   INVESTOR_PROFILE_FORM_CODE as WEBHOOK_INVESTOR_PROFILE_FORM_CODE,
   syncFormsToN8n
 } from '../lib/form-webhook-sync.js';
+import { getWorkspaceFormTitle } from '../lib/form-pdf-utils.js';
 import { HttpError } from '../lib/http-error.js';
 import { zodFieldErrors } from '../lib/validation.js';
 import { requireAuth } from '../middleware/require-auth.js';
@@ -215,6 +216,18 @@ const createClientSchema = z.object({
 
 const clientIdParamsSchema = z.object({
   clientId: z.string().trim().min(1)
+});
+
+const clientFormPdfParamsSchema = z.object({
+  clientId: z.string().trim().min(1),
+  formCode: z.string().trim().min(1)
+});
+
+const formPdfUpdatesQuerySchema = z.object({
+  after: z
+    .string()
+    .datetime({ offset: true })
+    .optional()
 });
 
 const investorProfileReviewStepParamsSchema = z.object({
@@ -571,12 +584,42 @@ interface FormWorkspaceItem {
   viewRoute: string | null;
   editRoute: string | null;
   totalSteps: number | null;
+  pdfCount: number;
+  latestPdfReceivedAt: string | null;
 }
 
 interface FormWorkspaceRecord {
   clientId: string;
   clientName: string;
   forms: FormWorkspaceItem[];
+}
+
+interface ClientFormPdfRecord {
+  id: string;
+  clientId: string;
+  clientName: string;
+  formCode: string;
+  workspaceFormCode: string;
+  workspaceFormTitle: string;
+  pdfUrl: string;
+  documentTitle: string | null;
+  fileName: string | null;
+  sourceRunId: string | null;
+  generatedAt: string | null;
+  receivedAt: string;
+}
+
+interface FormPdfListResponse {
+  clientId: string;
+  formCode: string;
+  workspaceFormCode: string;
+  pdfs: ClientFormPdfRecord[];
+}
+
+interface PdfUpdatesResponse {
+  updates: ClientFormPdfRecord[];
+  affectedClientIds: string[];
+  serverTime: string;
 }
 
 interface FormWorkspaceResponse {
@@ -1008,6 +1051,66 @@ function isOnboardingIncomplete(status: WorkspaceOnboardingStatus | null): boole
   return status !== InvestorProfileOnboardingStatus.COMPLETED;
 }
 
+function toClientFormPdfRecord(pdf: {
+  id: string;
+  clientId: string;
+  formCode: string;
+  workspaceFormCode: string;
+  pdfUrl: string;
+  documentTitle: string | null;
+  fileName: string | null;
+  sourceRunId: string | null;
+  generatedAt: Date | null;
+  receivedAt: Date;
+  client: {
+    name: string;
+  };
+}): ClientFormPdfRecord {
+  return {
+    id: pdf.id,
+    clientId: pdf.clientId,
+    clientName: pdf.client.name,
+    formCode: pdf.formCode,
+    workspaceFormCode: pdf.workspaceFormCode,
+    workspaceFormTitle: getWorkspaceFormTitle(pdf.workspaceFormCode),
+    pdfUrl: pdf.pdfUrl,
+    documentTitle: pdf.documentTitle,
+    fileName: pdf.fileName,
+    sourceRunId: pdf.sourceRunId,
+    generatedAt: pdf.generatedAt?.toISOString() ?? null,
+    receivedAt: pdf.receivedAt.toISOString()
+  };
+}
+
+function summarizeClientFormPdfs(
+  pdfs: Array<{
+    workspaceFormCode: string;
+    receivedAt: Date;
+  }>
+): Map<string, { pdfCount: number; latestPdfReceivedAt: string | null }> {
+  const summaries = new Map<string, { pdfCount: number; latestPdfReceivedAt: string | null }>();
+
+  for (const pdf of pdfs) {
+    const current = summaries.get(pdf.workspaceFormCode);
+    const receivedAt = pdf.receivedAt.toISOString();
+
+    if (!current) {
+      summaries.set(pdf.workspaceFormCode, {
+        pdfCount: 1,
+        latestPdfReceivedAt: receivedAt
+      });
+      continue;
+    }
+
+    current.pdfCount += 1;
+    if (!current.latestPdfReceivedAt || current.latestPdfReceivedAt < receivedAt) {
+      current.latestPdfReceivedAt = receivedAt;
+    }
+  }
+
+  return summaries;
+}
+
 function getNextOnboardingRouteForClient(client: HydratedClient, filterCodes?: Set<string>): string | null {
   const selectedCodes = getSelectedFormCodes(client);
 
@@ -1034,7 +1137,11 @@ function getNextOnboardingRouteForClient(client: HydratedClient, filterCodes?: S
   return null;
 }
 
-function toFormWorkspaceRecord(client: HydratedClient, activeForms: Array<{ code: string; title: string }>): FormWorkspaceRecord {
+function toFormWorkspaceRecord(
+  client: HydratedClient,
+  activeForms: Array<{ code: string; title: string }>,
+  pdfSummaries: Map<string, { pdfCount: number; latestPdfReceivedAt: string | null }> = new Map()
+): FormWorkspaceRecord {
   const selectedCodes = getSelectedFormCodes(client);
   const sortedForms = [...activeForms].sort((left, right) => {
     const leftIndex = FORM_SEQUENCE.indexOf(left.code as (typeof FORM_SEQUENCE)[number]);
@@ -1058,6 +1165,7 @@ function toFormWorkspaceRecord(client: HydratedClient, activeForms: Array<{ code
       const status = selected ? getOnboardingStatusForForm(client, form.code) : null;
       const resumeRoute = selected ? getResumeRouteForForm(client, form.code) : null;
       const canRoute = selected && SUPPORTED_CLIENT_FORM_CODES.has(form.code);
+      const pdfSummary = pdfSummaries.get(form.code);
 
       return {
         code: form.code,
@@ -1069,7 +1177,9 @@ function toFormWorkspaceRecord(client: HydratedClient, activeForms: Array<{ code
         editRoute: canRoute ? `/clients/${client.id}/forms/${form.code}/edit/step/1` : null,
         totalSteps: SUPPORTED_CLIENT_FORM_CODES.has(form.code)
           ? FORM_STEP_COUNT[form.code as (typeof FORM_SEQUENCE)[number]]
-          : null
+          : null,
+        pdfCount: pdfSummary?.pdfCount ?? 0,
+        latestPdfReceivedAt: pdfSummary?.latestPdfReceivedAt ?? null
       };
     })
   };
@@ -1833,6 +1943,129 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
+  router.get('/pdfs/updates', requireAuth(deps), async (request, response, next) => {
+    const parsedQuery = formPdfUpdatesQuerySchema.safeParse(request.query);
+
+    if (!parsedQuery.success) {
+      response.status(400).json({
+        message: 'Invalid updates cursor.',
+        fieldErrors: zodFieldErrors(parsedQuery.error)
+      });
+      return;
+    }
+
+    const authUser = request.authUser!;
+    const after = parsedQuery.data.after ? new Date(parsedQuery.data.after) : new Date(0);
+
+    try {
+      const pdfs = await deps.prisma.clientFormPdf.findMany({
+        where: {
+          receivedAt: {
+            gt: after
+          },
+          client: {
+            ownerUserId: authUser.id
+          }
+        },
+        include: {
+          client: {
+            select: {
+              name: true
+            }
+          }
+        },
+        orderBy: {
+          receivedAt: 'asc'
+        }
+      });
+
+      const payload: PdfUpdatesResponse = {
+        updates: pdfs.map((pdf) => toClientFormPdfRecord(pdf)),
+        affectedClientIds: [...new Set(pdfs.map((pdf) => pdf.clientId))],
+        serverTime: new Date().toISOString()
+      };
+
+      response.json(payload);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get('/:clientId/forms/:formCode/pdfs', requireAuth(deps), async (request, response, next) => {
+    const parsedParams = clientFormPdfParamsSchema.safeParse(request.params);
+
+    if (!parsedParams.success) {
+      response.status(400).json({ message: 'Invalid client or form identifier.' });
+      return;
+    }
+
+    const { clientId, formCode } = parsedParams.data;
+    if (!SUPPORTED_CLIENT_FORM_CODES.has(formCode)) {
+      response.status(400).json({ message: 'Unsupported form code.' });
+      return;
+    }
+
+    const authUser = request.authUser!;
+
+    try {
+      const client = await deps.prisma.client.findFirst({
+        where: {
+          id: clientId,
+          ownerUserId: authUser.id
+        },
+        include: {
+          formSelections: {
+            include: {
+              form: {
+                select: {
+                  code: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (!client) {
+        response.status(404).json({ message: 'Client not found.' });
+        return;
+      }
+
+      if (!client.formSelections.some((selection) => selection.form.code === formCode)) {
+        response.status(404).json({ message: 'Form not selected for client.' });
+        return;
+      }
+
+      const pdfs = await deps.prisma.clientFormPdf.findMany({
+        where: {
+          clientId,
+          workspaceFormCode: formCode
+        },
+        include: {
+          client: {
+            select: {
+              name: true
+            }
+          }
+        },
+        orderBy: {
+          receivedAt: 'desc'
+        }
+      });
+
+      const payload: FormPdfListResponse = {
+        clientId,
+        formCode,
+        workspaceFormCode: formCode,
+        pdfs: pdfs.map((pdf) => toClientFormPdfRecord(pdf))
+      };
+
+      response.json(payload);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.get('/:clientId/forms/workspace', requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
@@ -1845,7 +2078,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     const clientId = parsedParams.data.clientId;
 
     try {
-      const [client, activeForms] = await Promise.all([
+      const [client, activeForms, pdfs] = await Promise.all([
         deps.prisma.client.findFirst({
           where: {
             id: clientId,
@@ -1861,6 +2094,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             code: true,
             title: true
           }
+        }),
+        deps.prisma.clientFormPdf.findMany({
+          where: {
+            clientId
+          },
+          select: {
+            workspaceFormCode: true,
+            receivedAt: true
+          }
         })
       ]);
 
@@ -1870,7 +2112,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const payload: FormWorkspaceResponse = {
-        workspace: toFormWorkspaceRecord(client, activeForms)
+        workspace: toFormWorkspaceRecord(client, activeForms, summarizeClientFormPdfs(pdfs))
       };
 
       response.json(payload);
@@ -2022,7 +2264,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         });
       }
 
-      const [hydratedClient, activeForms] = await Promise.all([
+      const [hydratedClient, activeForms, pdfs] = await Promise.all([
         deps.prisma.client.findFirst({
           where: {
             id: clientId,
@@ -2035,6 +2277,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           select: {
             code: true,
             title: true
+          }
+        }),
+        deps.prisma.clientFormPdf.findMany({
+          where: {
+            clientId
+          },
+          select: {
+            workspaceFormCode: true,
+            receivedAt: true
           }
         })
       ]);
@@ -2053,7 +2304,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                 new Set(formsToAdd.map((form) => form.code))
               )
             : null,
-        workspace: toFormWorkspaceRecord(hydratedClient, activeForms)
+        workspace: toFormWorkspaceRecord(hydratedClient, activeForms, summarizeClientFormPdfs(pdfs))
       };
 
       const formCodesToSync = requestedCodes.filter((code) =>
@@ -2065,6 +2316,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           client: hydratedClient,
           formCodes: getWebhookSyncFormCodes(formCodesToSync),
           advisorName: authUser.name,
+          backendPublicUrl: deps.config.backendPublicUrl ?? 'http://localhost:4000',
           config: deps.config.n8nWebhooks
         });
       }

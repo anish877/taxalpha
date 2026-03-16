@@ -43,6 +43,7 @@ import {
   applySfcStep2Prefill,
   normalizeSfcStep2Fields
 } from './statement-of-financial-condition-step2.js';
+import { buildFormPdfCallbackUrl, getWorkspaceFormCode } from './form-pdf-utils.js';
 import type { N8nWebhookConfig } from '../types/deps.js';
 
 export const INVESTOR_PROFILE_FORM_CODE = 'INVESTOR_PROFILE';
@@ -130,6 +131,8 @@ interface FormWebhookMetadata {
   clientPhone: string | null;
   formCode: string;
   formTitle: string;
+  callbackUrl?: string;
+  workspaceFormCode?: string;
   sourceFormCode?: string;
   onboardingStatus?: string;
 }
@@ -244,6 +247,7 @@ function getInvestorStep1Fields(client: FormWebhookClientSnapshot) {
 function createBaseMetadata(
   client: FormWebhookClientSnapshot,
   formCode: string,
+  backendPublicUrl: string,
   onboardingStatus?: string
 ): FormWebhookMetadata {
   return {
@@ -253,6 +257,8 @@ function createBaseMetadata(
     clientPhone: client.phone,
     formCode,
     formTitle: getFormTitle(client, formCode),
+    callbackUrl: buildFormPdfCallbackUrl(backendPublicUrl, client.id, formCode),
+    workspaceFormCode: getWorkspaceFormCode(formCode),
     onboardingStatus
   };
 }
@@ -260,19 +266,20 @@ function createBaseMetadata(
 export function buildFormWebhookPayload(
   client: FormWebhookClientSnapshot,
   formCode: string,
-  advisorName: string
+  advisorName: string,
+  backendPublicUrl: string
 ): FormWebhookPayload {
   switch (formCode) {
     case INVESTOR_PROFILE_FORM_CODE:
-      return buildInvestorProfilePayload(client, advisorName);
+      return buildInvestorProfilePayload(client, advisorName, backendPublicUrl);
     case INVESTOR_PROFILE_ADDITIONAL_HOLDER_FORM_CODE:
-      return buildAdditionalHolderPayload(client);
+      return buildAdditionalHolderPayload(client, backendPublicUrl);
     case STATEMENT_OF_FINANCIAL_CONDITION_FORM_CODE:
-      return buildStatementOfFinancialConditionPayload(client);
+      return buildStatementOfFinancialConditionPayload(client, backendPublicUrl);
     case BAIODF_FORM_CODE:
-      return buildBaiodfPayload(client, advisorName);
+      return buildBaiodfPayload(client, advisorName, backendPublicUrl);
     case BAIV_506C_FORM_CODE:
-      return buildBaiv506cPayload(client, advisorName);
+      return buildBaiv506cPayload(client, advisorName, backendPublicUrl);
     default:
       throw new HttpError(400, `Unsupported n8n webhook form code: ${formCode}.`);
   }
@@ -280,7 +287,8 @@ export function buildFormWebhookPayload(
 
 function buildInvestorProfilePayload(
   client: FormWebhookClientSnapshot,
-  advisorName: string
+  advisorName: string,
+  backendPublicUrl: string
 ): FormWebhookPayload {
   const step1Fields = getInvestorStep1Fields(client);
   const step3DefaultKind = inferDefaultHolderKindFromStep1(client.investorProfileOnboarding?.step1Data ?? null);
@@ -307,6 +315,7 @@ function buildInvestorProfilePayload(
       createBaseMetadata(
         client,
         INVESTOR_PROFILE_FORM_CODE,
+        backendPublicUrl,
         client.investorProfileOnboarding?.status ?? InvestorProfileOnboardingStatus.NOT_STARTED
       ),
       {
@@ -322,7 +331,10 @@ function buildInvestorProfilePayload(
   };
 }
 
-function buildAdditionalHolderPayload(client: FormWebhookClientSnapshot): FormWebhookPayload {
+function buildAdditionalHolderPayload(
+  client: FormWebhookClientSnapshot,
+  backendPublicUrl: string
+): FormWebhookPayload {
   const defaultKind = inferDefaultHolderKindFromStep1(client.investorProfileOnboarding?.step1Data ?? null);
   const step4Fields = applyHolderKindDefault(
     normalizeStep4Fields(client.investorProfileOnboarding?.step4Data ?? null),
@@ -335,6 +347,7 @@ function buildAdditionalHolderPayload(client: FormWebhookClientSnapshot): FormWe
         ...createBaseMetadata(
           client,
           INVESTOR_PROFILE_ADDITIONAL_HOLDER_FORM_CODE,
+          backendPublicUrl,
           client.investorProfileOnboarding?.status ?? InvestorProfileOnboardingStatus.NOT_STARTED
         ),
         sourceFormCode: INVESTOR_PROFILE_FORM_CODE
@@ -344,7 +357,10 @@ function buildAdditionalHolderPayload(client: FormWebhookClientSnapshot): FormWe
   };
 }
 
-function buildStatementOfFinancialConditionPayload(client: FormWebhookClientSnapshot): FormWebhookPayload {
+function buildStatementOfFinancialConditionPayload(
+  client: FormWebhookClientSnapshot,
+  backendPublicUrl: string
+): FormWebhookPayload {
   const investorStep1 = getInvestorStep1Fields(client);
   const investorStep7 = normalizeStep7Fields(client.investorProfileOnboarding?.step7Data ?? null);
   const requiresJointOwnerSignature = isStep4RequiredFromStep1(
@@ -356,6 +372,7 @@ function buildStatementOfFinancialConditionPayload(client: FormWebhookClientSnap
       createBaseMetadata(
         client,
         STATEMENT_OF_FINANCIAL_CONDITION_FORM_CODE,
+        backendPublicUrl,
         client.statementOfFinancialConditionOnboarding?.status ??
           StatementOfFinancialConditionOnboardingStatus.NOT_STARTED
       ),
@@ -385,7 +402,8 @@ function buildStatementOfFinancialConditionPayload(client: FormWebhookClientSnap
 
 function buildBaiodfPayload(
   client: FormWebhookClientSnapshot,
-  advisorName: string
+  advisorName: string,
+  backendPublicUrl: string
 ): FormWebhookPayload {
   const investorStep1 = getInvestorStep1Fields(client);
   const investorStep7 = normalizeStep7Fields(client.investorProfileOnboarding?.step7Data ?? null);
@@ -410,6 +428,7 @@ function buildBaiodfPayload(
       createBaseMetadata(
         client,
         BAIODF_FORM_CODE,
+        backendPublicUrl,
         client.baiodfOnboarding?.status ??
           BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED
       ),
@@ -455,7 +474,8 @@ function buildBaiodfPayload(
 
 function buildBaiv506cPayload(
   client: FormWebhookClientSnapshot,
-  advisorName: string
+  advisorName: string,
+  backendPublicUrl: string
 ): FormWebhookPayload {
   const investorStep1 = getInvestorStep1Fields(client);
   const investorStep7 = normalizeStep7Fields(client.investorProfileOnboarding?.step7Data ?? null);
@@ -480,6 +500,7 @@ function buildBaiv506cPayload(
       createBaseMetadata(
         client,
         BAIV_506C_FORM_CODE,
+        backendPublicUrl,
         client.baiv506cOnboarding?.status ??
           BrokerageAccreditedInvestorVerificationOnboardingStatus.NOT_STARTED
       ),
@@ -535,6 +556,7 @@ export async function syncFormsToN8n(params: {
   client: FormWebhookClientSnapshot;
   formCodes: string[];
   advisorName: string;
+  backendPublicUrl: string;
   config: N8nWebhookConfig | undefined;
   fetchFn?: typeof fetch;
   skipWhenUnconfigured?: boolean;
@@ -557,7 +579,12 @@ export async function syncFormsToN8n(params: {
       throw new HttpError(500, `Missing n8n webhook URL for form ${formCode}.`);
     }
 
-    const payload = buildFormWebhookPayload(params.client, formCode, params.advisorName);
+    const payload = buildFormWebhookPayload(
+      params.client,
+      formCode,
+      params.advisorName,
+      params.backendPublicUrl
+    );
 
     let response: Response;
     try {

@@ -80,6 +80,7 @@ model Client {
   owner                     User                      @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   brokerLinks               ClientBroker[]
   formSelections            ClientFormSelection[]
+  formPdfs                  ClientFormPdf[]
   investorProfileOnboarding InvestorProfileOnboarding?
   statementOfFinancialConditionOnboarding StatementOfFinancialConditionOnboarding?
   baiodfOnboarding BrokerageAlternativeInvestmentOrderDisclosureOnboarding?
@@ -118,6 +119,26 @@ model ClientFormSelection {
   form   FormCatalog @relation(fields: [formId], references: [id], onDelete: Cascade)
 
   @@id([clientId, formId])
+}
+
+model ClientFormPdf {
+  id                String   @id @default(cuid())
+  clientId          String
+  formCode          String
+  workspaceFormCode String
+  pdfUrl            String
+  documentTitle     String?
+  fileName          String?
+  sourceRunId       String?
+  generatedAt       DateTime?
+  receivedAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, formCode, pdfUrl])
+  @@index([clientId, workspaceFormCode, receivedAt(sort: Desc)])
+  @@index([receivedAt(sort: Desc)])
 }
 
 model InvestorProfileOnboarding {

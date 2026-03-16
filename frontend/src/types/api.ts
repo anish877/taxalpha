@@ -1420,12 +1420,42 @@ export interface FormWorkspaceItem {
   viewRoute: string | null;
   editRoute: string | null;
   totalSteps: number | null;
+  pdfCount: number;
+  latestPdfReceivedAt: string | null;
 }
 
 export interface FormWorkspaceRecord {
   clientId: string;
   clientName: string;
   forms: FormWorkspaceItem[];
+}
+
+export interface ClientFormPdfRecord {
+  id: string;
+  clientId: string;
+  clientName: string;
+  formCode: string;
+  workspaceFormCode: string;
+  workspaceFormTitle: string;
+  pdfUrl: string;
+  documentTitle: string | null;
+  fileName: string | null;
+  sourceRunId: string | null;
+  generatedAt: string | null;
+  receivedAt: string;
+}
+
+export interface FormPdfListResponse {
+  clientId: string;
+  formCode: string;
+  workspaceFormCode: string;
+  pdfs: ClientFormPdfRecord[];
+}
+
+export interface PdfUpdatesResponse {
+  updates: ClientFormPdfRecord[];
+  affectedClientIds: string[];
+  serverTime: string;
 }
 
 export interface SelectClientFormsRequest {

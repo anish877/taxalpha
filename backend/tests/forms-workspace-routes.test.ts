@@ -8,6 +8,7 @@ import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
 const config = {
   nodeEnv: 'test' as const,
   frontendUrl: 'http://localhost:5173',
+  backendPublicUrl: 'https://api.example.com',
   jwtSecret: 'test_secret_test_secret_test_secret_1234',
   jwtExpiresIn: '7d',
   n8nWebhooks: {
@@ -16,7 +17,8 @@ const config = {
     statementOfFinancialConditionUrl: 'https://example.com/sfc',
     baiodfUrl: 'https://example.com/baiodf',
     baiv506cUrl: 'https://example.com/baiv-506c',
-    timeoutMs: 5000
+    timeoutMs: 5000,
+    callbackSecret: 'callback-secret'
   }
 };
 
@@ -38,6 +40,11 @@ function createMockPrisma() {
     },
     client: {
       findFirst: vi.fn()
+    },
+    clientFormPdf: {
+      findMany: vi.fn().mockResolvedValue([]),
+      findFirst: vi.fn().mockResolvedValue(null),
+      create: vi.fn()
     },
     formCatalog: {
       findMany: vi.fn()
@@ -130,6 +137,8 @@ describe('forms workspace routes', () => {
     expect(sfc.selected).toBe(true);
     expect(sfc.onboardingStatus).toBe('NOT_STARTED');
     expect(sfc.viewRoute).toBe('/clients/client_1/forms/SFC/view/step/1');
+    expect(sfc.pdfCount).toBe(0);
+    expect(sfc.latestPdfReceivedAt).toBeNull();
     expect(baiv.selected).toBe(false);
     expect(baiv.onboardingStatus).toBeNull();
   });
@@ -855,8 +864,10 @@ describe('forms workspace routes', () => {
 
     expect(webhookUrl).toBe('https://example.com/sfc');
     expect(payload.metadata.formCode).toBe('SFC');
-    expect(payload.fields.step1.employmentStatus.current).toBeNull();
-    expect(payload.fields.step2.signatures.accountOwner.typedSignature).toBeNull();
+    expect(payload.metadata.workspaceFormCode).toBe('SFC');
+    expect(payload.metadata.callbackUrl).toBe('https://api.example.com/api/n8n/clients/client_1/forms/SFC/pdfs');
+    expect(payload.fields.step1.liquidNonQualifiedAssets.cashMoneyMarketsCds).toBe(0);
+    expect(payload.fields.step2.signatures.accountOwner.printedName).toBe('Client One');
   });
 
   it('syncs investor profile and additional holder payloads when investor profile is selected', async () => {
@@ -965,8 +976,70 @@ describe('forms workspace routes', () => {
     const investorPayload = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body));
     const additionalHolderPayload = JSON.parse(String((fetchMock.mock.calls[1]?.[1] as RequestInit).body));
 
-    expect(investorPayload.fields.step1.accountRegistration.rrName).toBeNull();
+    expect(investorPayload.fields.step1.accountRegistration.rrName).toBe('');
+    expect(investorPayload.metadata.callbackUrl).toBe(
+      'https://api.example.com/api/n8n/clients/client_1/forms/INVESTOR_PROFILE/pdfs'
+    );
     expect(additionalHolderPayload.metadata.sourceFormCode).toBe('INVESTOR_PROFILE');
-    expect(additionalHolderPayload.fields.holder.name).toBeNull();
+    expect(additionalHolderPayload.metadata.workspaceFormCode).toBe('INVESTOR_PROFILE');
+    expect(additionalHolderPayload.metadata.callbackUrl).toBe(
+      'https://api.example.com/api/n8n/clients/client_1/forms/INVESTOR_PROFILE_ADDITIONAL_HOLDER/pdfs'
+    );
+    expect(additionalHolderPayload.fields.holder.name).toBe('');
+  });
+
+  it('stores callback PDFs under the mapped workspace form code', async () => {
+    const prisma = createMockPrisma();
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      name: 'Client One',
+      formSelections: [{ form: { code: 'INVESTOR_PROFILE' } }]
+    });
+    prisma.clientFormPdf.create.mockResolvedValue({ id: 'pdf_1' });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/n8n/clients/client_1/forms/INVESTOR_PROFILE_ADDITIONAL_HOLDER/pdfs')
+      .set('Content-Type', 'application/json')
+      .set('x-taxalpha-callback-secret', 'callback-secret')
+      .send({
+        pdfUrl: 'https://files.example.com/additional-holder.pdf',
+        sourceRunId: 'run_1',
+        generatedAt: '2026-03-16T10:00:00.000Z'
+      });
+
+    expect(response.status).toBe(201);
+    expect(prisma.clientFormPdf.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          clientId: 'client_1',
+          formCode: 'INVESTOR_PROFILE_ADDITIONAL_HOLDER',
+          workspaceFormCode: 'INVESTOR_PROFILE',
+          documentTitle: 'Additional Holder'
+        })
+      })
+    );
+  });
+
+  it('rejects callbacks with an invalid secret', async () => {
+    const prisma = createMockPrisma();
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/n8n/clients/client_1/forms/SFC/pdfs')
+      .set('x-taxalpha-callback-secret', 'wrong-secret')
+      .send({
+        pdfUrl: 'https://files.example.com/sfc.pdf'
+      });
+
+    expect(response.status).toBe(401);
+    expect(prisma.clientFormPdf.create).not.toHaveBeenCalled();
   });
 });

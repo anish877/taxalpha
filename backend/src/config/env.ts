@@ -10,6 +10,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  BACKEND_PUBLIC_URL: z.string().url().default('http://localhost:4000'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required.'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters.'),
   JWT_EXPIRES_IN: z.string().default('7d'),
@@ -33,7 +34,8 @@ const envSchema = z.object({
     .string()
     .url()
     .default('https://n8n.srv891599.hstgr.cloud/webhook/b47bbb12-d35c-4329-9973-45aa0b851913'),
-  N8N_WEBHOOK_TIMEOUT_MS: z.coerce.number().int().positive().default(5000)
+  N8N_WEBHOOK_TIMEOUT_MS: z.coerce.number().int().positive().default(5000),
+  N8N_CALLBACK_SECRET: z.string().min(1, 'N8N_CALLBACK_SECRET is required.').default('taxalpha-local-callback-secret')
 });
 
 export type Environment = z.infer<typeof envSchema>;
@@ -103,6 +105,7 @@ export function getRuntimeConfig(env: Environment = getEnv()): RuntimeConfig {
   return {
     nodeEnv: env.NODE_ENV,
     frontendUrl: env.FRONTEND_URL,
+    backendPublicUrl: env.BACKEND_PUBLIC_URL,
     jwtSecret: env.JWT_SECRET,
     jwtExpiresIn: env.JWT_EXPIRES_IN,
     n8nWebhooks: {
@@ -111,7 +114,8 @@ export function getRuntimeConfig(env: Environment = getEnv()): RuntimeConfig {
       statementOfFinancialConditionUrl: env.N8N_STATEMENT_OF_FINANCIAL_CONDITION_WEBHOOK_URL,
       baiodfUrl: env.N8N_BAIODF_WEBHOOK_URL,
       baiv506cUrl: env.N8N_BAIV_506C_WEBHOOK_URL,
-      timeoutMs: env.N8N_WEBHOOK_TIMEOUT_MS
+      timeoutMs: env.N8N_WEBHOOK_TIMEOUT_MS,
+      callbackSecret: env.N8N_CALLBACK_SECRET
     }
   };
 }

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -102,7 +102,9 @@ describe('Client forms workspace', () => {
                     resumeRoute: '/clients/client_1/investor-profile/step-7',
                     viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
                     editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
-                    totalSteps: 7
+                    totalSteps: 7,
+                    pdfCount: 0,
+                    latestPdfReceivedAt: null
                   },
                   {
                     code: 'BAIV_506C',
@@ -112,7 +114,9 @@ describe('Client forms workspace', () => {
                     resumeRoute: '/clients/client_1/brokerage-accredited-investor-verification/step-1',
                     viewRoute: '/clients/client_1/forms/BAIV_506C/view/step/1',
                     editRoute: '/clients/client_1/forms/BAIV_506C/edit/step/1',
-                    totalSteps: 2
+                    totalSteps: 2,
+                    pdfCount: 0,
+                    latestPdfReceivedAt: null
                   }
                 ]
               }
@@ -135,7 +139,9 @@ describe('Client forms workspace', () => {
                   resumeRoute: '/clients/client_1/investor-profile/step-7',
                   viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
                   editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
-                  totalSteps: 7
+                  totalSteps: 7,
+                  pdfCount: 0,
+                  latestPdfReceivedAt: null
                 },
                 {
                   code: 'BAIV_506C',
@@ -145,7 +151,9 @@ describe('Client forms workspace', () => {
                   resumeRoute: null,
                   viewRoute: null,
                   editRoute: null,
-                  totalSteps: 2
+                  totalSteps: 2,
+                  pdfCount: 0,
+                  latestPdfReceivedAt: null
                 }
               ]
             }
@@ -171,7 +179,9 @@ describe('Client forms workspace', () => {
                   resumeRoute: '/clients/client_1/investor-profile/step-7',
                   viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
                   editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
-                  totalSteps: 7
+                  totalSteps: 7,
+                  pdfCount: 0,
+                  latestPdfReceivedAt: null
                 },
                 {
                   code: 'BAIV_506C',
@@ -181,7 +191,9 @@ describe('Client forms workspace', () => {
                   resumeRoute: null,
                   viewRoute: null,
                   editRoute: null,
-                  totalSteps: 2
+                  totalSteps: 2,
+                  pdfCount: 0,
+                  latestPdfReceivedAt: null
                 }
               ]
             }
@@ -256,4 +268,230 @@ describe('Client forms workspace', () => {
       expect(window.location.pathname).toBe('/clients/client_1/forms');
     });
   });
+
+  it('opens the PDFs drawer and shows PDF history with readable timestamps', async () => {
+    const user = userEvent.setup();
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return new Response(
+          JSON.stringify({
+            user: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/forms/workspace')) {
+        return new Response(
+          JSON.stringify({
+            workspace: {
+              clientId: 'client_1',
+              clientName: 'Client One',
+              forms: [
+                {
+                  code: 'INVESTOR_PROFILE',
+                  title: 'Investor Profile',
+                  selected: true,
+                  onboardingStatus: 'COMPLETED',
+                  resumeRoute: '/clients/client_1/investor-profile/step-7',
+                  viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
+                  editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
+                  totalSteps: 7,
+                  pdfCount: 2,
+                  latestPdfReceivedAt: '2026-03-16T10:05:00.000Z'
+                }
+              ]
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/forms/INVESTOR_PROFILE/pdfs')) {
+        return new Response(
+          JSON.stringify({
+            clientId: 'client_1',
+            formCode: 'INVESTOR_PROFILE',
+            workspaceFormCode: 'INVESTOR_PROFILE',
+            pdfs: [
+              {
+                id: 'pdf_1',
+                clientId: 'client_1',
+                clientName: 'Client One',
+                formCode: 'INVESTOR_PROFILE',
+                workspaceFormCode: 'INVESTOR_PROFILE',
+                workspaceFormTitle: 'Investor Profile',
+                pdfUrl: 'https://files.example.com/investor-profile.pdf',
+                documentTitle: 'Investor Profile',
+                fileName: 'investor-profile.pdf',
+                sourceRunId: 'run_1',
+                generatedAt: '2026-03-16T10:00:00.000Z',
+                receivedAt: '2026-03-16T10:05:00.000Z'
+              },
+              {
+                id: 'pdf_2',
+                clientId: 'client_1',
+                clientName: 'Client One',
+                formCode: 'INVESTOR_PROFILE_ADDITIONAL_HOLDER',
+                workspaceFormCode: 'INVESTOR_PROFILE',
+                workspaceFormTitle: 'Investor Profile',
+                pdfUrl: 'https://files.example.com/additional-holder.pdf',
+                documentTitle: 'Additional Holder',
+                fileName: 'additional-holder.pdf',
+                sourceRunId: 'run_2',
+                generatedAt: '2026-03-16T10:01:00.000Z',
+                receivedAt: '2026-03-16T10:06:00.000Z'
+              }
+            ]
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/forms');
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Client One' })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'PDFs (2)' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Investor Profile' })).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Additional Holder')).toBeInTheDocument();
+    expect(screen.getAllByText(new Date('2026-03-16T10:05:00.000Z').toLocaleString()).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: 'Open PDF' })).toHaveLength(2);
+  });
+
+  it('polls for PDF updates, shows a toast, and refreshes workspace counts', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    let workspaceRequests = 0;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return new Response(
+          JSON.stringify({
+            user: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/pdfs/updates')) {
+        return new Response(
+          JSON.stringify({
+            updates: [
+              {
+                id: 'pdf_1',
+                clientId: 'client_1',
+                clientName: 'Client One',
+                formCode: 'INVESTOR_PROFILE',
+                workspaceFormCode: 'INVESTOR_PROFILE',
+                workspaceFormTitle: 'Investor Profile',
+                pdfUrl: 'https://files.example.com/investor-profile.pdf',
+                documentTitle: 'Investor Profile',
+                fileName: 'investor-profile.pdf',
+                sourceRunId: 'run_1',
+                generatedAt: '2026-03-16T10:00:00.000Z',
+                receivedAt: '2026-03-16T10:05:00.000Z'
+              }
+            ],
+            affectedClientIds: ['client_1'],
+            serverTime: '2026-03-16T10:06:00.000Z'
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/forms/workspace')) {
+        workspaceRequests += 1;
+
+        return new Response(
+          JSON.stringify({
+            workspace: {
+              clientId: 'client_1',
+              clientName: 'Client One',
+              forms: [
+                {
+                  code: 'INVESTOR_PROFILE',
+                  title: 'Investor Profile',
+                  selected: true,
+                  onboardingStatus: 'COMPLETED',
+                  resumeRoute: '/clients/client_1/investor-profile/step-7',
+                  viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
+                  editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
+                  totalSteps: 7,
+                  pdfCount: workspaceRequests > 1 ? 1 : 0,
+                  latestPdfReceivedAt: workspaceRequests > 1 ? '2026-03-16T10:05:00.000Z' : null
+                }
+              ]
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/forms');
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'PDFs (0)' })).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(15_000);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('New PDF received for Client One • Investor Profile')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'PDFs (1)' })).toBeInTheDocument();
+    });
+
+    vi.useRealTimers();
+  }, 10_000);
 });
