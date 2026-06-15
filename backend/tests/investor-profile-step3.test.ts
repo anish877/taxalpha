@@ -49,16 +49,16 @@ function buildCompleteStep3EntityFields(): Step3Fields {
   fields.investmentKnowledge.byType.other.label = null;
 
   fields.financialInformation.annualIncomeRange = {
-    fromBracket: '100k_250k',
-    toBracket: '250k_500k'
+    fromBracket: 175000,
+    toBracket: 375000
   };
   fields.financialInformation.netWorthExPrimaryResidenceRange = {
-    fromBracket: '250k_500k',
-    toBracket: '500k_1m'
+    fromBracket: 375000,
+    toBracket: 750000
   };
   fields.financialInformation.liquidNetWorthRange = {
-    fromBracket: '100k_250k',
-    toBracket: '250k_500k'
+    fromBracket: 175000,
+    toBracket: 375000
   };
   fields.financialInformation.taxBracket = {
     bracket_0_15: false,
@@ -351,8 +351,8 @@ describe('investor-profile-step3', () => {
   it('rejects invalid liquid net worth range and partial gov ID', () => {
     const fields = buildCompleteStep3EntityFields();
     fields.financialInformation.liquidNetWorthRange = {
-      fromBracket: '500k_1m',
-      toBracket: '1m_5m'
+      fromBracket: 750000,
+      toBracket: 3000000
     };
     fields.governmentIdentification.photoId1.type = 'Passport';
 

@@ -142,16 +142,16 @@ function buildCompleteStep3EntityFields(): Step3Fields {
   fields.investmentKnowledge.byType.other.label = null;
 
   fields.financialInformation.annualIncomeRange = {
-    fromBracket: '100k_250k',
-    toBracket: '250k_500k'
+    fromBracket: 175000,
+    toBracket: 375000
   };
   fields.financialInformation.netWorthExPrimaryResidenceRange = {
-    fromBracket: '250k_500k',
-    toBracket: '500k_1m'
+    fromBracket: 375000,
+    toBracket: 750000
   };
   fields.financialInformation.liquidNetWorthRange = {
-    fromBracket: '100k_250k',
-    toBracket: '250k_500k'
+    fromBracket: 175000,
+    toBracket: 375000
   };
   fields.financialInformation.taxBracket = {
     bracket_0_15: false,
@@ -210,16 +210,16 @@ function buildCompleteStep4EntityFields(): Step4Fields {
   fields.investmentKnowledge.byType.other.label = null;
 
   fields.financialInformation.annualIncomeRange = {
-    fromBracket: '100k_250k',
-    toBracket: '250k_500k'
+    fromBracket: 175000,
+    toBracket: 375000
   };
   fields.financialInformation.netWorthExPrimaryResidenceRange = {
-    fromBracket: '250k_500k',
-    toBracket: '500k_1m'
+    fromBracket: 375000,
+    toBracket: 750000
   };
   fields.financialInformation.liquidNetWorthRange = {
-    fromBracket: '100k_250k',
-    toBracket: '250k_500k'
+    fromBracket: 175000,
+    toBracket: 375000
   };
   fields.financialInformation.taxBracket = {
     bracket_0_15: false,

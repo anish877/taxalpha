@@ -340,9 +340,9 @@ describe('forms workspace routes', () => {
               }
             },
             financialInformation: {
-              annualIncomeRange: { fromBracket: '100k_250k', toBracket: '250k_500k' },
-              netWorthExPrimaryResidenceRange: { fromBracket: '250k_500k', toBracket: '500k_1m' },
-              liquidNetWorthRange: { fromBracket: '100k_250k', toBracket: '250k_500k' },
+              annualIncomeRange: { fromBracket: 175000, toBracket: 375000 },
+              netWorthExPrimaryResidenceRange: { fromBracket: 375000, toBracket: 750000 },
+              liquidNetWorthRange: { fromBracket: 175000, toBracket: 375000 },
               taxBracket: {
                 bracket_0_15: false,
                 bracket_15_1_32: true,
@@ -664,9 +664,9 @@ describe('forms workspace routes', () => {
               }
             },
             financialInformation: {
-              annualIncomeRange: { fromBracket: '100k_250k', toBracket: '250k_500k' },
-              netWorthExPrimaryResidenceRange: { fromBracket: '250k_500k', toBracket: '500k_1m' },
-              liquidNetWorthRange: { fromBracket: '100k_250k', toBracket: '250k_500k' },
+              annualIncomeRange: { fromBracket: 175000, toBracket: 375000 },
+              netWorthExPrimaryResidenceRange: { fromBracket: 375000, toBracket: 750000 },
+              liquidNetWorthRange: { fromBracket: 175000, toBracket: 375000 },
               taxBracket: {
                 bracket_0_15: false,
                 bracket_15_1_32: true,

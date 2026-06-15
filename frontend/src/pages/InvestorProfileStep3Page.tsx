@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { ApiError, apiRequest } from '../api/client';
+import { MoneyInput } from '../components/MoneyInput';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import type {
-  InvestorProfileFinancialRangeBracket,
   InvestorProfileInvestmentTypeKey,
   InvestorProfileStepThreeFields,
   InvestorProfileStepThreeQuestionConfig,
@@ -72,16 +72,6 @@ const KNOWLEDGE_OPTIONS = [
   { key: 'extensive', label: 'Extensive' },
   { key: 'none', label: 'None' }
 ] as const;
-
-const RANGE_BRACKET_OPTIONS: Array<{ key: InvestorProfileFinancialRangeBracket; label: string }> = [
-  { key: 'under_50k', label: 'Under $50K' },
-  { key: '50k_100k', label: '$50K - $100K' },
-  { key: '100k_250k', label: '$100K - $250K' },
-  { key: '250k_500k', label: '$250K - $500K' },
-  { key: '500k_1m', label: '$500K - $1M' },
-  { key: '1m_5m', label: '$1M - $5M' },
-  { key: '5m_plus', label: '$5M+' }
-];
 
 type YesNoMap = { yes: boolean; no: boolean };
 
@@ -566,19 +556,19 @@ const QUESTION_CONFIG: Partial<
   'step3.financial.annualIncomeRange': {
     key: 'step3.financial.annualIncomeRange',
     title: 'What is annual income range?',
-    helper: 'Choose both From and To brackets.',
+    helper: 'Enter both From and To amounts.',
     type: 'range-bracket'
   },
   'step3.financial.netWorthExPrimaryResidenceRange': {
     key: 'step3.financial.netWorthExPrimaryResidenceRange',
     title: 'What is net worth (excluding primary residence) range?',
-    helper: 'Choose both From and To brackets.',
+    helper: 'Enter both From and To amounts.',
     type: 'range-bracket'
   },
   'step3.financial.liquidNetWorthRange': {
     key: 'step3.financial.liquidNetWorthRange',
     title: 'What is liquid net worth range?',
-    helper: 'Choose both From and To brackets.',
+    helper: 'Enter both From and To amounts.',
     type: 'range-bracket'
   },
   'step3.financial.taxBracket': {
@@ -1343,58 +1333,42 @@ export function InvestorProfileStep3Page() {
 
   const renderRangeControl = () => {
     const answer = currentAnswer as {
-      fromBracket: InvestorProfileFinancialRangeBracket | null;
-      toBracket: InvestorProfileFinancialRangeBracket | null;
+      fromBracket: number | null;
+      toBracket: number | null;
+    };
+
+    const updateAmount = (field: 'fromBracket' | 'toBracket') => (value: number | null) => {
+      if (!currentQuestionId) return;
+      setFields((current) =>
+        applyAnswer(current, currentQuestionId, {
+          ...answer,
+          [field]: value
+        })
+      );
     };
 
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="rounded-2xl border border-line bg-paper p-4">
           <p className="text-xs uppercase tracking-[0.14em] text-mute">From</p>
-          <select
-            className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-3 text-sm"
-            value={answer.fromBracket ?? ''}
-            onChange={(event) => {
-              if (!currentQuestionId) return;
-              setFields((current) =>
-                applyAnswer(current, currentQuestionId, {
-                  ...answer,
-                  fromBracket: event.target.value || null
-                })
-              );
-            }}
-          >
-            <option value="">Select range</option>
-            {RANGE_BRACKET_OPTIONS.map((option) => (
-              <option key={option.key} value={option.key}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <MoneyInput
+            className="mt-2"
+            aria-label="From amount"
+            placeholder="0"
+            value={answer.fromBracket}
+            onValueChange={updateAmount('fromBracket')}
+          />
         </label>
 
         <label className="rounded-2xl border border-line bg-paper p-4">
           <p className="text-xs uppercase tracking-[0.14em] text-mute">To</p>
-          <select
-            className="mt-2 w-full rounded-xl border border-line bg-white px-3 py-3 text-sm"
-            value={answer.toBracket ?? ''}
-            onChange={(event) => {
-              if (!currentQuestionId) return;
-              setFields((current) =>
-                applyAnswer(current, currentQuestionId, {
-                  ...answer,
-                  toBracket: event.target.value || null
-                })
-              );
-            }}
-          >
-            <option value="">Select range</option>
-            {RANGE_BRACKET_OPTIONS.map((option) => (
-              <option key={option.key} value={option.key}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <MoneyInput
+            className="mt-2"
+            aria-label="To amount"
+            placeholder="0"
+            value={answer.toBracket}
+            onValueChange={updateAmount('toBracket')}
+          />
         </label>
       </div>
     );

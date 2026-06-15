@@ -10,15 +10,6 @@ const MARITAL_STATUS_KEYS = ['single', 'married', 'divorced', 'domesticPartner',
 const EMPLOYMENT_STATUS_KEYS = ['employed', 'selfEmployed', 'retired', 'unemployed', 'homemaker', 'student'] as const;
 const KNOWLEDGE_LEVEL_KEYS = ['limited', 'moderate', 'extensive', 'none'] as const;
 const TAX_BRACKET_KEYS = ['bracket_0_15', 'bracket_15_1_32', 'bracket_32_1_50', 'bracket_50_1_plus'] as const;
-const RANGE_BUCKET_KEYS = [
-  'under_50k',
-  '50k_100k',
-  '100k_250k',
-  '250k_500k',
-  '500k_1m',
-  '1m_5m',
-  '5m_plus'
-] as const;
 const INVESTMENT_TYPE_KEYS = [
   'commoditiesFutures',
   'equities',
@@ -84,7 +75,6 @@ type MaritalStatusKey = (typeof MARITAL_STATUS_KEYS)[number];
 type EmploymentStatusKey = (typeof EMPLOYMENT_STATUS_KEYS)[number];
 type KnowledgeLevelKey = (typeof KNOWLEDGE_LEVEL_KEYS)[number];
 type TaxBracketKey = (typeof TAX_BRACKET_KEYS)[number];
-type RangeBucketKey = (typeof RANGE_BUCKET_KEYS)[number];
 type InvestmentTypeKey = (typeof INVESTMENT_TYPE_KEYS)[number];
 
 type InvestmentKnowledgeQuestionId = `step4.investment.byType.${InvestmentTypeKey}.knowledge`;
@@ -152,9 +142,6 @@ const STEP_4_QUESTION_IDS: Step4QuestionId[] = [
 ];
 
 const STEP_4_QUESTION_ID_SET = new Set<string>(STEP_4_QUESTION_IDS);
-const RANGE_BUCKET_INDEX = new Map<RangeBucketKey, number>(
-  RANGE_BUCKET_KEYS.map((key, index) => [key, index])
-);
 const INVESTMENT_TYPE_KEY_SET = new Set<string>(INVESTMENT_TYPE_KEYS);
 
 interface Step4Address {
@@ -184,9 +171,10 @@ type Step4InvestmentKnowledgeByType = Record<InvestmentTypeKey, Step4InvestmentT
   };
 };
 
+// Annual income / net worth ranges are stored as raw dollar amounts (From and To).
 interface Step4Range {
-  fromBracket: RangeBucketKey | null;
-  toBracket: RangeBucketKey | null;
+  fromBracket: number | null;
+  toBracket: number | null;
 }
 
 interface Step4PhotoId {
@@ -505,21 +493,34 @@ function emptyAddress(): Step4Address {
   };
 }
 
-function normalizeRangeBucket(value: unknown): RangeBucketKey | null {
-  if (typeof value !== 'string') {
-    return null;
+function normalizeRangeAmount(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value >= 0 ? value : null;
   }
 
-  const normalized = value.trim() as RangeBucketKey;
-  return RANGE_BUCKET_INDEX.has(normalized) ? normalized : null;
+  if (typeof value === 'string') {
+    // Legacy records stored bracket keys (e.g. "under_50k"). Anything with
+    // letters is not a real amount — treat it as empty so it can be re-entered.
+    if (/[a-z]/i.test(value)) {
+      return null;
+    }
+    const digits = value.replace(/[^0-9.]/g, '');
+    if (!digits) {
+      return null;
+    }
+    const parsed = Number(digits);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  }
+
+  return null;
 }
 
 function normalizeRange(source: unknown): Step4Range {
   const record = toRecord(source);
 
   return {
-    fromBracket: normalizeRangeBucket(record.fromBracket),
-    toBracket: normalizeRangeBucket(record.toBracket)
+    fromBracket: normalizeRangeAmount(record.fromBracket),
+    toBracket: normalizeRangeAmount(record.toBracket)
   };
 }
 
@@ -608,15 +609,8 @@ function getKnowledgeSelectionForType(fields: Step4Fields, typeKey: InvestmentTy
   return getSingleSelection(fields.investmentKnowledge.byType[typeKey].knowledge, KNOWLEDGE_LEVEL_KEYS);
 }
 
-function getRangeOrderError(fromBracket: RangeBucketKey, toBracket: RangeBucketKey): string | null {
-  const fromIndex = RANGE_BUCKET_INDEX.get(fromBracket);
-  const toIndex = RANGE_BUCKET_INDEX.get(toBracket);
-
-  if (fromIndex === undefined || toIndex === undefined) {
-    return 'Select valid range options.';
-  }
-
-  return fromIndex <= toIndex ? null : 'The From range must be less than or equal to the To range.';
+function getRangeOrderError(fromBracket: number, toBracket: number): string | null {
+  return fromBracket <= toBracket ? null : 'The From amount must be less than or equal to the To amount.';
 }
 
 function isPhotoIdEmpty(block: Step4PhotoId): boolean {
@@ -1143,8 +1137,8 @@ function validateRangeAnswer(answer: unknown, questionId: string): ValidationRes
     return {
       success: false,
       fieldErrors: {
-        [`${questionId}.fromBracket`]: 'Choose a From range.',
-        [`${questionId}.toBracket`]: 'Choose a To range.'
+        [`${questionId}.fromBracket`]: 'Enter a From amount.',
+        [`${questionId}.toBracket`]: 'Enter a To amount.'
       }
     };
   }
@@ -1152,15 +1146,15 @@ function validateRangeAnswer(answer: unknown, questionId: string): ValidationRes
   const range = normalizeRange(answer);
   const fieldErrors: Record<string, string> = {};
 
-  if (!range.fromBracket) {
-    fieldErrors[`${questionId}.fromBracket`] = 'Choose a From range.';
+  if (range.fromBracket === null) {
+    fieldErrors[`${questionId}.fromBracket`] = 'Enter a From amount.';
   }
 
-  if (!range.toBracket) {
-    fieldErrors[`${questionId}.toBracket`] = 'Choose a To range.';
+  if (range.toBracket === null) {
+    fieldErrors[`${questionId}.toBracket`] = 'Enter a To amount.';
   }
 
-  if (range.fromBracket && range.toBracket) {
+  if (range.fromBracket !== null && range.toBracket !== null) {
     const rangeOrderError = getRangeOrderError(range.fromBracket, range.toBracket);
     if (rangeOrderError) {
       fieldErrors[`${questionId}.toBracket`] = rangeOrderError;
@@ -1268,15 +1262,15 @@ function validateStep4RangesForCompletion(
     | 'step4.financial.liquidNetWorthRange',
   label: string
 ): void {
-  if (!range.fromBracket) {
-    errors[`${questionId}.fromBracket`] = `${label} from range is required.`;
+  if (range.fromBracket === null) {
+    errors[`${questionId}.fromBracket`] = `${label} from amount is required.`;
   }
 
-  if (!range.toBracket) {
-    errors[`${questionId}.toBracket`] = `${label} to range is required.`;
+  if (range.toBracket === null) {
+    errors[`${questionId}.toBracket`] = `${label} to amount is required.`;
   }
 
-  if (range.fromBracket && range.toBracket) {
+  if (range.fromBracket !== null && range.toBracket !== null) {
     const orderError = getRangeOrderError(range.fromBracket, range.toBracket);
     if (orderError) {
       errors[`${questionId}.toBracket`] = orderError;
@@ -1984,11 +1978,8 @@ export function validateStep4Answer(
       if (questionId === 'step4.financial.liquidNetWorthRange' && currentFields) {
         const netWorthRange = currentFields.financialInformation.netWorthExPrimaryResidenceRange;
 
-        if (netWorthRange.toBracket && rangeValidation.value.toBracket) {
-          const netWorthToIndex = RANGE_BUCKET_INDEX.get(netWorthRange.toBracket) ?? -1;
-          const liquidToIndex = RANGE_BUCKET_INDEX.get(rangeValidation.value.toBracket) ?? -1;
-
-          if (liquidToIndex > netWorthToIndex) {
+        if (netWorthRange.toBracket !== null && rangeValidation.value.toBracket !== null) {
+          if (rangeValidation.value.toBracket > netWorthRange.toBracket) {
             return {
               success: false,
               fieldErrors: {
@@ -2820,11 +2811,8 @@ export function validateStep4Completion(fields: Step4Fields): Record<string, str
   const netWorthTo = normalized.financialInformation.netWorthExPrimaryResidenceRange.toBracket;
   const liquidTo = normalized.financialInformation.liquidNetWorthRange.toBracket;
 
-  if (netWorthTo && liquidTo) {
-    const netWorthToIndex = RANGE_BUCKET_INDEX.get(netWorthTo) ?? -1;
-    const liquidToIndex = RANGE_BUCKET_INDEX.get(liquidTo) ?? -1;
-
-    if (liquidToIndex > netWorthToIndex) {
+  if (netWorthTo !== null && liquidTo !== null) {
+    if (liquidTo > netWorthTo) {
       errors['step4.financial.liquidNetWorthRange.toBracket'] =
         'Liquid net worth cannot exceed net worth (excluding primary residence).';
     }

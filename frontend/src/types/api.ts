@@ -255,14 +255,9 @@ export type InvestorProfileInvestmentTypeKey =
   | 'alternativeInvestments'
   | 'other';
 
-export type InvestorProfileFinancialRangeBracket =
-  | 'under_50k'
-  | '50k_100k'
-  | '100k_250k'
-  | '250k_500k'
-  | '500k_1m'
-  | '1m_5m'
-  | '5m_plus';
+// Financial ranges (annual income, net worth, liquid net worth) are entered as
+// raw dollar amounts. `null` means the field is empty.
+export type InvestorProfileFinancialRangeAmount = number;
 
 export type InvestorProfileStepThreeQuestionId =
   | 'step3.holder.kind'
@@ -435,16 +430,16 @@ export interface InvestorProfileStepThreeFields {
   };
   financialInformation: {
     annualIncomeRange: {
-      fromBracket: InvestorProfileFinancialRangeBracket | null;
-      toBracket: InvestorProfileFinancialRangeBracket | null;
+      fromBracket: InvestorProfileFinancialRangeAmount | null;
+      toBracket: InvestorProfileFinancialRangeAmount | null;
     };
     netWorthExPrimaryResidenceRange: {
-      fromBracket: InvestorProfileFinancialRangeBracket | null;
-      toBracket: InvestorProfileFinancialRangeBracket | null;
+      fromBracket: InvestorProfileFinancialRangeAmount | null;
+      toBracket: InvestorProfileFinancialRangeAmount | null;
     };
     liquidNetWorthRange: {
-      fromBracket: InvestorProfileFinancialRangeBracket | null;
-      toBracket: InvestorProfileFinancialRangeBracket | null;
+      fromBracket: InvestorProfileFinancialRangeAmount | null;
+      toBracket: InvestorProfileFinancialRangeAmount | null;
     };
     taxBracket: {
       bracket_0_15: boolean;
