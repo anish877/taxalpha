@@ -13,6 +13,7 @@ import { createClientsRouter } from './routes/clients.js';
 import { createFormsRouter } from './routes/forms.js';
 import { createN8nRouter } from './routes/n8n.js';
 import { createStatementOfFinancialConditionRouter } from './routes/statement-of-financial-condition.js';
+import { createUploadsRouter } from './routes/uploads.js';
 import type { RuntimeConfig } from './types/deps.js';
 
 interface CreateAppOptions {
@@ -40,6 +41,7 @@ export function createApp(options: CreateAppOptions = {}): Express {
 
   app.use('/api/n8n', createN8nRouter({ prisma: prismaClient, config }));
   app.use('/api/auth', createAuthRouter({ prisma: prismaClient, config }));
+  app.use('/api/uploads', createUploadsRouter({ prisma: prismaClient, config }));
   app.use('/api/forms', createFormsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createStatementOfFinancialConditionRouter({ prisma: prismaClient, config }));

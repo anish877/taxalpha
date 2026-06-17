@@ -455,6 +455,8 @@ export interface InvestorProfileStepThreeFields {
       countryOfIssue: string | null;
       dateOfIssue: string | null;
       dateOfExpiration: string | null;
+      documentKey: string | null;
+      documentFileName: string | null;
     };
     photoId2: {
       type: string | null;
@@ -462,6 +464,8 @@ export interface InvestorProfileStepThreeFields {
       countryOfIssue: string | null;
       dateOfIssue: string | null;
       dateOfExpiration: string | null;
+      documentKey: string | null;
+      documentFileName: string | null;
     };
     requirementContext: {
       requiresDocumentaryId: boolean | null;

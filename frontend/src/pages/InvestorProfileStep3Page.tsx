@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { ApiError, apiRequest } from '../api/client';
+import { DocumentUploadField } from '../components/DocumentUploadField';
 import { MoneyInput } from '../components/MoneyInput';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -207,14 +208,18 @@ function createEmptyStep3Fields(): InvestorProfileStepThreeFields {
         idNumber: null,
         countryOfIssue: null,
         dateOfIssue: null,
-        dateOfExpiration: null
+        dateOfExpiration: null,
+        documentKey: null,
+        documentFileName: null
       },
       photoId2: {
         type: null,
         idNumber: null,
         countryOfIssue: null,
         dateOfIssue: null,
-        dateOfExpiration: null
+        dateOfExpiration: null,
+        documentKey: null,
+        documentFileName: null
       },
       requirementContext: {
         requiresDocumentaryId: null,
@@ -1671,6 +1676,8 @@ export function InvestorProfileStep3Page() {
       countryOfIssue: string | null;
       dateOfIssue: string | null;
       dateOfExpiration: string | null;
+      documentKey: string | null;
+      documentFileName: string | null;
     };
 
     const context = fields.governmentIdentification.requirementContext;
@@ -1770,6 +1777,16 @@ export function InvestorProfileStep3Page() {
             />
           </label>
         </div>
+
+        <DocumentUploadField
+          scope={currentQuestionId ?? 'photo-id'}
+          documentKey={answer.documentKey ?? null}
+          documentFileName={answer.documentFileName ?? null}
+          onChange={(next) => {
+            if (!currentQuestionId) return;
+            setFields((current) => applyAnswer(current, currentQuestionId, { ...answer, ...next }));
+          }}
+        />
       </div>
     );
   };

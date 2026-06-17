@@ -183,6 +183,9 @@ interface Step3PhotoId {
   countryOfIssue: string | null;
   dateOfIssue: string | null;
   dateOfExpiration: string | null;
+  // Optional uploaded scan of the document (S3 object key + original file name).
+  documentKey: string | null;
+  documentFileName: string | null;
 }
 
 export interface Step3Fields {
@@ -541,7 +544,9 @@ function normalizePhotoId(source: unknown): Step3PhotoId {
     idNumber: normalizeNullableString(record.idNumber),
     countryOfIssue: normalizeNullableString(record.countryOfIssue)?.toUpperCase() ?? null,
     dateOfIssue: normalizeNullableString(record.dateOfIssue),
-    dateOfExpiration: normalizeNullableString(record.dateOfExpiration)
+    dateOfExpiration: normalizeNullableString(record.dateOfExpiration),
+    documentKey: normalizeNullableString(record.documentKey),
+    documentFileName: normalizeNullableString(record.documentFileName)
   };
 }
 
@@ -551,7 +556,9 @@ function emptyPhotoId(): Step3PhotoId {
     idNumber: null,
     countryOfIssue: null,
     dateOfIssue: null,
-    dateOfExpiration: null
+    dateOfExpiration: null,
+    documentKey: null,
+    documentFileName: null
   };
 }
 

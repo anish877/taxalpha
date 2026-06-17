@@ -12,6 +12,14 @@ export interface N8nWebhookConfig {
   callbackSecret?: string | null;
 }
 
+export interface S3UploadConfig {
+  region: string;
+  /** Target bucket. When null, document uploads are disabled. */
+  bucket: string | null;
+  /** Key prefix (folder) under which uploaded documents are stored. */
+  uploadPrefix: string;
+}
+
 export interface RuntimeConfig {
   nodeEnv: NodeEnvironment;
   frontendUrl: string;
@@ -19,6 +27,8 @@ export interface RuntimeConfig {
   jwtSecret: string;
   jwtExpiresIn: string;
   n8nWebhooks: N8nWebhookConfig;
+  /** Present when the app is configured; absent disables document uploads. */
+  s3?: S3UploadConfig;
 }
 
 export interface RouteDeps {
