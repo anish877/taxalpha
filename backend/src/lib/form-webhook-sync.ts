@@ -136,6 +136,9 @@ interface FormWebhookMetadata {
   formCode: string;
   formTitle: string;
   callbackUrl?: string;
+  // Shared secret to send back in the `x-taxalpha-callback-secret` header on the
+  // PDF callback. Provided here so n8n can echo it without separate config.
+  callbackSecret?: string;
   workspaceFormCode?: string;
   sourceFormCode?: string;
   onboardingStatus?: string;
@@ -587,6 +590,10 @@ export async function syncFormsToN8n(params: {
       params.advisorName,
       params.backendPublicUrl
     );
+
+    if (params.config?.callbackSecret) {
+      payload.metadata.callbackSecret = params.config.callbackSecret;
+    }
 
     let response: Response;
     try {
