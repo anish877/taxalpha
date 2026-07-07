@@ -231,18 +231,15 @@ model ClientUploadedPdfFill {
 }
 
 model ClientDocument {
-  id                     String   @id @default(cuid())
-  clientId               String
-  uploadedByUserId       String
-  fileName               String
-  contentType            String
-  sizeBytes              Int
-  storageKey             String   @unique
-  storageProvider        String   @default("LOCAL")
-  cloudinaryPublicId     String?
-  cloudinaryResourceType String?
-  cloudinaryDeliveryType String?
-  createdAt              DateTime @default(now())
+  id               String   @id @default(cuid())
+  clientId         String
+  uploadedByUserId String
+  fileName         String
+  contentType      String
+  sizeBytes        Int
+  storageKey       String   @unique
+  storageProvider  String   @default("LOCAL")
+  createdAt        DateTime @default(now())
 
   client     Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   uploadedBy User   @relation(fields: [uploadedByUserId], references: [id], onDelete: Cascade)

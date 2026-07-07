@@ -34,10 +34,7 @@ const envSchema = z.object({
   AWS_REGION: z.string().min(1).default('us-east-1'),
   S3_BUCKET: z.string().min(1).optional(),
   S3_UPLOAD_PREFIX: z.string().default('investor-profile/government-id'),
-  CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
-  CLOUDINARY_API_KEY: z.string().min(1).optional(),
-  CLOUDINARY_API_SECRET: z.string().min(1).optional(),
-  CLOUDINARY_CLIENT_DOCUMENT_FOLDER: z.string().default('taxalpha/client-documents'),
+  S3_CLIENT_DOCUMENT_PREFIX: z.string().default('client-documents'),
   // AI form-ingestion (OpenRouter, OpenAI-compatible). Ingestion stays disabled
   // unless OPENROUTER_API_KEY is set.
   OPENROUTER_API_KEY: z.string().min(1).optional(),
@@ -128,13 +125,8 @@ export function getRuntimeConfig(env: Environment = getEnv()): RuntimeConfig {
     s3: {
       region: env.AWS_REGION,
       bucket: env.S3_BUCKET ?? null,
-      uploadPrefix: env.S3_UPLOAD_PREFIX.replace(/^\/+|\/+$/g, '')
-    },
-    cloudinary: {
-      cloudName: env.CLOUDINARY_CLOUD_NAME ?? null,
-      apiKey: env.CLOUDINARY_API_KEY ?? null,
-      apiSecret: env.CLOUDINARY_API_SECRET ?? null,
-      folder: env.CLOUDINARY_CLIENT_DOCUMENT_FOLDER.replace(/^\/+|\/+$/g, '')
+      uploadPrefix: env.S3_UPLOAD_PREFIX.replace(/^\/+|\/+$/g, ''),
+      clientDocumentPrefix: env.S3_CLIENT_DOCUMENT_PREFIX.replace(/^\/+|\/+$/g, '')
     },
     openrouter: {
       apiKey: env.OPENROUTER_API_KEY ?? null,

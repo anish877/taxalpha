@@ -8,12 +8,12 @@ import { z } from 'zod';
 
 import { clientAccessWhere } from '../lib/client-access.js';
 import {
-  cloudinaryPublicId,
-  deleteRawDocumentFromCloudinary,
-  isCloudinaryConfigured,
-  signedRawDocumentUrl,
-  uploadRawDocumentToCloudinary
-} from '../lib/cloudinary-documents.js';
+  buildClientDocumentS3Key,
+  createClientDocumentViewUrl,
+  deleteClientDocumentFromS3,
+  isClientDocumentsS3Configured,
+  uploadClientDocumentToS3
+} from '../lib/s3-client-documents.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
@@ -182,10 +182,17 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      if (isCloudinaryConfigured(deps.config.cloudinary)) {
-        const upload = await uploadRawDocumentToCloudinary(deps.config.cloudinary, {
-          buffer: body,
-          publicId: cloudinaryPublicId(deps.config.cloudinary, clientId, uniqueFileName)
+      if (isClientDocumentsS3Configured(deps.config.s3)) {
+        const storageKey = buildClientDocumentS3Key(deps.config.s3, {
+          clientId,
+          uniqueFileName
+        });
+
+        await uploadClientDocumentToS3(deps.config.s3, {
+          key: storageKey,
+          body,
+          contentType,
+          fileName
         });
 
         try {
@@ -195,12 +202,9 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
               uploadedByUserId: authUser.id,
               fileName,
               contentType,
-              sizeBytes: upload.bytes || body.length,
-              storageKey: `cloudinary:${upload.publicId}`,
-              storageProvider: 'CLOUDINARY',
-              cloudinaryPublicId: upload.publicId,
-              cloudinaryResourceType: upload.resourceType,
-              cloudinaryDeliveryType: upload.deliveryType
+              sizeBytes: body.length,
+              storageKey,
+              storageProvider: 'S3'
             },
             include: {
               uploadedBy: {
@@ -213,11 +217,7 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
 
           response.status(201).json({ document: toClientDocumentRecord(document) });
         } catch (error) {
-          await deleteRawDocumentFromCloudinary(deps.config.cloudinary, {
-            publicId: upload.publicId,
-            resourceType: upload.resourceType,
-            deliveryType: upload.deliveryType
-          });
+          await deleteClientDocumentFromS3(deps.config.s3, { key: storageKey });
           throw error;
         }
 
@@ -285,22 +285,22 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      if (document.storageProvider === 'CLOUDINARY') {
-        if (!isCloudinaryConfigured(deps.config.cloudinary)) {
-          response.status(503).json({ message: 'Cloudinary document storage is not configured.' });
+      if (document.storageProvider === 'S3') {
+        if (!isClientDocumentsS3Configured(deps.config.s3)) {
+          response.status(503).json({ message: 'S3 document storage is not configured.' });
           return;
         }
 
-        if (!document.cloudinaryPublicId) {
+        if (!document.storageKey) {
           response.status(404).json({ message: 'Stored document file not found.' });
           return;
         }
 
         response.redirect(
-          signedRawDocumentUrl(deps.config.cloudinary, {
-            publicId: document.cloudinaryPublicId,
-            resourceType: document.cloudinaryResourceType ?? 'raw',
-            deliveryType: document.cloudinaryDeliveryType ?? 'authenticated'
+          await createClientDocumentViewUrl(deps.config.s3, {
+            key: document.storageKey,
+            contentType: document.contentType,
+            fileName: document.fileName
           })
         );
         return;

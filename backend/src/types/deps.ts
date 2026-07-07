@@ -18,14 +18,8 @@ export interface S3UploadConfig {
   bucket: string | null;
   /** Key prefix (folder) under which uploaded documents are stored. */
   uploadPrefix: string;
-}
-
-export interface CloudinaryConfig {
-  /** Missing credentials keep client-document uploads on local disk. */
-  cloudName: string | null;
-  apiKey: string | null;
-  apiSecret: string | null;
-  folder: string;
+  /** Key prefix (folder) for client workspace documents. */
+  clientDocumentPrefix: string;
 }
 
 export interface OpenRouterConfig {
@@ -45,8 +39,6 @@ export interface RuntimeConfig {
   n8nWebhooks: N8nWebhookConfig;
   /** Present when the app is configured; absent disables document uploads. */
   s3?: S3UploadConfig;
-  /** Client document storage. When configured, documents are stored in Cloudinary. */
-  cloudinary?: CloudinaryConfig;
   /** AI form-ingestion (OpenRouter). */
   openrouter?: OpenRouterConfig;
 }

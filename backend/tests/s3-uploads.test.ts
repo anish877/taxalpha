@@ -6,12 +6,14 @@ import {
   isKeyWithinPrefix,
   isUploadsConfigured
 } from '../src/lib/s3-uploads.js';
+import { buildClientDocumentS3Key } from '../src/lib/s3-client-documents.js';
 import type { S3UploadConfig } from '../src/types/deps.js';
 
 const baseConfig: S3UploadConfig = {
   region: 'us-east-1',
   bucket: 'gpt-alpha-905418209881',
-  uploadPrefix: 'investor-profile/government-id'
+  uploadPrefix: 'investor-profile/government-id',
+  clientDocumentPrefix: 'client-documents'
 };
 
 describe('s3-uploads helpers', () => {
@@ -65,5 +67,14 @@ describe('s3-uploads helpers', () => {
   it('guards view access to keys within the configured prefix', () => {
     expect(isKeyWithinPrefix(baseConfig, 'investor-profile/government-id/user-1/abc.pdf')).toBe(true);
     expect(isKeyWithinPrefix(baseConfig, 'some-other-prefix/secret.pdf')).toBe(false);
+  });
+
+  it('builds client document keys under the separate client document prefix', () => {
+    const key = buildClientDocumentS3Key(baseConfig as S3UploadConfig & { bucket: string }, {
+      clientId: 'client 123',
+      uniqueFileName: 'uuid-Tax Letter.docx'
+    });
+
+    expect(key).toBe('client-documents/client-123/uuid-Tax-Letter.docx');
   });
 });

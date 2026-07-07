@@ -45,9 +45,6 @@ type StoredDocumentCreateData = {
   sizeBytes: number;
   storageKey: string;
   storageProvider: string;
-  cloudinaryPublicId?: string | null;
-  cloudinaryResourceType?: string | null;
-  cloudinaryDeliveryType?: string | null;
 };
 
 function createAuthCookie(): string {
