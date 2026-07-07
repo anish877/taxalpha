@@ -109,14 +109,14 @@ function getErrorForQuestion(
   return prefixed ? fieldErrors[prefixed] : null;
 }
 
-function parseAmountInput(raw: string): number {
+function parseAmountInput(raw: string): number | null {
   if (!raw.trim()) {
-    return 0;
+    return null;
   }
 
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed < 0) {
-    return 0;
+    return null;
   }
 
   return parsed;
@@ -467,7 +467,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
                 min={0}
                 step="any"
                 type="number"
-                value={answer.existingIlliquidAltPositions}
+                value={answer.existingIlliquidAltPositions ?? ''}
                 onChange={(event) => {
                   const payload = structuredClone(answer);
                   payload.existingIlliquidAltPositions = parseAmountInput(event.target.value);
@@ -484,7 +484,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
                 min={0}
                 step="any"
                 type="number"
-                value={answer.existingSemiLiquidAltPositions}
+                value={answer.existingSemiLiquidAltPositions ?? ''}
                 onChange={(event) => {
                   const payload = structuredClone(answer);
                   payload.existingSemiLiquidAltPositions = parseAmountInput(event.target.value);
@@ -501,7 +501,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
                 min={0}
                 step="any"
                 type="number"
-                value={answer.existingTaxAdvantageAltPositions}
+                value={answer.existingTaxAdvantageAltPositions ?? ''}
                 onChange={(event) => {
                   const payload = structuredClone(answer);
                   payload.existingTaxAdvantageAltPositions = parseAmountInput(event.target.value);
@@ -526,7 +526,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
               min={0}
               step="any"
               type="number"
-              value={answer.totalNetWorth}
+              value={answer.totalNetWorth ?? ''}
               onChange={(event) => {
                 const payload = structuredClone(answer);
                 payload.totalNetWorth = parseAmountInput(event.target.value);
@@ -544,7 +544,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
               min={0}
               step="any"
               type="number"
-              value={answer.liquidNetWorth}
+              value={answer.liquidNetWorth ?? ''}
               onChange={(event) => {
                 const payload = structuredClone(answer);
                 payload.liquidNetWorth = parseAmountInput(event.target.value);

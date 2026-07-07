@@ -1,0 +1,3614 @@
+[
+  {
+    "page": 1,
+    "fieldName": "Investment",
+    "type": "text",
+    "rect": [
+      184.9,
+      495,
+      270.8,
+      520.8
+    ],
+    "inferredLabel": "$",
+    "nearbyText": [
+      "$",
+      "Total Purchase Price:",
+      "(“Subscription Payment”)",
+      "Investment",
+      "1",
+      "Purchasing Units as ("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 1,
+    "fieldName": "Trust Include name of trust name of trustee and date trust was formed",
+    "type": "text",
+    "rect": [
+      159.8,
+      380.3,
+      574.8,
+      392.9
+    ],
+    "inferredLabel": "___________________________________________________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________",
+      "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________",
+      "Partnership (Include evidence of partnership authority for person who executes required documents.)",
+      "Tenants in Common (Both parties must sign all required documents.)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 1,
+    "fieldName": "Corporation Include evidence of corporate authority for person who executes required documents",
+    "type": "text",
+    "rect": [
+      251.8,
+      314.8,
+      576.7,
+      327.4
+    ],
+    "inferredLabel": "Other (Indicate Type) _________________________________________________________________",
+    "nearbyText": [
+      "Other (Indicate Type) _________________________________________________________________",
+      "Corporation* (Include evidence of corporate authority for person who executes required documents.)",
+      "executes required documents.)",
+      "If Limited Liability Company or Corporation, please indicate the tax form used for its annual tax filing:",
+      "*"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 1,
+    "fieldName": "may require clarification",
+    "type": "text",
+    "rect": [
+      123.8,
+      115.3,
+      573.8,
+      127.9
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "may require clarification):",
+      "(If a trust, please forward a copy of the trust documents)",
+      "Natural and",
+      "(",
+      "Information"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 1,
+    "fieldName": "Primary Owner Information",
+    "type": "text",
+    "rect": [
+      153,
+      52,
+      578,
+      64.6
+    ],
+    "inferredLabel": "Name: _____________________________________________________________________________________",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "Information",
+      "Investor(s)",
+      "4",
+      "Primary Owner Information"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box1",
+    "type": "checkbox",
+    "rect": [
+      327.7,
+      505.1,
+      345.7,
+      523.1
+    ],
+    "inferredLabel": "Investment",
+    "nearbyText": [
+      "Purchasing Units as (",
+      "Limited Partner",
+      "must check one",
+      "$",
+      "Total Purchase Price:",
+      "):"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box2",
+    "type": "checkbox",
+    "rect": [
+      326.2,
+      485.3,
+      344.2,
+      503.3
+    ],
+    "inferredLabel": "(“Subscription Payment”)",
+    "nearbyText": [
+      "Investor General Partner",
+      "Limited Partner",
+      "(“Subscription Payment”)",
+      "$",
+      "Individual or Separate Property (In community property states, if the purchaser is married, then his",
+      "Investment"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box3",
+    "type": "checkbox",
+    "rect": [
+      126.4,
+      463.5,
+      144.4,
+      481.5
+    ],
+    "inferredLabel": "(“Subscription Payment”)",
+    "nearbyText": [
+      "Individual or Separate Property (In community property states, if the purchaser is married, then his",
+      "(her) spouse must sign and submit the Consent of Spouse Form, available upon request)",
+      "(“Subscription Payment”)",
+      "Investment Type",
+      "2",
+      "Investor General Partner"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box4",
+    "type": "checkbox",
+    "rect": [
+      125.3,
+      442.5,
+      143.3,
+      460.5
+    ],
+    "inferredLabel": "(her) spouse must sign and submit the Consent of Spouse Form, available upon request)",
+    "nearbyText": [
+      "Husband and Wife as community property (Community property states only. Husband and wife should",
+      "(her) spouse must sign and submit the Consent of Spouse Form, available upon request)",
+      "sign all required documents.)",
+      "Individual or Separate Property (In community property states, if the purchaser is married, then his",
+      "Must Choose",
+      "("
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box5",
+    "type": "checkbox",
+    "rect": [
+      124.9,
+      420.8,
+      142.9,
+      438.8
+    ],
+    "inferredLabel": ")",
+    "nearbyText": [
+      ")",
+      "sign all required documents.)",
+      "Joint Tenants with Right of Survivorship (Both parties must sign all required documents.)",
+      "Husband and Wife as community property (Community property states only. Husband and wife should",
+      "One",
+      "Tenants in Common (Both parties must sign all required documents.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box6",
+    "type": "checkbox",
+    "rect": [
+      124.9,
+      400.9,
+      142.9,
+      418.9
+    ],
+    "inferredLabel": "Joint Tenants with Right of Survivorship (Both parties must sign all required documents.)",
+    "nearbyText": [
+      "Tenants in Common (Both parties must sign all required documents.)",
+      "Joint Tenants with Right of Survivorship (Both parties must sign all required documents.)",
+      "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________",
+      ")",
+      "One"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box7",
+    "type": "checkbox",
+    "rect": [
+      125.3,
+      383.3,
+      143.3,
+      401.3
+    ],
+    "inferredLabel": "Tenants in Common (Both parties must sign all required documents.)",
+    "nearbyText": [
+      "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________",
+      "___________________________________________________________________________________",
+      "Tenants in Common (Both parties must sign all required documents.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box8",
+    "type": "checkbox",
+    "rect": [
+      125.6,
+      363.8,
+      143.6,
+      381.8
+    ],
+    "inferredLabel": "___________________________________________________________________________________",
+    "nearbyText": [
+      "Partnership (Include evidence of partnership authority for person who executes required documents.)",
+      "___________________________________________________________________________________",
+      "Limited Liability Company* (Include evidence of limited liability company authority for person who",
+      "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box9",
+    "type": "checkbox",
+    "rect": [
+      125.6,
+      345,
+      143.6,
+      363
+    ],
+    "inferredLabel": "Partnership (Include evidence of partnership authority for person who executes required documents.)",
+    "nearbyText": [
+      "Limited Liability Company* (Include evidence of limited liability company authority for person who",
+      "executes required documents.)",
+      "Partnership (Include evidence of partnership authority for person who executes required documents.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box10",
+    "type": "checkbox",
+    "rect": [
+      124.9,
+      326.6,
+      142.9,
+      344.6
+    ],
+    "inferredLabel": "executes required documents.)",
+    "nearbyText": [
+      "Corporation* (Include evidence of corporate authority for person who executes required documents.)",
+      "executes required documents.)",
+      "Limited Liability Company* (Include evidence of limited liability company authority for person who",
+      "Other (Indicate Type) _________________________________________________________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box11",
+    "type": "checkbox",
+    "rect": [
+      124.9,
+      308.6,
+      142.9,
+      326.6
+    ],
+    "inferredLabel": "Corporation* (Include evidence of corporate authority for person who executes required documents.)",
+    "nearbyText": [
+      "*",
+      "If Limited Liability Company or Corporation, please indicate the tax form used for its annual tax filing:",
+      "Other (Indicate Type) _________________________________________________________________",
+      "Corporation* (Include evidence of corporate authority for person who executes required documents.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box12",
+    "type": "checkbox",
+    "rect": [
+      129.8,
+      284.6,
+      147.8,
+      302.6
+    ],
+    "inferredLabel": "_____ Form 1065 (Partnership)",
+    "nearbyText": [
+      "_____ Form 1065 (Partnership)",
+      "If Limited Liability Company or Corporation, please indicate the tax form used for its annual tax filing:",
+      "*",
+      "Other (Indicate Type) _________________________________________________________________",
+      "_____ Form 1120S (S Corporation)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box13",
+    "type": "checkbox",
+    "rect": [
+      130.9,
+      264.4,
+      148.9,
+      282.4
+    ],
+    "inferredLabel": "_____ Form 1120 (Corporation)",
+    "nearbyText": [
+      "_____ Form 1120 (Corporation)",
+      "_____ Form 1065 (Partnership)",
+      "Important Note:",
+      "In all cases, the person or entity actually making the investment decision to purchase Units",
+      "_____ Form 1040 (disregarded)",
+      "_____ Form 1120S (S Corporation)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box14",
+    "type": "checkbox",
+    "rect": [
+      342.4,
+      283.9,
+      360.4,
+      301.9
+    ],
+    "inferredLabel": "_____ Form 1120S (S Corporation)",
+    "nearbyText": [
+      "_____ Form 1120S (S Corporation)",
+      "Other (Indicate Type) _________________________________________________________________",
+      "If Limited Liability Company or Corporation, please indicate the tax form used for its annual tax filing:",
+      "_____ Form 1065 (Partnership)",
+      "*"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Check Box15",
+    "type": "checkbox",
+    "rect": [
+      343.1,
+      264.4,
+      361.1,
+      282.4
+    ],
+    "inferredLabel": "_____ Form 1040 (disregarded)",
+    "nearbyText": [
+      "_____ Form 1040 (disregarded)",
+      "_____ Form 1120S (S Corporation)",
+      "In all cases, the person or entity actually making the investment decision to purchase Units",
+      "_____ Form 1120 (Corporation)",
+      "_____ Form 1065 (Partnership)",
+      "Important Note:"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 1,
+    "fieldName": "Text49",
+    "type": "text",
+    "rect": [
+      457.5,
+      392.8,
+      577.9,
+      408.4
+    ],
+    "inferredLabel": "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________",
+    "nearbyText": [
+      "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________",
+      "Tenants in Common (Both parties must sign all required documents.)",
+      "___________________________________________________________________________________",
+      "Joint Tenants with Right of Survivorship (Both parties must sign all required documents.)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Address of Principal Place of Residence no PO Box",
+    "type": "text",
+    "rect": [
+      348.6,
+      730,
+      578.8,
+      754
+    ],
+    "inferredLabel": "and",
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "and",
+      "Communication"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "1_2",
+    "type": "text",
+    "rect": [
+      123.8,
+      702.8,
+      578.9,
+      726.8
+    ],
+    "inferredLabel": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Communication"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "2_2",
+    "type": "text",
+    "rect": [
+      123.8,
+      678.1,
+      573.8,
+      702.1
+    ],
+    "inferredLabel": "Natural Persons",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________",
+      ")",
+      "Only",
+      "Natural Persons",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined",
+    "type": "text",
+    "rect": [
+      223.8,
+      653.4,
+      343.9,
+      677.4
+    ],
+    "inferredLabel": ")",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________",
+      ")",
+      "Only",
+      "Natural Persons",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Home",
+    "type": "text",
+    "rect": [
+      376.6,
+      653.4,
+      401.6,
+      677.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________",
+      ")",
+      "Only",
+      "Natural Persons",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Phone Business",
+    "type": "text",
+    "rect": [
+      195.5,
+      653.4,
+      220.4,
+      677.4
+    ],
+    "inferredLabel": ")",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________",
+      ")",
+      "Only",
+      "Natural Persons",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_2",
+    "type": "text",
+    "rect": [
+      405,
+      653.4,
+      574.9,
+      677.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________",
+      ")",
+      "Only",
+      "Natural Persons",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Primary State of Residence",
+    "type": "text",
+    "rect": [
+      238.3,
+      626.5,
+      338.2,
+      650.5
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Date of Birth",
+    "type": "text",
+    "rect": [
+      401.3,
+      626.5,
+      576.2,
+      650.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Social Security or Federal Tax ID Number TIN",
+    "type": "text",
+    "rect": [
+      334.3,
+      599.4,
+      579.1,
+      623.4
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Email Address",
+    "type": "text",
+    "rect": [
+      191.6,
+      572.5,
+      576.6,
+      596.5
+    ],
+    "inferredLabel": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+    "nearbyText": [
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "Paper Delivery",
+      "E-mail Address: _____________________________________________________________________________",
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Name",
+    "type": "text",
+    "rect": [
+      153,
+      487.8,
+      578,
+      511.4
+    ],
+    "inferredLabel": "Joint Owner Information (if applicable)",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "Joint Owner Information (if applicable)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Address of Principal Place of Residence no PO Box 1",
+    "type": "text",
+    "rect": [
+      348.6,
+      463.1,
+      578.8,
+      487.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Address of Principal Place of Residence no PO Box 2",
+    "type": "text",
+    "rect": [
+      123.8,
+      438.4,
+      578.9,
+      462.2
+    ],
+    "inferredLabel": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Address of Principal Place of Residence no PO Box 3",
+    "type": "text",
+    "rect": [
+      123.8,
+      413.6,
+      573.8,
+      437.6
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_3",
+    "type": "text",
+    "rect": [
+      223.8,
+      388.9,
+      343.8,
+      412.9
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Home_2",
+    "type": "text",
+    "rect": [
+      376.6,
+      388.9,
+      401.6,
+      412.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Phone Business_2",
+    "type": "text",
+    "rect": [
+      195.5,
+      388.9,
+      220.4,
+      412.9
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_4",
+    "type": "text",
+    "rect": [
+      405,
+      388.9,
+      574.9,
+      412.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Primary State of Residence_2",
+    "type": "text",
+    "rect": [
+      238.3,
+      362,
+      338.2,
+      386
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Date of Birth_2",
+    "type": "text",
+    "rect": [
+      401.3,
+      362,
+      576.2,
+      386
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Social Security or Federal Tax ID Number TIN_2",
+    "type": "text",
+    "rect": [
+      334.3,
+      334.9,
+      579.1,
+      358.9
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Email Address_2",
+    "type": "text",
+    "rect": [
+      191.6,
+      308,
+      576.6,
+      332
+    ],
+    "inferredLabel": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+    "nearbyText": [
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "Paper Delivery",
+      "E-mail Address: _____________________________________________________________________________",
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Name_2",
+    "type": "text",
+    "rect": [
+      153,
+      228.4,
+      578,
+      252.4
+    ],
+    "inferredLabel": "Control Person",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "Control Person",
+      "Beneficial and",
+      "Ownership",
+      "5",
+      "Beneficial Owner 1 Information"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Address of Principal Place of Residence no PO Box_2",
+    "type": "text",
+    "rect": [
+      348.6,
+      201.5,
+      578.8,
+      225.5
+    ],
+    "inferredLabel": "Information",
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Name: _____________________________________________________________________________________",
+      "Information",
+      "Ownership",
+      "For Entity",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_5",
+    "type": "text",
+    "rect": [
+      123.8,
+      174.4,
+      578.9,
+      198.4
+    ],
+    "inferredLabel": "For Entity",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      ")",
+      "For Entity",
+      "(",
+      "Investors Only"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_6",
+    "type": "text",
+    "rect": [
+      123.8,
+      147.5,
+      573.8,
+      171.5
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________",
+      ")",
+      "Investors Only"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Phone Business_3",
+    "type": "text",
+    "rect": [
+      195.5,
+      120.4,
+      220.4,
+      144.4
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_7",
+    "type": "text",
+    "rect": [
+      223.8,
+      120.4,
+      343.8,
+      144.4
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Home_3",
+    "type": "text",
+    "rect": [
+      376.6,
+      120.4,
+      401.6,
+      144.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "undefined_8",
+    "type": "text",
+    "rect": [
+      405,
+      120.4,
+      574.9,
+      144.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Primary State of Residence_3",
+    "type": "text",
+    "rect": [
+      238.3,
+      93.5,
+      338.2,
+      117.5
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Date of Birth_3",
+    "type": "text",
+    "rect": [
+      401.3,
+      93.5,
+      576.2,
+      117.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Social Security or Federal Tax ID Number TIN_3",
+    "type": "text",
+    "rect": [
+      334.3,
+      66.4,
+      579.1,
+      90.4
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 2,
+    "fieldName": "Check Box47",
+    "type": "checkbox",
+    "rect": [
+      124.9,
+      283.1,
+      142.9,
+      301.1
+    ],
+    "inferredLabel": "Paper Delivery",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Paper Delivery",
+      "Election:",
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "of communications. You may request paper copies of any document delivered electronically. Check this",
+      "box if you would prefer to receive paper copies."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 2,
+    "fieldName": "Check Box48",
+    "type": "checkbox",
+    "rect": [
+      126,
+      547.1,
+      144,
+      565.1
+    ],
+    "inferredLabel": "Paper Delivery",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Paper Delivery",
+      "Election:",
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "of communications. You may request paper copies of any document delivered electronically. Check this",
+      "box if you would prefer to receive paper copies."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Email Address_3",
+    "type": "text",
+    "rect": [
+      191.6,
+      743.4,
+      576.6,
+      754.4
+    ],
+    "inferredLabel": "E-mail Address: _____________________________________________________________________________",
+    "nearbyText": [
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "Paper Delivery",
+      "E-mail Address: _____________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Ownership Percentage",
+    "type": "text",
+    "rect": [
+      123.8,
+      663.2,
+      238.8,
+      687.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "_______________________",
+      "Direct Ownership",
+      "Check here if no individual owns 25% or more of",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Name_3",
+    "type": "text",
+    "rect": [
+      153,
+      598,
+      578,
+      621.8
+    ],
+    "inferredLabel": "Beneficial Owner 2 Information",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "Beneficial Owner 2 Information"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Address of Principal Place of Residence no PO Box 1_2",
+    "type": "text",
+    "rect": [
+      348.6,
+      573.2,
+      578.8,
+      597.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Address of Principal Place of Residence no PO Box 2_2",
+    "type": "text",
+    "rect": [
+      123.8,
+      548.5,
+      578.9,
+      572.4
+    ],
+    "inferredLabel": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Address of Principal Place of Residence no PO Box 3_2",
+    "type": "text",
+    "rect": [
+      123.8,
+      524,
+      573.8,
+      547.8
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Phone Business_4",
+    "type": "text",
+    "rect": [
+      195.5,
+      499.3,
+      220.4,
+      523.3
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_9",
+    "type": "text",
+    "rect": [
+      223.8,
+      499.3,
+      343.8,
+      523.3
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Home_4",
+    "type": "text",
+    "rect": [
+      376.6,
+      499.3,
+      401.6,
+      523.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_10",
+    "type": "text",
+    "rect": [
+      405,
+      499.3,
+      574.9,
+      523.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Primary State of Residence_4",
+    "type": "text",
+    "rect": [
+      238.3,
+      472.2,
+      338.2,
+      496.2
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Date of Birth_4",
+    "type": "text",
+    "rect": [
+      401.3,
+      472.2,
+      576.2,
+      496.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Social Security or Federal Tax ID Number TIN_4",
+    "type": "text",
+    "rect": [
+      334.3,
+      445.3,
+      579.1,
+      469.3
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Email Address_4",
+    "type": "text",
+    "rect": [
+      191.6,
+      418.2,
+      576.6,
+      442.2
+    ],
+    "inferredLabel": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+    "nearbyText": [
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "Paper Delivery",
+      "E-mail Address: _____________________________________________________________________________",
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Ownership Percentage_2",
+    "type": "text",
+    "rect": [
+      123.8,
+      351.5,
+      238.8,
+      375.5
+    ],
+    "inferredLabel": "box if you would prefer to receive paper copies.",
+    "nearbyText": [
+      "_______________________",
+      "box if you would prefer to receive paper copies.",
+      "Direct Ownership",
+      "Check here if no individual owns 25% or more of",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Name_4",
+    "type": "text",
+    "rect": [
+      153,
+      286.4,
+      578,
+      310.1
+    ],
+    "inferredLabel": "Beneficial Owner 3 Information",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "Beneficial Owner 3 Information"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Address of Principal Place of Residence no PO Box 1_3",
+    "type": "text",
+    "rect": [
+      348.6,
+      261.7,
+      578.8,
+      285.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Address of Principal Place of Residence no PO Box 2_3",
+    "type": "text",
+    "rect": [
+      123.8,
+      237,
+      578.9,
+      260.9
+    ],
+    "inferredLabel": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Address of Principal Place of Residence no PO Box 3_3",
+    "type": "text",
+    "rect": [
+      123.8,
+      212.3,
+      573.8,
+      236.3
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Phone Business_5",
+    "type": "text",
+    "rect": [
+      195.5,
+      187.6,
+      220.4,
+      211.6
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_11",
+    "type": "text",
+    "rect": [
+      223.8,
+      187.6,
+      343.8,
+      211.6
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Home_5",
+    "type": "text",
+    "rect": [
+      376.6,
+      187.6,
+      401.6,
+      211.6
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_12",
+    "type": "text",
+    "rect": [
+      405,
+      187.6,
+      574.9,
+      211.6
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Primary State of Residence_5",
+    "type": "text",
+    "rect": [
+      238.3,
+      160.7,
+      338.2,
+      184.7
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Date of Birth_5",
+    "type": "text",
+    "rect": [
+      401.3,
+      160.7,
+      576.2,
+      184.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Social Security or Federal Tax ID Number TIN_5",
+    "type": "text",
+    "rect": [
+      334.3,
+      133.6,
+      579.1,
+      157.6
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Email Address_5",
+    "type": "text",
+    "rect": [
+      191.6,
+      106.7,
+      576.6,
+      130.7
+    ],
+    "inferredLabel": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+    "nearbyText": [
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "Paper Delivery",
+      "E-mail Address: _____________________________________________________________________________",
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box40",
+    "type": "checkbox",
+    "rect": [
+      247.9,
+      335.3,
+      265.9,
+      353.3
+    ],
+    "inferredLabel": "Indirect Ownership",
+    "nearbyText": [
+      "Indirect Ownership",
+      "Direct Ownership",
+      "Ownership Percentage (%)",
+      "_______________________",
+      "the Fund if/when one assumes 25% or more",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box41",
+    "type": "checkbox",
+    "rect": [
+      247.1,
+      356.6,
+      265.1,
+      374.6
+    ],
+    "inferredLabel": "box if you would prefer to receive paper copies.",
+    "nearbyText": [
+      "Direct Ownership",
+      "box if you would prefer to receive paper copies.",
+      "Check here if no individual owns 25% or more of",
+      "_______________________",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box42",
+    "type": "checkbox",
+    "rect": [
+      356.2,
+      348.8,
+      374.2,
+      366.8
+    ],
+    "inferredLabel": "the legal entity and that you agree to inform the",
+    "nearbyText": [
+      "the legal entity and that you agree to inform the",
+      "Check here if no individual owns 25% or more of",
+      "the Fund if/when one assumes 25% or more",
+      "Direct Ownership",
+      "Indirect Ownership",
+      "_______________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box43",
+    "type": "checkbox",
+    "rect": [
+      123.4,
+      719.6,
+      141.4,
+      737.6
+    ],
+    "inferredLabel": "Paper Delivery",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Paper Delivery",
+      "Election:",
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "of communications. You may request paper copies of any document delivered electronically. Check this",
+      "box if you would prefer to receive paper copies."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box44",
+    "type": "checkbox",
+    "rect": [
+      247.1,
+      672.4,
+      265.1,
+      690.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Direct Ownership",
+      "Check here if no individual owns 25% or more of",
+      "_______________________",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box45",
+    "type": "checkbox",
+    "rect": [
+      247.5,
+      646.5,
+      265.5,
+      664.5
+    ],
+    "inferredLabel": "Ownership Percentage (%)",
+    "nearbyText": [
+      "Indirect Ownership",
+      "Direct Ownership",
+      "Ownership Percentage (%)",
+      "_______________________",
+      "the Fund if/when one assumes 25% or more",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box46",
+    "type": "checkbox",
+    "rect": [
+      355.5,
+      660.8,
+      373.5,
+      678.8
+    ],
+    "inferredLabel": "_______________________",
+    "nearbyText": [
+      "the legal entity and that you agree to inform the",
+      "Check here if no individual owns 25% or more of",
+      "the Fund if/when one assumes 25% or more",
+      "Direct Ownership",
+      "Indirect Ownership",
+      "_______________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box53",
+    "type": "checkbox",
+    "rect": [
+      124.5,
+      394.1,
+      142.5,
+      412.1
+    ],
+    "inferredLabel": "Paper Delivery",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Paper Delivery",
+      "Election:",
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "of communications. You may request paper copies of any document delivered electronically. Check this",
+      "box if you would prefer to receive paper copies."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box54",
+    "type": "checkbox",
+    "rect": [
+      126.4,
+      82.1,
+      144.4,
+      100.1
+    ],
+    "inferredLabel": "Paper Delivery",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Paper Delivery",
+      "Election:",
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "of communications. You may request paper copies of any document delivered electronically. Check this",
+      "box if you would prefer to receive paper copies."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Ownership Percentage_3",
+    "type": "text",
+    "rect": [
+      123.8,
+      710,
+      238.8,
+      734
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "_______________________",
+      "Direct Ownership",
+      "Check here if no individual owns 25% or more of",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Name_5",
+    "type": "text",
+    "rect": [
+      153,
+      642.6,
+      578,
+      666.2
+    ],
+    "inferredLabel": "Beneficial Owner 4 Information",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "Beneficial Owner 4 Information"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Address of Principal Place of Residence no PO Box 1_4",
+    "type": "text",
+    "rect": [
+      348.6,
+      617.9,
+      578.8,
+      641.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Address of Principal Place of Residence no PO Box 2_4",
+    "type": "text",
+    "rect": [
+      123.8,
+      593.2,
+      578.9,
+      617
+    ],
+    "inferredLabel": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Address of Principal Place of Residence no PO Box 3_4",
+    "type": "text",
+    "rect": [
+      123.8,
+      568.4,
+      573.8,
+      592.4
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Phone Business_6",
+    "type": "text",
+    "rect": [
+      195.5,
+      543.7,
+      220.4,
+      567.7
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "undefined_13",
+    "type": "text",
+    "rect": [
+      223.8,
+      543.7,
+      343.8,
+      567.7
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Home_6",
+    "type": "text",
+    "rect": [
+      376.6,
+      543.7,
+      401.6,
+      567.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "undefined_14",
+    "type": "text",
+    "rect": [
+      405,
+      543.7,
+      574.9,
+      567.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Primary State of Residence_6",
+    "type": "text",
+    "rect": [
+      238.3,
+      516.8,
+      338.2,
+      540.8
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Date of Birth_6",
+    "type": "text",
+    "rect": [
+      401.3,
+      516.8,
+      576.2,
+      540.8
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Social Security or Federal Tax ID Number TIN_6",
+    "type": "text",
+    "rect": [
+      334.3,
+      489.7,
+      579.1,
+      513.7
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Email Address_6",
+    "type": "text",
+    "rect": [
+      191.6,
+      462.8,
+      576.6,
+      486.8
+    ],
+    "inferredLabel": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+    "nearbyText": [
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "Paper Delivery",
+      "E-mail Address: _____________________________________________________________________________",
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Ownership Percentage_4",
+    "type": "text",
+    "rect": [
+      123.8,
+      396.1,
+      238.8,
+      420.1
+    ],
+    "inferredLabel": "box if you would prefer to receive paper copies.",
+    "nearbyText": [
+      "_______________________",
+      "box if you would prefer to receive paper copies.",
+      "Direct Ownership",
+      "Check here if no individual owns 25% or more of",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Name_6",
+    "type": "text",
+    "rect": [
+      153,
+      326.3,
+      578,
+      350.3
+    ],
+    "inferredLabel": "Control Person (Officer, Director or Otherwise Directly or Indirectly Controlling Entity)",
+    "nearbyText": [
+      "Control Person (Officer, Director or Otherwise Directly or Indirectly Controlling Entity)",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Address of Principal Place of Residence no PO Box 1_5",
+    "type": "text",
+    "rect": [
+      348.6,
+      301.6,
+      578.8,
+      325.6
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Address of Principal Place of Residence no PO Box 2_5",
+    "type": "text",
+    "rect": [
+      123.8,
+      276.8,
+      578.9,
+      300.7
+    ],
+    "inferredLabel": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Address of Principal Place of Residence no PO Box 3_5",
+    "type": "text",
+    "rect": [
+      123.8,
+      252.4,
+      573.8,
+      276.1
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "___________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Phone Business_7",
+    "type": "text",
+    "rect": [
+      195.5,
+      227.6,
+      220.4,
+      251.6
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "undefined_15",
+    "type": "text",
+    "rect": [
+      223.8,
+      227.6,
+      343.8,
+      251.6
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Home_7",
+    "type": "text",
+    "rect": [
+      376.6,
+      227.6,
+      401.6,
+      251.6
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "undefined_16",
+    "type": "text",
+    "rect": [
+      405,
+      227.6,
+      574.9,
+      251.6
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Phone: Business (_____)________________________ Home (_____)__________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Primary State of Residence_7",
+    "type": "text",
+    "rect": [
+      238.3,
+      200.5,
+      338.2,
+      224.5
+    ],
+    "inferredLabel": "Phone: Business (_____)________________________ Home (_____)__________________________________",
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Date of Birth_7",
+    "type": "text",
+    "rect": [
+      401.3,
+      200.5,
+      576.2,
+      224.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+      "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Social Security or Federal Tax ID Number TIN_7",
+    "type": "text",
+    "rect": [
+      334.3,
+      173.6,
+      579.1,
+      197.6
+    ],
+    "inferredLabel": "Primary State of Residence: ____________________ Date of Birth: ___________________________________",
+    "nearbyText": [
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+      "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Email Address_7",
+    "type": "text",
+    "rect": [
+      191.6,
+      146.5,
+      576.6,
+      170.5
+    ],
+    "inferredLabel": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box33",
+    "type": "checkbox",
+    "rect": [
+      354,
+      391.9,
+      372,
+      409.9
+    ],
+    "inferredLabel": "_______________________",
+    "nearbyText": [
+      "the legal entity and that you agree to inform the",
+      "Check here if no individual owns 25% or more of",
+      "the Fund if/when one assumes 25% or more",
+      "Direct Ownership",
+      "Indirect Ownership",
+      "_______________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box34",
+    "type": "checkbox",
+    "rect": [
+      247.9,
+      379.9,
+      265.9,
+      397.9
+    ],
+    "inferredLabel": "Indirect Ownership",
+    "nearbyText": [
+      "Indirect Ownership",
+      "Direct Ownership",
+      "Ownership Percentage (%)",
+      "_______________________",
+      "the Fund if/when one assumes 25% or more",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box35",
+    "type": "checkbox",
+    "rect": [
+      247.9,
+      402.8,
+      265.9,
+      420.8
+    ],
+    "inferredLabel": "Direct Ownership",
+    "nearbyText": [
+      "Direct Ownership",
+      "box if you would prefer to receive paper copies.",
+      "Check here if no individual owns 25% or more of",
+      "_______________________",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box36",
+    "type": "checkbox",
+    "rect": [
+      124.9,
+      438,
+      142.9,
+      456
+    ],
+    "inferredLabel": "Paper Delivery",
+    "nearbyText": [
+      "E-mail Address: _____________________________________________________________________________",
+      "Paper Delivery",
+      "Election:",
+      "By not checking this box, you conserve natural resources, reduce costs and consent to electronic delivery",
+      "of communications. You may request paper copies of any document delivered electronically. Check this",
+      "box if you would prefer to receive paper copies."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box37",
+    "type": "checkbox",
+    "rect": [
+      247.5,
+      715.1,
+      265.5,
+      733.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Direct Ownership",
+      "Check here if no individual owns 25% or more of",
+      "_______________________",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box38",
+    "type": "checkbox",
+    "rect": [
+      246.8,
+      693.4,
+      264.8,
+      711.4
+    ],
+    "inferredLabel": "Ownership Percentage (%)",
+    "nearbyText": [
+      "Indirect Ownership",
+      "Direct Ownership",
+      "Ownership Percentage (%)",
+      "_______________________",
+      "the Fund if/when one assumes 25% or more",
+      "the legal entity and that you agree to inform the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Check Box39",
+    "type": "checkbox",
+    "rect": [
+      355.5,
+      715.5,
+      373.5,
+      733.5
+    ],
+    "inferredLabel": "Direct Ownership",
+    "nearbyText": [
+      "Check here if no individual owns 25% or more of",
+      "the legal entity and that you agree to inform the",
+      "Direct Ownership",
+      "_______________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Signature Investor or authorized signature",
+    "type": "signature",
+    "rect": [
+      123.8,
+      649.6,
+      578.8,
+      673.4
+    ],
+    "inferredLabel": "Agreement other than the certifications required to avoid backup withholding.",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Agreement other than the certifications required to avoid backup withholding."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Signature Investor or authorized signature_2",
+    "type": "signature",
+    "rect": [
+      123.8,
+      611.4,
+      578.8,
+      635.3
+    ],
+    "inferredLabel": "Signature (Investor, or authorized signature)",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Signature (Investor, or authorized signature)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Name_7",
+    "type": "text",
+    "rect": [
+      153,
+      569.6,
+      578,
+      592
+    ],
+    "inferredLabel": "Signature (Investor, or authorized signature)",
+    "nearbyText": [
+      "Signature (Investor, or authorized signature)",
+      "Name: _____________________________________________________________________________________",
+      "(Indicate if different than name in Section 3 above)",
+      "Distributions",
+      "7"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Name of Financial Institution",
+    "type": "text",
+    "rect": [
+      244.9,
+      409.3,
+      579.7,
+      433.2
+    ],
+    "inferredLabel": "the amount of the erroneous deposit.",
+    "nearbyText": [
+      "Name of Financial Institution: ___________________________________________________________________",
+      "the amount of the erroneous deposit."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Account",
+    "type": "text",
+    "rect": [
+      170.5,
+      351,
+      395.5,
+      374.9
+    ],
+    "inferredLabel": "Checking",
+    "nearbyText": [
+      "Checking",
+      "Account #: _____________________________________________",
+      "Savings",
+      "Brokerage"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "ABA Routing",
+    "type": "text",
+    "rect": [
+      192.5,
+      324.1,
+      397.4,
+      348
+    ],
+    "inferredLabel": "Account #: _____________________________________________",
+    "nearbyText": [
+      "ABA Routing #: _________________________________________",
+      "Account #: _____________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Name_8",
+    "type": "text",
+    "rect": [
+      153,
+      250,
+      578,
+      273.8
+    ],
+    "inferredLabel": "If different address from Section 4 above, please complete the following:",
+    "nearbyText": [
+      "Name: _____________________________________________________________________________________",
+      "If different address from Section 4 above, please complete the following:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Name if applicable",
+    "type": "text",
+    "rect": [
+      209,
+      222.8,
+      374.2,
+      246.7
+    ],
+    "inferredLabel": "Account",
+    "nearbyText": [
+      "Institution",
+      "Name (if applicable) _________________________________ Number: _________________________________",
+      "Name: _____________________________________________________________________________________",
+      "Account"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Number",
+    "type": "text",
+    "rect": [
+      413.9,
+      222.8,
+      579,
+      246.7
+    ],
+    "inferredLabel": "Account",
+    "nearbyText": [
+      "Account",
+      "Institution",
+      "Name (if applicable) _________________________________ Number: _________________________________",
+      "Name: _____________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Address 1",
+    "type": "text",
+    "rect": [
+      161.9,
+      198.4,
+      576.8,
+      222
+    ],
+    "inferredLabel": "Name (if applicable) _________________________________ Number: _________________________________",
+    "nearbyText": [
+      "Address: ___________________________________________________________________________________",
+      "Name (if applicable) _________________________________ Number: _________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Address 2",
+    "type": "text",
+    "rect": [
+      123.8,
+      173.6,
+      578.9,
+      197.5
+    ],
+    "inferredLabel": "Address: ___________________________________________________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "Address: ___________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box26",
+    "type": "checkbox",
+    "rect": [
+      126,
+      65.3,
+      144,
+      83.3
+    ],
+    "inferredLabel": "current year.",
+    "nearbyText": [
+      "current year.",
+      "license or registration, as applicable, and holds such license or registration in good standing.",
+      "excess of $300,000, for the past two years, and who reasonably expects to reach the same income level in the",
+      "Passed the required examinations administered by FINRA necessary for a Series 7, Series 65 or Series 82"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box27",
+    "type": "checkbox",
+    "rect": [
+      126.8,
+      100.5,
+      144.8,
+      118.5
+    ],
+    "inferredLabel": "Suitability",
+    "nearbyText": [
+      "exceeds $1,000,000 (excluding the estimated fair market value of the undersigned’s primary residence).",
+      "excess of $300,000, for the past two years, and who reasonably expects to reach the same income level in the",
+      "An individual income of more than $200,000, or joint income with any spouse or spousal equivalent in",
+      "An individual net worth,",
+      "Suitability",
+      "Minimum"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box28",
+    "type": "checkbox",
+    "rect": [
+      126.8,
+      127.1,
+      144.8,
+      145.1
+    ],
+    "inferredLabel": "Investor &",
+    "nearbyText": [
+      "having (check all applicable):",
+      "exceeds $1,000,000 (excluding the estimated fair market value of the undersigned’s primary residence).",
+      "An individual net worth,",
+      "If",
+      "a natural person",
+      "Investor &"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box29",
+    "type": "checkbox",
+    "rect": [
+      138.4,
+      289.5,
+      156.4,
+      307.5
+    ],
+    "inferredLabel": "ABA Routing #: _________________________________________",
+    "nearbyText": [
+      "Mail Paper Check",
+      "If different address from Section 4 above, please complete the following:"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box30",
+    "type": "checkbox",
+    "rect": [
+      139.1,
+      372.8,
+      157.1,
+      390.8
+    ],
+    "inferredLabel": "(",
+    "nearbyText": [
+      "Checking",
+      "Savings",
+      "(",
+      "Bank or Brokerage Firm",
+      "Brokerage",
+      ")"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box31",
+    "type": "checkbox",
+    "rect": [
+      234.8,
+      375.8,
+      252.8,
+      393.8
+    ],
+    "inferredLabel": "Checking",
+    "nearbyText": [
+      "Savings",
+      "(",
+      "Bank or Brokerage Firm",
+      "Checking",
+      "Brokerage",
+      ")"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box32",
+    "type": "checkbox",
+    "rect": [
+      309.4,
+      372.4,
+      327.4,
+      390.4
+    ],
+    "inferredLabel": "Savings",
+    "nearbyText": [
+      "Brokerage",
+      "Bank or Brokerage Firm",
+      "(",
+      "Savings",
+      ")",
+      "Please attach a voided check"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box55",
+    "type": "checkbox",
+    "rect": [
+      136.2,
+      486.9,
+      154.2,
+      504.9
+    ],
+    "inferredLabel": "(",
+    "nearbyText": [
+      "Direct Deposit via ACH to Checking, Savings or Brokerage Account",
+      "(",
+      "If nothing is marked the distributions will default to Mail Check to the Address of Record in Section 4)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 6,
+    "fieldName": "Check Box22",
+    "type": "checkbox",
+    "rect": [
+      126,
+      84.4,
+      144,
+      102.4
+    ],
+    "inferredLabel": "with the purchase of the Units.",
+    "nearbyText": [
+      "with the purchase of the Units.",
+      "or directors, of a nature and duration as would allow me to be aware of the character, business acumen, general",
+      "I have a preexisting personal or business relationship with the Fund, MGP or any of their executive officers",
+      "By reason of my business or financial experience, I have the capacity to protect my interests in connection"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 6,
+    "fieldName": "Check Box23",
+    "type": "checkbox",
+    "rect": [
+      125.3,
+      111,
+      143.3,
+      129
+    ],
+    "inferredLabel": "In addition, the undersigned subscriber certifies as qualifying under the following categories (check all applicable):",
+    "nearbyText": [
+      "In addition, the undersigned subscriber certifies as qualifying under the following categories (check all applicable):",
+      "with the purchase of the Units.",
+      "By reason of my business or financial experience, I have the capacity to protect my interests in connection"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 6,
+    "fieldName": "Check Box24",
+    "type": "checkbox",
+    "rect": [
+      125.6,
+      605.3,
+      143.6,
+      623.3
+    ],
+    "inferredLabel": "certifies that (",
+    "nearbyText": [
+      "certifies that (",
+      "subscriber is an “",
+      "at the time of investment.",
+      "If",
+      "check if applicable",
+      "other than a natural person"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 6,
+    "fieldName": "Check Box25",
+    "type": "checkbox",
+    "rect": [
+      125.3,
+      737.3,
+      143.3,
+      755.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "A director, executive officer, or general partner of the Fund, or any director, executive officer, or general",
+      "partner of RGP Fund Management II, LLC (the “MGP”)."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 7,
+    "fieldName": "financial and business matters",
+    "type": "text",
+    "rect": [
+      123.8,
+      693.5,
+      573.8,
+      719.5
+    ],
+    "inferredLabel": "financial and business matters:",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "financial and business matters:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Check all applicable boxes Note that additional information may be requested",
+    "type": "text",
+    "rect": [
+      123.8,
+      666.4,
+      573.8,
+      692.4
+    ],
+    "inferredLabel": "__________________________________________________________________________________________",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Check Box19",
+    "type": "checkbox",
+    "rect": [
+      140.6,
+      615.4,
+      158.6,
+      633.4
+    ],
+    "inferredLabel": "Investor is subject to the U.S. Bank Holding Company Act of 1956 or directly or indirectly “controlled”",
+    "nearbyText": [
+      "Investor is subject to the U.S. Bank Holding Company Act of 1956 or directly or indirectly “controlled”",
+      "(as that term is defined in such act) by an individual or entity that is subject to such Act.",
+      "Investor is associated with Financial Industry Regulatory Authority, Inc. (“FINRA”) member firm."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 7,
+    "fieldName": "Check Box20",
+    "type": "checkbox",
+    "rect": [
+      139.9,
+      635.3,
+      157.9,
+      653.3
+    ],
+    "inferredLabel": "Investor is associated with Financial Industry Regulatory Authority, Inc. (“FINRA”) member firm.",
+    "nearbyText": [
+      "Investor is associated with Financial Industry Regulatory Authority, Inc. (“FINRA”) member firm.",
+      "Check all applicable boxes. Note that additional information may be requested:",
+      "Investor is subject to the U.S. Bank Holding Company Act of 1956 or directly or indirectly “controlled”",
+      "__________________________________________________________________________________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 7,
+    "fieldName": "Check Box21",
+    "type": "checkbox",
+    "rect": [
+      124.5,
+      738.4,
+      142.5,
+      756.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "evaluating the merits and risks of an investment in the Units. The following is a description of my experience in",
+      "By reason of my knowledge and experience in financial and business matters that I am capable of"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "undefined_17",
+    "type": "text",
+    "rect": [
+      250.8,
+      412,
+      370.8,
+      435.8
+    ],
+    "inferredLabel": "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE.",
+    "nearbyText": [
+      "Executed this ________ day of ________________________, ________________.",
+      "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 10,
+    "fieldName": "undefined_18",
+    "type": "text",
+    "rect": [
+      375.7,
+      412,
+      455.8,
+      435.8
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Executed this ________ day of ________________________, ________________.",
+      "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 10,
+    "fieldName": "BEHALF OF THE PERSONS OR ENTITY REGISTERED IN SECTION 4 ABOVE",
+    "type": "text",
+    "rect": [
+      180.5,
+      412,
+      220.4,
+      435.8
+    ],
+    "inferredLabel": "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE.",
+    "nearbyText": [
+      "Executed this ________ day of ________________________, ________________.",
+      "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 10,
+    "fieldName": "Signature Investor or authorized signature_3",
+    "type": "signature",
+    "rect": [
+      124.6,
+      387,
+      574.6,
+      410.8
+    ],
+    "inferredLabel": "Executed this ________ day of ________________________, ________________.",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "Executed this ________ day of ________________________, ________________."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box18",
+    "type": "checkbox",
+    "rect": [
+      130.9,
+      309.4,
+      148.9,
+      327.4
+    ],
+    "inferredLabel": "Signature (Investor, or authorized signature)",
+    "nearbyText": [
+      "Consent to Electronic Signature:",
+      "consenting to use of electric signatures and you understand and agree that (i) your electronic signature",
+      "will constitute an “electronic signature” as defined in the Electronic Signatures in Global and National",
+      "Signature (Investor, or authorized signature)",
+      "By checking this box along with your signature above, you are"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Signature50",
+    "type": "signature",
+    "rect": [
+      125.3,
+      347.1,
+      573.7,
+      371.6
+    ],
+    "inferredLabel": "Signature (Investor, or authorized signature)",
+    "nearbyText": [
+      "__________________________________________________________________________________________",
+      "Signature (Investor, or authorized signature)",
+      "Signature (Investor, or authorized signature)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 11,
+    "fieldName": "BrokerDealer Firm Name",
+    "type": "text",
+    "rect": [
+      235,
+      60.4,
+      580,
+      89.2
+    ],
+    "inferredLabel": "BD Authorized",
+    "nearbyText": [
+      "Memorandum.",
+      "Broker-Dealer Firm Name: _____________________________________________________________________",
+      "description of which has been furnished to the Managing Broker-Dealer and MGP and disclosed in the",
+      "Principal",
+      "AND",
+      "BD Authorized"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Registered Representative Name Print",
+    "type": "text",
+    "rect": [
+      288.8,
+      743.4,
+      579,
+      754.3
+    ],
+    "inferredLabel": "Registered Representative Name (Print): __________________________________________________________",
+    "nearbyText": [
+      "Registered Representative",
+      "Registered Representative Name (Print): __________________________________________________________",
+      "Broker-Dealer"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "BrokerDealer",
+    "type": "text",
+    "rect": [
+      166.9,
+      716.3,
+      306.8,
+      729.1
+    ],
+    "inferredLabel": "CRD No.: ____________________________ CRD No.: _____________________________________________",
+    "nearbyText": [
+      "CRD No.: ____________________________ CRD No.: _____________________________________________",
+      "Broker-Dealer",
+      "Registered Representative Name (Print): __________________________________________________________",
+      "Registered Representative"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Registered Representative",
+    "type": "text",
+    "rect": [
+      355,
+      716.3,
+      580,
+      729.1
+    ],
+    "inferredLabel": "CRD No.: ____________________________ CRD No.: _____________________________________________",
+    "nearbyText": [
+      "Registered Representative",
+      "CRD No.: ____________________________ CRD No.: _____________________________________________",
+      "Broker-Dealer",
+      "Registered Representative Name (Print): __________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "CRD No",
+    "type": "text",
+    "rect": [
+      123.8,
+      691.6,
+      578.9,
+      704.4
+    ],
+    "inferredLabel": "___________________________________________________________________________________________",
+    "nearbyText": [
+      "___________________________________________________________________________________________",
+      "CRD No.: ____________________________ CRD No.: _____________________________________________",
+      "Registered Representative’s Branch Address, City, State, Zip"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "undefined_19",
+    "type": "text",
+    "rect": [
+      252.4,
+      651.2,
+      337.4,
+      664.1
+    ],
+    "inferredLabel": "Branch Phone Number: (_____)_________________",
+    "nearbyText": [
+      "Registered Representative’s Branch Address, City, State, Zip",
+      "E-mail Address: _________________________________",
+      "Branch Phone Number: (_____)_________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Registered Representatives Branch Address City State Zip",
+    "type": "text",
+    "rect": [
+      224,
+      651.2,
+      249.1,
+      664.1
+    ],
+    "inferredLabel": "Branch Phone Number: (_____)_________________",
+    "nearbyText": [
+      "Registered Representative’s Branch Address, City, State, Zip",
+      "Branch Phone Number: (_____)_________________",
+      "E-mail Address: _________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "undefined_20",
+    "type": "text",
+    "rect": [
+      412.7,
+      651.2,
+      577.7,
+      664.1
+    ],
+    "inferredLabel": "E-mail Address: _________________________________",
+    "nearbyText": [
+      "E-mail Address: _________________________________",
+      "Registered Representative’s Branch Address, City, State, Zip",
+      "Branch Phone Number: (_____)_________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Branch Phone Number",
+    "type": "text",
+    "rect": [
+      123.8,
+      626.5,
+      323.9,
+      639.4
+    ],
+    "inferredLabel": "________________________________________",
+    "nearbyText": [
+      "________________________________________",
+      "Branch Phone Number: (_____)_________________",
+      "Signature of Registered Representative",
+      "________________________________________________",
+      "Broker-Dealer Principal Approval Signature (",
+      "E-mail Address: _________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Email Address_8",
+    "type": "text",
+    "rect": [
+      339.8,
+      626.5,
+      579.8,
+      639.4
+    ],
+    "inferredLabel": "________________________________________________",
+    "nearbyText": [
+      "________________________________________________",
+      "Broker-Dealer Principal Approval Signature (",
+      "E-mail Address: _________________________________",
+      "REQUIRED",
+      "________________________________________",
+      "Signature of Registered Representative"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Text51",
+    "type": "text",
+    "rect": [
+      126.4,
+      586.6,
+      276.4,
+      608.6
+    ],
+    "inferredLabel": "Signature of Registered Representative",
+    "nearbyText": [
+      "________________________________________",
+      "Signature of Registered Representative",
+      "Date",
+      "______________________________________________",
+      "Broker-Dealer Principal Approval Signature (",
+      "Date"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 12,
+    "fieldName": "Text52",
+    "type": "text",
+    "rect": [
+      340.9,
+      587,
+      490.9,
+      609
+    ],
+    "inferredLabel": "Broker-Dealer Principal Approval Signature (",
+    "nearbyText": [
+      "______________________________________________",
+      "Broker-Dealer Principal Approval Signature (",
+      "Date",
+      "REQUIRED",
+      "________________________________________",
+      "Signature of Registered Representative"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 13,
+    "fieldName": "2 Unless noted below a he or she is not a member of FINRA and based on the activities he or she performs",
+    "type": "text",
+    "rect": [
+      455,
+      74.5,
+      580.1,
+      103.3
+    ],
+    "inferredLabel": "The undersigned registered investment advisor further certifies that:",
+    "nearbyText": [
+      "the State of _________________________",
+      "the SEC or",
+      "He or she is registered with (please check one)",
+      "The undersigned registered investment advisor further certifies that:",
+      "(1)",
+      "under the Securities Act."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box16",
+    "type": "checkbox",
+    "rect": [
+      333.2,
+      72.3,
+      347.6,
+      86.4
+    ],
+    "inferredLabel": "the SEC or",
+    "nearbyText": [
+      "the SEC or",
+      "the State of _________________________",
+      "He or she is registered with (please check one)",
+      "Unless noted below, (a) he or she is not a member of FINRA and, based on the activities he or she performs,",
+      "(1)",
+      "The undersigned registered investment advisor further certifies that:"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box17",
+    "type": "checkbox",
+    "rect": [
+      392.6,
+      72.3,
+      406.4,
+      87
+    ],
+    "inferredLabel": "the State of _________________________",
+    "nearbyText": [
+      "the State of _________________________",
+      "the SEC or",
+      "He or she is registered with (please check one)",
+      "Unless noted below, (a) he or she is not a member of FINRA and, based on the activities he or she performs,",
+      "(1)",
+      "The undersigned registered investment advisor further certifies that:"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Advisor is affiliated with the following FINRA member include CRD",
+    "type": "text",
+    "rect": [
+      469.9,
+      731.9,
+      580,
+      742.6
+    ],
+    "inferredLabel": "Advisor is affiliated with the following FINRA member (include CRD #):______________________",
+    "nearbyText": [
+      "Advisor is affiliated with the following FINRA member (include CRD #):______________________",
+      "Advisor is a member of FINRA and his or her CRD # is as set forth above.",
+      "His/her signature below constitutes his/her agreement to be bound by all the provisions of the terms and",
+      "(3)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Name of RIA Firm",
+    "type": "text",
+    "rect": [
+      205,
+      683.9,
+      580,
+      707.8
+    ],
+    "inferredLabel": "conditions set forth on the following page.",
+    "nearbyText": [
+      "conditions set forth on the following page.",
+      "Name of RIA Firm: ___________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Representative",
+    "type": "text",
+    "rect": [
+      187.9,
+      656.8,
+      362.8,
+      680.6
+    ],
+    "inferredLabel": "Name of",
+    "nearbyText": [
+      "Name of",
+      "Representative: ___________________________________ Telephone Number: (_____)____________________",
+      "Name of RIA Firm: ___________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Telephone Number",
+    "type": "text",
+    "rect": [
+      451.6,
+      656.8,
+      476.6,
+      680.6
+    ],
+    "inferredLabel": "Name of",
+    "nearbyText": [
+      "Name of",
+      "Representative: ___________________________________ Telephone Number: (_____)____________________",
+      "Name of RIA Firm: ___________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "undefined_21",
+    "type": "text",
+    "rect": [
+      480,
+      656.8,
+      580,
+      680.6
+    ],
+    "inferredLabel": "Name of",
+    "nearbyText": [
+      "Name of",
+      "Representative: ___________________________________ Telephone Number: (_____)____________________",
+      "Name of RIA Firm: ___________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "No",
+    "type": "text",
+    "rect": [
+      143.9,
+      629.9,
+      324,
+      642.5
+    ],
+    "inferredLabel": "No.: ____________________________________",
+    "nearbyText": [
+      "No.: ____________________________________",
+      "RIA CRD",
+      "Representative: ___________________________________ Telephone Number: (_____)____________________",
+      "CRD No.: _______________________________________",
+      "IA Representative"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "CRD No_2",
+    "type": "text",
+    "rect": [
+      382.9,
+      629.9,
+      577.8,
+      642.5
+    ],
+    "inferredLabel": "CRD No.: _______________________________________",
+    "nearbyText": [
+      "CRD No.: _______________________________________",
+      "IA Representative",
+      "No.: ____________________________________",
+      "RIA CRD",
+      "Representative: ___________________________________ Telephone Number: (_____)____________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Address",
+    "type": "text",
+    "rect": [
+      161.9,
+      602.8,
+      576.8,
+      626.6
+    ],
+    "inferredLabel": "No.: ____________________________________",
+    "nearbyText": [
+      "Address: ___________________________________________________________________________________",
+      "No.: ____________________________________",
+      "CRD No.: _______________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Email",
+    "type": "text",
+    "rect": [
+      153,
+      579.5,
+      578,
+      601.9
+    ],
+    "inferredLabel": "Address: ___________________________________________________________________________________",
+    "nearbyText": [
+      "Email: _____________________________________________________________________________________",
+      "Address: ___________________________________________________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Signature of Representative",
+    "type": "signature",
+    "rect": [
+      123.8,
+      532.2,
+      323.9,
+      556.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "________________________________________",
+      "______________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "RIA Approval Signature REQUIRED",
+    "type": "signature",
+    "rect": [
+      346.3,
+      532.2,
+      576.4,
+      556.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "______________________________________________",
+      "________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Date",
+    "type": "text",
+    "rect": [
+      123.8,
+      494,
+      323.9,
+      517.9
+    ],
+    "inferredLabel": "Signature of Representative",
+    "nearbyText": [
+      "________________________________________",
+      "Signature of Representative",
+      "________________________________________________",
+      "RIA Approval Signature (",
+      "REQUIRED",
+      ")"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Date_2",
+    "type": "text",
+    "rect": [
+      338.9,
+      494,
+      578.9,
+      517.9
+    ],
+    "inferredLabel": "RIA Approval Signature (",
+    "nearbyText": [
+      "________________________________________________",
+      "RIA Approval Signature (",
+      "REQUIRED",
+      ")",
+      "Signature of Representative",
+      "________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "day of",
+    "type": "text",
+    "rect": [
+      255,
+      392.3,
+      360.1,
+      416.2
+    ],
+    "inferredLabel": "terms of the Partnership Agreement.",
+    "nearbyText": [
+      "Dated this ___________, day of _____________________, ________.",
+      "terms of the Partnership Agreement."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "undefined_22",
+    "type": "text",
+    "rect": [
+      364.9,
+      392.3,
+      404.9,
+      416.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Dated this ___________, day of _____________________, ________.",
+      "terms of the Partnership Agreement."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Dated this",
+    "type": "text",
+    "rect": [
+      167.2,
+      392.3,
+      222.2,
+      416.2
+    ],
+    "inferredLabel": "terms of the Partnership Agreement.",
+    "nearbyText": [
+      "Dated this ___________, day of _____________________, ________.",
+      "terms of the Partnership Agreement."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "By",
+    "type": "text",
+    "rect": [
+      267.8,
+      301.6,
+      517.8,
+      325.4
+    ],
+    "inferredLabel": "Renaissance Growth Partners, LLC, its sole member",
+    "nearbyText": [
+      "__________________________________________________",
+      "By:",
+      "Renaissance Growth Partners, LLC, its sole member",
+      "By:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Name_9",
+    "type": "text",
+    "rect": [
+      267.8,
+      274.4,
+      517.8,
+      298.3
+    ],
+    "inferredLabel": "__________________________________________________",
+    "nearbyText": [
+      "__________________________________________________",
+      "__________________________________________________",
+      "Name:",
+      "By:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box56",
+    "type": "checkbox",
+    "rect": [
+      161.1,
+      743.4,
+      176.1,
+      754.5
+    ],
+    "inferredLabel": "Advisor is a member of FINRA and his or her CRD # is as set forth above.",
+    "nearbyText": [
+      "Advisor is a member of FINRA and his or her CRD # is as set forth above.",
+      "Advisor is affiliated with the following FINRA member (include CRD #):______________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box57",
+    "type": "checkbox",
+    "rect": [
+      162.3,
+      726.9,
+      175.8,
+      742.8
+    ],
+    "inferredLabel": "Advisor is affiliated with the following FINRA member (include CRD #):______________________",
+    "nearbyText": [
+      "Advisor is affiliated with the following FINRA member (include CRD #):______________________",
+      "Advisor is a member of FINRA and his or her CRD # is as set forth above.",
+      "His/her signature below constitutes his/her agreement to be bound by all the provisions of the terms and",
+      "(3)"
+    ],
+    "exportValue": "Yes"
+  }
+]

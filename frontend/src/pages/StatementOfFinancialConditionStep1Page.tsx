@@ -214,14 +214,14 @@ function getErrorForQuestion(
   return prefixed ? fieldErrors[prefixed] : null;
 }
 
-function parseAmountInput(raw: string): number {
+function parseAmountInput(raw: string): number | null {
   if (!raw.trim()) {
-    return 0;
+    return null;
   }
 
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed < 0) {
-    return 0;
+    return null;
   }
 
   return parsed;
@@ -460,7 +460,7 @@ export function StatementOfFinancialConditionStep1Page() {
       | 'illiquidQualifiedAssets',
     entries: Array<{ key: string; label: string }>
   ) => {
-    const answer = fields[section] as Record<string, number>;
+    const answer = fields[section] as Record<string, number | null>;
 
     return (
       <div className="grid gap-4 sm:grid-cols-2">
@@ -472,7 +472,7 @@ export function StatementOfFinancialConditionStep1Page() {
               min={0}
               step="any"
               type="number"
-              value={answer[entry.key]}
+              value={answer[entry.key] ?? ''}
               onChange={(event) => {
                 const payload = structuredClone(answer);
                 payload[entry.key] = parseAmountInput(event.target.value);

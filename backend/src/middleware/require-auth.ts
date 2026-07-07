@@ -25,7 +25,8 @@ export function requireAuth({ prisma, config }: RouteDeps) {
         select: {
           id: true,
           name: true,
-          email: true
+          email: true,
+          isAdmin: true
         }
       });
 
@@ -39,5 +40,19 @@ export function requireAuth({ prisma, config }: RouteDeps) {
     } catch (error) {
       next(error);
     }
+  };
+}
+
+/**
+ * Gate a route to admins. Must run AFTER `requireAuth`, which populates
+ * `request.authUser` (including `isAdmin`).
+ */
+export function requireAdmin() {
+  return (request: Request, response: Response, next: NextFunction) => {
+    if (!request.authUser?.isAdmin) {
+      response.status(403).json({ message: 'Admin access required.' });
+      return;
+    }
+    next();
   };
 }

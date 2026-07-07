@@ -227,4 +227,84 @@ describe('InvestorProfileStep1Page', () => {
       expect(screen.getByText('Perfect. What RR number should we use?')).toBeInTheDocument();
     });
   });
+
+  it('lets a 0-valued number input be cleared without restoring 0', async () => {
+    const user = userEvent.setup();
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return new Response(
+          JSON.stringify({
+            user: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/investor-profile/step-1')) {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'IN_PROGRESS',
+              step: {
+                key: 'STEP_1_ACCOUNT_REGISTRATION',
+                label: 'STEP 1. ACCOUNT REGISTRATION',
+                currentQuestionId: 'typeOfAccount.joint.numberOfTenants',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['typeOfAccount.joint.numberOfTenants'],
+                fields: {
+                  ...baseStepFields,
+                  typeOfAccount: {
+                    ...baseStepFields.typeOfAccount,
+                    joint: {
+                      ...baseStepFields.typeOfAccount.joint,
+                      numberOfTenants: 0
+                    }
+                  }
+                }
+              }
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/investor-profile/step-1');
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await screen.findByText('How many tenants are on this joint account?');
+
+    const tenantsInput = screen.getByRole('spinbutton') as HTMLInputElement;
+    expect(tenantsInput.value).toBe('0');
+
+    await user.clear(tenantsInput);
+    expect(tenantsInput.value).toBe('');
+  });
 });

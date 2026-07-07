@@ -1,0 +1,5314 @@
+[
+  {
+    "page": 3,
+    "fieldName": "Please check to confirm the Investor has completed the following items",
+    "type": "text",
+    "rect": [
+      40.6,
+      715.1,
+      67.8,
+      731.2
+    ],
+    "inferredLabel": "Please check to confirm the Investor has completed the following items:",
+    "nearbyText": [
+      "______",
+      "Please check to confirm the Investor has completed the following items:",
+      "______",
+      "All parties (account holders) have signed and dated where required, including the W-9 form."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined",
+    "type": "text",
+    "rect": [
+      40.6,
+      698.8,
+      67.8,
+      714.5
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "All parties (account holders) have signed and dated where required, including the W-9 form.",
+      "The Primary Account Holder information has been completed for all account types. (Please be sure date",
+      "of birth, social security number, zip code and telephone numbers have been included.)",
+      "COPY OF VALID"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "1",
+    "type": "text",
+    "rect": [
+      40.6,
+      657.5,
+      67.8,
+      672.8
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "DRIVERS LICENSE IS REQUIRED.",
+      "Signature page section has been completed.",
+      "of birth, social security number, zip code and telephone numbers have been included.)",
+      "COPY OF VALID"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "2",
+    "type": "text",
+    "rect": [
+      40.6,
+      640.1,
+      67.8,
+      656.2
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "______",
+      "______",
+      "Signature page section has been completed.",
+      "Broker Information section has been completed and signed."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_2",
+    "type": "text",
+    "rect": [
+      40.6,
+      619.4,
+      67.8,
+      635.5
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "______",
+      "Broker Information section has been completed and signed.",
+      "Distribution Option has been selected."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_3",
+    "type": "text",
+    "rect": [
+      40.6,
+      595.4,
+      67.8,
+      611.5
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "______",
+      "(i)Have provided bank statements, brokerage statements and other statements of securities holdings,",
+      "Distribution Option has been selected.",
+      "certificates of deposit, tax assessments and appraisal reports issued within the last three months by"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Please check the box or indicate NA not applicable for the items below",
+    "type": "text",
+    "rect": [
+      41.4,
+      424.1,
+      68.6,
+      440.2
+    ],
+    "inferredLabel": "Please check the box or indicate N/A (not applicable) for the items below:",
+    "nearbyText": [
+      "______",
+      "Please check the box or indicate N/A (not applicable) for the items below:",
+      "If the subscription is for a Trust, include a copy of the title page, authorized individual page and signature",
+      "page of the Trust Agreement. (Failure to provide this documentation may result in a delay in processing"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "undefined_4",
+    "type": "text",
+    "rect": [
+      41.4,
+      382.7,
+      68.6,
+      398.8
+    ],
+    "inferredLabel": "your application.)",
+    "nearbyText": [
+      "______",
+      "If the subscription is for an IRA or other Qualified or Custodial Account, all of the following have been",
+      "your application.)",
+      "completed:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box63",
+    "type": "checkbox",
+    "rect": [
+      150.8,
+      360.4,
+      158.5,
+      368.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "IRA Information Section has been completed",
+      "This agreement has been sent to Custodian for signature",
+      "completed:",
+      "If the subscription is for an IRA or other Qualified or Custodial Account, all of the following have been"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box64",
+    "type": "checkbox",
+    "rect": [
+      150.8,
+      342.1,
+      158.5,
+      349.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "",
+      "This agreement has been sent to Custodian for signature",
+      "IRA Information Section has been completed",
+      "Custodian has provided a Corporate Charter"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box65",
+    "type": "checkbox",
+    "rect": [
+      150.8,
+      323.1,
+      158.5,
+      330.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "",
+      "Custodian has provided a Corporate Charter",
+      "This agreement has been sent to Custodian for signature",
+      "Custodian has provided a W-9 (Form W-9 is attached)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 3,
+    "fieldName": "Check Box66",
+    "type": "checkbox",
+    "rect": [
+      150.8,
+      304.8,
+      158.5,
+      312.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Custodian has provided a W-9 (Form W-9 is attached)",
+      "Custodian has provided a Corporate Charter",
+      "If the subscription is for a corporate, LLC, or partnership account, the Articles or Certificate of Partnership,",
+      "______"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 4,
+    "fieldName": "Type of Interests in the Partnership Being Subscribed For please check one",
+    "type": "text",
+    "rect": [
+      429.7,
+      632,
+      553.8,
+      650.6
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Amount of Commitment ($50,000/Unit): $________________________ Units: ________________________",
+      "Investment for the Following Fund (please check one):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Units",
+    "type": "text",
+    "rect": [
+      270.8,
+      632,
+      394.9,
+      650.6
+    ],
+    "inferredLabel": "Investment for the Following Fund (please check one):",
+    "nearbyText": [
+      "Amount of Commitment ($50,000/Unit): $________________________ Units: ________________________",
+      "Investment for the Following Fund (please check one):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Limited Partner Interests",
+    "type": "text",
+    "rect": [
+      61.6,
+      566.6,
+      89,
+      585.2
+    ],
+    "inferredLabel": "subject to the terms of the Partnership Agreement, the Memorandum and this Subscription Agreement.",
+    "nearbyText": [
+      "______",
+      "subject to the terms of the Partnership Agreement, the Memorandum and this Subscription Agreement.",
+      "The Investor desires to subscribe for the following type of Interests in the Partnership indicated below",
+      "Limited Partner Interests",
+      "MBD USE ONLY"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "General Partner Interests",
+    "type": "text",
+    "rect": [
+      61.6,
+      547.1,
+      89,
+      565.7
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "General Partner Interests",
+      "Limited Partner Interests",
+      "____ Class A-1",
+      "before 6/30/26 - 10% Bonus"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Initial Investment",
+    "type": "text",
+    "rect": [
+      58.4,
+      489.5,
+      91,
+      508.1
+    ],
+    "inferredLabel": "____ Class A-2",
+    "nearbyText": [
+      "Initial Investment",
+      "$250,000 made on or before 6/30/26",
+      "investments equal to or greater than $250,000 made on or",
+      "____ Class A-2",
+      "before 6/30/26 - 13% Bonus",
+      "Returning Investors with investments less than"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Additional Investment",
+    "type": "text",
+    "rect": [
+      60.1,
+      456.1,
+      91.4,
+      474.7
+    ],
+    "inferredLabel": "OR",
+    "nearbyText": [
+      "OR",
+      "Additional Investment",
+      "Initial Investment",
+      "____ Class A-3",
+      "before 6/30/26 - 13% Bonus",
+      "greater than $250,000 made on or before 6/30/26 - 16% Bonus"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "BrokerDealer Class",
+    "type": "text",
+    "rect": [
+      58.4,
+      388.2,
+      96.2,
+      404.2
+    ],
+    "inferredLabel": "Class of Units to be Purchased:",
+    "nearbyText": [
+      "Class of Units to be Purchased:",
+      "Broker-Dealer Class",
+      "Registered Investment Adviser Class",
+      "____ RIA/Direct Investor",
+      "A-3; All investments made after 6/30/26",
+      "- 7% Gross Up"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Registered Investment Adviser Class",
+    "type": "text",
+    "rect": [
+      58.4,
+      369.6,
+      95.9,
+      387.4
+    ],
+    "inferredLabel": "Broker-Dealer Class",
+    "nearbyText": [
+      "Registered Investment Adviser Class",
+      "Broker-Dealer Class",
+      "____ RIA/Direct Investor",
+      "____ NAV",
+      "- 6% Gross Up",
+      "- 7% Gross Up"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 4,
+    "fieldName": "Directly Offered Class",
+    "type": "text",
+    "rect": [
+      58.4,
+      351.1,
+      97.8,
+      368.8
+    ],
+    "inferredLabel": "Directly Offered Class",
+    "nearbyText": [
+      "Directly Offered Class",
+      "Registered Investment Adviser Class",
+      "____ NAV",
+      "__________ Total Bonus",
+      "- 6% Gross Up",
+      "_____________ Total Units"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Uniform Gift to Minors Act  State of",
+    "type": "text",
+    "rect": [
+      215.2,
+      609.5,
+      279.1,
+      625.7
+    ],
+    "inferredLabel": "— All parties must sign.",
+    "nearbyText": [
+      "— State of ________________",
+      "— All parties must sign.",
+      "",
+      "",
+      "Other",
+      "KEOGH"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Other",
+    "type": "text",
+    "rect": [
+      354,
+      609.6,
+      561.4,
+      625.7
+    ],
+    "inferredLabel": "— Owner and custodian signatures required.",
+    "nearbyText": [
+      "— Owner and custodian signatures required.",
+      "Other",
+      "KEOGH",
+      "Owner and custodian signatures required.",
+      "",
+      ""
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Other Specify",
+    "type": "text",
+    "rect": [
+      130.1,
+      469.3,
+      293.5,
+      485.3
+    ],
+    "inferredLabel": "signature(s) required.",
+    "nearbyText": [
+      "-",
+      "— Include partnership agreement. Authorize",
+      "Other (Specify)",
+      "signature(s) required.",
+      "Include title and signature pages",
+      "Partnership"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Custodian Name",
+    "type": "text",
+    "rect": [
+      121.8,
+      310.7,
+      566.9,
+      326.9
+    ],
+    "inferredLabel": "(Qualified and Custodial Accounts Only)",
+    "nearbyText": [
+      "Custodian Name:",
+      "(Qualified and Custodial Accounts Only)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Custodian Account Number",
+    "type": "text",
+    "rect": [
+      172.7,
+      292.2,
+      566.9,
+      308.4
+    ],
+    "inferredLabel": "Custodian Name:",
+    "nearbyText": [
+      "Custodian Account Number:",
+      "Custodian Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Custodian Address",
+    "type": "text",
+    "rect": [
+      128.4,
+      273.8,
+      566.9,
+      290
+    ],
+    "inferredLabel": "Custodian Account Number:",
+    "nearbyText": [
+      "Custodian Address:",
+      "Custodian Account Number:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "City",
+    "type": "text",
+    "rect": [
+      63.1,
+      255.5,
+      300.6,
+      271.7
+    ],
+    "inferredLabel": "Custodian Address:",
+    "nearbyText": [
+      "City:",
+      "Custodian Address:",
+      "State:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "State",
+    "type": "text",
+    "rect": [
+      330.7,
+      255.5,
+      453.6,
+      271.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "State:",
+      "Zip:",
+      "City:",
+      "Custodian Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Zip",
+    "type": "text",
+    "rect": [
+      474.5,
+      255.5,
+      566.9,
+      271.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Zip:",
+      "State:",
+      "City:",
+      "Custodian Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Custodian Tax ID Number",
+    "type": "text",
+    "rect": [
+      164.2,
+      218.6,
+      566.9,
+      234.8
+    ],
+    "inferredLabel": "Custodian Tax I.D. Number:",
+    "nearbyText": [
+      "_________________________",
+      "Custodian Tax I.D. Number:",
+      "Telephone Number: _"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Custodian Email",
+    "type": "text",
+    "rect": [
+      121.8,
+      199.7,
+      566.9,
+      215.9
+    ],
+    "inferredLabel": "Custodian Email:",
+    "nearbyText": [
+      "Custodian Email:",
+      "Custodian Tax I.D. Number:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box67",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      700.9,
+      48.7,
+      706.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Individual",
+      "",
+      "Joint tenants with Rights of Survivorship",
+      "— one signature required",
+      "— All parties"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box68",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      683.6,
+      48.7,
+      689.5
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Joint tenants with Rights of Survivorship",
+      "must sign.",
+      "Individual",
+      "— one signature required"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box69",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      655.5,
+      48.7,
+      661.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Community Property",
+      "must sign.",
+      "— All parties must sign.",
+      "",
+      "Simplified Employee Pension/Trust (SEP)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box70",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      627.7,
+      48.7,
+      633.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Tenants in Common",
+      "",
+      "Uniform Gift to Minors Act",
+      "— All parties must sign.",
+      "— State of ________________"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box71",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      610.5,
+      48.7,
+      616.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Uniform Gift to Minors Act",
+      "Custodian signature required.",
+      "Tenants in Common",
+      "— All parties must sign."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box72",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      582.7,
+      48.7,
+      588.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Qualified Pension or Profit-Sharing Plan",
+      "Custodian signature required.",
+      "documents",
+      "— Include plan",
+      "Owner and custodian signatures required."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box73",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      554.2,
+      48.7,
+      560.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Trust",
+      "documents",
+      "Trustees” pages",
+      "— Include title, signature and “Powers of the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box74",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      526.1,
+      48.7,
+      532
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Corporation",
+      "Trustees” pages",
+      "incorporation and bylaws. Authorized signature required.",
+      "— Include corporate resolution, articles of"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box75",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      497.9,
+      48.7,
+      503.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Partnership",
+      "incorporation and bylaws. Authorized signature required.",
+      "signature(s) required.",
+      "— Include partnership agreement. Authorize"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box76",
+    "type": "checkbox",
+    "rect": [
+      42.4,
+      470.2,
+      48.7,
+      476.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Other (Specify)",
+      "signature(s) required.",
+      "Include title and signature pages",
+      "-"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box77",
+    "type": "checkbox",
+    "rect": [
+      310,
+      700.9,
+      316.4,
+      706.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Traditional IRA",
+      "Roth IRA",
+      "— Owner and custodian signatures required.",
+      "— Owner and custodian signatures required"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box78",
+    "type": "checkbox",
+    "rect": [
+      310,
+      683.6,
+      316.4,
+      689.5
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Roth IRA",
+      "Traditional IRA",
+      "— Owner and custodian signatures required.",
+      "— All parties"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box79",
+    "type": "checkbox",
+    "rect": [
+      310,
+      655.9,
+      316.4,
+      661.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Simplified Employee Pension/Trust (SEP)",
+      "custodian signatures required.",
+      "— All parties must sign.",
+      "— Owner and",
+      "Community Property"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box80",
+    "type": "checkbox",
+    "rect": [
+      310,
+      627.1,
+      316.4,
+      633.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "KEOGH",
+      "",
+      "custodian signatures required.",
+      "Other",
+      "— Owner and custodian signatures required."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Check Box81",
+    "type": "checkbox",
+    "rect": [
+      310,
+      609.9,
+      316.4,
+      615.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Other",
+      "KEOGH",
+      "Owner and custodian signatures required.",
+      "— Owner and custodian signatures required."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 5,
+    "fieldName": "Text139",
+    "type": "text",
+    "rect": [
+      132.9,
+      236.8,
+      250.8,
+      252.7
+    ],
+    "inferredLabel": "_________________________",
+    "nearbyText": [
+      "_________________________",
+      "Telephone Number: _",
+      "City:",
+      "State:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Account registration andor entity name",
+    "type": "text",
+    "rect": [
+      222.5,
+      722.5,
+      567.1,
+      740
+    ],
+    "inferredLabel": "INVESTOR INFORMATION",
+    "nearbyText": [
+      "INVESTOR INFORMATION",
+      "Account registration and/or entity name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Primary Investor Name",
+    "type": "text",
+    "rect": [
+      150.2,
+      653,
+      566.9,
+      670.6
+    ],
+    "inferredLabel": "complete.",
+    "nearbyText": [
+      "Primary Investor Name:",
+      "complete."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Primary Investor Social Security Number",
+    "type": "text",
+    "rect": [
+      230,
+      634.4,
+      356,
+      652
+    ],
+    "inferredLabel": "Primary Investor Name:",
+    "nearbyText": [
+      "____________________________",
+      "Primary Investor Social Security Number:",
+      "Primary Investor Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Tax ID for entity accounts",
+    "type": "text",
+    "rect": [
+      164.8,
+      616,
+      269.6,
+      633.5
+    ],
+    "inferredLabel": "____________________________",
+    "nearbyText": [
+      "_______________________",
+      "____________________________",
+      "Date of",
+      "Tax ID (for entity accounts):",
+      "Primary Investor Social Security Number:",
+      "Formation"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Date of Formation",
+    "type": "text",
+    "rect": [
+      360,
+      616,
+      442,
+      633.5
+    ],
+    "inferredLabel": "____________________________",
+    "nearbyText": [
+      "__________________",
+      ":",
+      "Formation",
+      "Date of",
+      "____________________________",
+      "_______________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Date of Birth",
+    "type": "text",
+    "rect": [
+      106,
+      597.6,
+      223,
+      615
+    ],
+    "inferredLabel": "_______________________",
+    "nearbyText": [
+      "__________________________",
+      "_______________________",
+      "Date of Birth:",
+      "Tax ID (for entity accounts):",
+      "Date of",
+      "Formation"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Telephone Number",
+    "type": "text",
+    "rect": [
+      135.4,
+      579.1,
+      261.4,
+      596.6
+    ],
+    "inferredLabel": "__________________________",
+    "nearbyText": [
+      "____________________________",
+      "__________________________",
+      "Telephone Number:",
+      "Date of Birth:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Email Address",
+    "type": "text",
+    "rect": [
+      113.6,
+      560.5,
+      566.9,
+      578
+    ],
+    "inferredLabel": "____________________________",
+    "nearbyText": [
+      "____________________________",
+      "E-mail Address:",
+      "Telephone Number:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Street Address Cannot be a PO Box",
+    "type": "text",
+    "rect": [
+      214.8,
+      542.2,
+      566.9,
+      559.7
+    ],
+    "inferredLabel": "E-mail Address:",
+    "nearbyText": [
+      "Street Address (Cannot be a P.O. Box):",
+      "E-mail Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "City_2",
+    "type": "text",
+    "rect": [
+      63.1,
+      522.7,
+      300.6,
+      540.2
+    ],
+    "inferredLabel": "Street Address (Cannot be a P.O. Box):",
+    "nearbyText": [
+      "City:",
+      "Street Address (Cannot be a P.O. Box):",
+      "State:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "State_2",
+    "type": "text",
+    "rect": [
+      330.7,
+      523.7,
+      453.6,
+      541.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "State:",
+      "Zip:",
+      "City:",
+      "Street Address (Cannot be a P.O. Box):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Zip_2",
+    "type": "text",
+    "rect": [
+      474.5,
+      524.6,
+      566.9,
+      541.6
+    ],
+    "inferredLabel": "Zip:",
+    "nearbyText": [
+      "Zip:",
+      "State:",
+      "City:",
+      "Street Address (Cannot be a P.O. Box):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Secondary Investor Name",
+    "type": "text",
+    "rect": [
+      162.1,
+      396.8,
+      566.9,
+      414.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Secondary Investor Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Secondary Investor Social Security Number",
+    "type": "text",
+    "rect": [
+      239.5,
+      378.8,
+      356.5,
+      396.2
+    ],
+    "inferredLabel": "Secondary Investor Name:",
+    "nearbyText": [
+      "__________________________",
+      "Secondary Investor Social Security Number:",
+      "Secondary Investor Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Date of Birth_2",
+    "type": "text",
+    "rect": [
+      103.9,
+      360.4,
+      198.5,
+      377.9
+    ],
+    "inferredLabel": "Secondary Investor Social Security Number:",
+    "nearbyText": [
+      "_____________________",
+      "Date of Birth:",
+      "Secondary Investor Social Security Number:",
+      "__________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Telephone Number_2",
+    "type": "text",
+    "rect": [
+      133.4,
+      342,
+      281.9,
+      359.5
+    ],
+    "inferredLabel": "_____________________",
+    "nearbyText": [
+      "_________________________________",
+      "_____________________",
+      "Telephone Number:",
+      "Date of Birth:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Email Address_2",
+    "type": "text",
+    "rect": [
+      113.6,
+      323.3,
+      566.9,
+      340.8
+    ],
+    "inferredLabel": "_________________________________",
+    "nearbyText": [
+      "_________________________________",
+      "E-mail Address:",
+      "Telephone Number:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Street Address Cannot be a PO Box_2",
+    "type": "text",
+    "rect": [
+      214.8,
+      304.8,
+      566.9,
+      322.3
+    ],
+    "inferredLabel": "E-mail Address:",
+    "nearbyText": [
+      "Street Address (Cannot be a P.O. Box):",
+      "E-mail Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "City_3",
+    "type": "text",
+    "rect": [
+      63.1,
+      286.4,
+      300.6,
+      303.7
+    ],
+    "inferredLabel": "Street Address (Cannot be a P.O. Box):",
+    "nearbyText": [
+      "City:",
+      "Street Address (Cannot be a P.O. Box):",
+      "State:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "State_3",
+    "type": "text",
+    "rect": [
+      330.7,
+      286.4,
+      453.6,
+      304
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "State:",
+      "Zip:",
+      "City:",
+      "Street Address (Cannot be a P.O. Box):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Zip_3",
+    "type": "text",
+    "rect": [
+      474.5,
+      286.4,
+      566.9,
+      304
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Zip:",
+      "State:",
+      "City:",
+      "Street Address (Cannot be a P.O. Box):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Permanent Residence or Principal Place of Business if different from Address above",
+    "type": "text",
+    "rect": [
+      41.4,
+      249.6,
+      566.9,
+      266.9
+    ],
+    "inferredLabel": "Permanent Residence or Principal Place of Business (if different from Address above):",
+    "nearbyText": [
+      "Permanent Residence or Principal Place of Business (if different from Address above):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 6,
+    "fieldName": "Text82",
+    "type": "text",
+    "rect": [
+      41.5,
+      488.9,
+      567.3,
+      503.2
+    ],
+    "inferredLabel": "Permanent Residence or Principal Place of Business (if different from Address above):",
+    "nearbyText": [
+      "Permanent Residence or Principal Place of Business (if different from Address above):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Please check one",
+    "type": "text",
+    "rect": [
+      41.4,
+      699.6,
+      68.4,
+      716.9
+    ],
+    "inferredLabel": "Please check one:",
+    "nearbyText": [
+      "______",
+      "Please check one:",
+      "Deposit distributions directly into the Investor’s account"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "1_2",
+    "type": "text",
+    "rect": [
+      41.4,
+      496.2,
+      68.4,
+      513.5
+    ],
+    "inferredLabel": "Account Name:",
+    "nearbyText": [
+      "______",
+      "Send distributions via check to the Investor’s home address",
+      "Account Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "2_2",
+    "type": "text",
+    "rect": [
+      41.4,
+      477.8,
+      68.4,
+      495.1
+    ],
+    "inferredLabel": "______",
+    "nearbyText": [
+      "______",
+      "______",
+      "Send distributions via check to alternate payee listed here",
+      "Send distributions via check to the Investor’s home address"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Financial Institution Name",
+    "type": "text",
+    "rect": [
+      215.6,
+      570,
+      562.8,
+      587.3
+    ],
+    "inferredLabel": "to exceed the amount of the erroneous deposit.",
+    "nearbyText": [
+      "Financial Institution Name:",
+      "to exceed the amount of the erroneous deposit.",
+      "account, such Management Representative is authorized to debit the Investor’s account for an amount not"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "ABA Routing Number",
+    "type": "text",
+    "rect": [
+      197.6,
+      551.6,
+      562.8,
+      568.9
+    ],
+    "inferredLabel": "Financial Institution Name:",
+    "nearbyText": [
+      "ABA/ Routing Number:",
+      "Financial Institution Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Account Number_2",
+    "type": "text",
+    "rect": [
+      174,
+      533.2,
+      562.8,
+      550.4
+    ],
+    "inferredLabel": "ABA/ Routing Number:",
+    "nearbyText": [
+      "Account Number:",
+      "ABA/ Routing Number:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Account Name",
+    "type": "text",
+    "rect": [
+      163.6,
+      514.8,
+      562.8,
+      532.1
+    ],
+    "inferredLabel": "Account Number:",
+    "nearbyText": [
+      "Account Name:",
+      "Account Number:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Name",
+    "type": "text",
+    "rect": [
+      123.2,
+      459.6,
+      562.8,
+      476.9
+    ],
+    "inferredLabel": "Send distributions via check to alternate payee listed here",
+    "nearbyText": [
+      "Name:",
+      "Send distributions via check to alternate payee listed here",
+      "______"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Street Address",
+    "type": "text",
+    "rect": [
+      161.8,
+      441.1,
+      562.8,
+      458.4
+    ],
+    "inferredLabel": "Name:",
+    "nearbyText": [
+      "Street Address:",
+      "Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "City_4",
+    "type": "text",
+    "rect": [
+      113,
+      422.8,
+      350.5,
+      440
+    ],
+    "inferredLabel": "Street Address:",
+    "nearbyText": [
+      "City:",
+      "Street Address:",
+      "State:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "State_4",
+    "type": "text",
+    "rect": [
+      380.6,
+      422.8,
+      503.5,
+      440
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "State:",
+      "Zip:",
+      "City:",
+      "Street Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 7,
+    "fieldName": "Zip_4",
+    "type": "text",
+    "rect": [
+      524.4,
+      422.8,
+      570.7,
+      440
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Zip:",
+      "State:",
+      "City:",
+      "Street Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Financial AdvisorBroker Name",
+    "type": "text",
+    "rect": [
+      185.9,
+      722.5,
+      562.3,
+      739.9
+    ],
+    "inferredLabel": "BROKER-DEALER/RIA INFORMATION",
+    "nearbyText": [
+      "BROKER-DEALER/RIA INFORMATION",
+      "Financial Advisor/Broker Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Telephone Number_3",
+    "type": "text",
+    "rect": [
+      111.1,
+      704.2,
+      562.3,
+      721.4
+    ],
+    "inferredLabel": "Financial Advisor/Broker Name:",
+    "nearbyText": [
+      "Office Address:",
+      "Financial Advisor/Broker Name:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "We must have the broker email address to set up online access to our broker web portal",
+    "type": "text",
+    "rect": [
+      133.4,
+      686,
+      253.3,
+      703.4
+    ],
+    "inferredLabel": "Office Address:",
+    "nearbyText": [
+      "___________________________",
+      "Telephone Number:",
+      "Office Address:",
+      "E-mail Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Email Address_3",
+    "type": "text",
+    "rect": [
+      365.6,
+      685.7,
+      562.7,
+      703.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "E-mail Address:",
+      "___________________________",
+      "Telephone Number:",
+      "Office Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Name of Broker Dealer",
+    "type": "text",
+    "rect": [
+      149.2,
+      648.8,
+      490.8,
+      666.2
+    ],
+    "inferredLabel": "(We must have the broker e-mail address to set up online access to our broker web portal.)",
+    "nearbyText": [
+      "Name of Broker Dealer:",
+      "(We must have the broker e-mail address to set up online access to our broker web portal.)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Zip_5",
+    "type": "text",
+    "rect": [
+      144.7,
+      630.5,
+      490.8,
+      647.9
+    ],
+    "inferredLabel": "Name of Broker Dealer:",
+    "nearbyText": [
+      "Broker Dealer Address:",
+      "Name of Broker Dealer:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Telephone of new Broker Dealer",
+    "type": "text",
+    "rect": [
+      63.1,
+      612,
+      300.6,
+      629.4
+    ],
+    "inferredLabel": "Broker Dealer Address:",
+    "nearbyText": [
+      "City:",
+      "Broker Dealer Address:",
+      "State:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "State_5",
+    "type": "text",
+    "rect": [
+      190.6,
+      594,
+      309.1,
+      610.9
+    ],
+    "inferredLabel": "State:",
+    "nearbyText": [
+      "__________________________",
+      "State:",
+      "Telephone of new Broker Dealer:",
+      "City:",
+      "Rep CRD Number:",
+      "Zip:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Rep CRD Number",
+    "type": "text",
+    "rect": [
+      330.7,
+      612,
+      453.6,
+      629.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "State:",
+      "Zip:",
+      "City:",
+      "Broker Dealer Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "undefined_5",
+    "type": "text",
+    "rect": [
+      474.5,
+      612,
+      566.9,
+      629.4
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Zip:",
+      "State:",
+      "City:",
+      "Broker Dealer Address:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "undefined_6",
+    "type": "text",
+    "rect": [
+      436.6,
+      593.6,
+      567.1,
+      610.9
+    ],
+    "inferredLabel": "Zip:",
+    "nearbyText": [
+      "Zip:",
+      "Rep CRD Number:",
+      "State:",
+      "__________________________",
+      "Telephone of new Broker Dealer:",
+      "City:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Date",
+    "type": "text",
+    "rect": [
+      389.5,
+      365.4,
+      576.1,
+      382.8
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "Date",
+      "Financial Advisor / Broker Signature"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Date_2",
+    "type": "text",
+    "rect": [
+      389.5,
+      328.1,
+      576.1,
+      345.5
+    ],
+    "inferredLabel": "Date",
+    "nearbyText": [
+      "Date",
+      "Date",
+      "Financial Advisor / Broker Signature",
+      "Broker/Dealer Principal Signature"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 8,
+    "fieldName": "Check Box83",
+    "type": "checkbox",
+    "rect": [
+      42.1,
+      264.3,
+      48.5,
+      270.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a Registered Investment Adviser affiliated with the broker/dealer indicated above and will not be",
+      "Acknowledgments: (check if applicable)",
+      "paid a commission for this purchase."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 8,
+    "fieldName": "Check Box84",
+    "type": "checkbox",
+    "rect": [
+      42.1,
+      232.8,
+      48.5,
+      238.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is an unaffiliated Registered Investment Adviser and will not be paid a commission for this",
+      "purchase.",
+      "paid a commission for this purchase."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 8,
+    "fieldName": "Check Box85",
+    "type": "checkbox",
+    "rect": [
+      42.1,
+      202,
+      48.5,
+      208.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor has a preexisting personal or business relationship with the Partnership, Management Company or",
+      "any of their officers or directors.",
+      "purchase."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box86",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      422.3,
+      49.3,
+      429.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor has an individual net worth, or the Investor’s spouse and the Investor has a combined net worth, in",
+      "(Please check all that apply.)",
+      "excess of $1,000,000."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box87",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      392,
+      49.3,
+      399.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor has individual income (exclusive of any income attributable to the Investor’s spouse) of more than",
+      "excess of $1,000,000.",
+      "$200,000 in each of the past two years, or joint income with the Investor’s spouse of more than $300,000 in each"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box88",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      349,
+      49.3,
+      356.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is an individual retirement account or Keogh plan, the individual for whose benefit the investment in",
+      "of those years, and the Investor reasonably expects to reach the same income level in the current year.",
+      "the Partnership is being made has directed such investment, and such individual is an accredited investor"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box89",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      305.4,
+      49.3,
+      312.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a bank as defined in Section 3(a)(2) of the Securities Act or any savings and loan association or other",
+      "because such individual has a net worth or income as described above.",
+      "institution as defined in Section 3(a)(5)(A) of the Securities Act, whether acting in its individual or fiduciary capacity."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box90",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      274.4,
+      49.3,
+      281.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is a broker-dealer registered pursuant to Section 15 of the Exchange Act.",
+      "institution as defined in Section 3(a)(5)(A) of the Securities Act, whether acting in its individual or fiduciary capacity.",
+      "The Investor is an insurance company as defined in Section 2(a)(13) of the Securities Act."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box91",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      256.1,
+      49.3,
+      263.5
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "",
+      "The Investor is an insurance company as defined in Section 2(a)(13) of the Securities Act.",
+      "The Investor is a broker-dealer registered pursuant to Section 15 of the Exchange Act.",
+      "The Investor is an investment adviser registered pursuant to Section 203 of the Investment Advisers Act of 1940,"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box92",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      237.6,
+      49.3,
+      245
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is an investment adviser registered pursuant to Section 203 of the Investment Advisers Act of 1940,",
+      "The Investor is an insurance company as defined in Section 2(a)(13) of the Securities Act.",
+      "as amended (the “",
+      "Investment Advisers Act"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box93",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      207,
+      49.3,
+      214.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is an investment company registered under the Investment Company Act of 1940, as amended (the",
+      "as amended (the “",
+      "“",
+      "Investment Company Act",
+      "Investment Advisers Act"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box94",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      176.1,
+      49.3,
+      183.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is a director or executive officer of the Partnership.",
+      "“",
+      "Investment Company Act",
+      "The Investor is a natural person who holds, in good standing, one of the following professional certifications or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box95",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      157.8,
+      49.3,
+      165.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is a natural person who holds, in good standing, one of the following professional certifications or",
+      "The Investor is a director or executive officer of the Partnership.",
+      "licenses: the General Securities Representative license (Series 7); the Private Securities Offerings Representative"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 9,
+    "fieldName": "Check Box96",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      114.5,
+      49.3,
+      121.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a natural person who is a",
+      "license (Series 82); or the Investment Adviser Representative license (Series 65).",
+      "Investment Company Act, of the Partnership, where the Partnership",
+      "“",
+      "knowledgeable employee,"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "a By reason of the Investors business or financial experience the Investor has the capacity to protect the",
+    "type": "text",
+    "rect": [
+      57.5,
+      217.7,
+      84.5,
+      235.1
+    ],
+    "inferredLabel": "that the Investor qualifies under the following categories",
+    "nearbyText": [
+      "______ (a) By reason of the Investor’s business or financial experience, the Investor has the capacity to protect the",
+      "that the Investor qualifies under the following categories",
+      "The Investor represents and warranties, in addition to the other representations and warranties contained herein,",
+      "",
+      "Investor’s own interests in connection with the purchase of the Units.",
+      "(initial all applicable categories):"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 10,
+    "fieldName": "b The Investor has a preexisting personal or business relationship with the Fund the General Partner the",
+    "type": "text",
+    "rect": [
+      57.5,
+      183.8,
+      84.5,
+      201.2
+    ],
+    "inferredLabel": "Investor’s own interests in connection with the purchase of the Units.",
+    "nearbyText": [
+      "______ (b) The Investor has a preexisting personal or business relationship with the Fund, the General Partner, the",
+      "Investor’s own interests in connection with the purchase of the Units.",
+      "Management Company, or any of their officers or directors, of a nature and duration as would allow the"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box97",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      746.1,
+      48.9,
+      753.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a small business investment company licensed by the Small Business Administration under Section",
+      "301(c) or (d) of the Small Business Investment Act of 1958."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box98",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      714.9,
+      48.9,
+      721.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a Rural Business Investment Company as defined in section 384A of the Consolidated Farm and",
+      "301(c) or (d) of the Small Business Investment Act of 1958.",
+      "Rural Development Act."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box99",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      684.3,
+      48.9,
+      691.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a plan established and maintained by a state, its political subdivisions, or any agency or",
+      "Rural Development Act.",
+      "instrumentality of a state or its political subdivisions, for the benefit of its employees, if the plan has total assets in"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box100",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      641.3,
+      48.9,
+      648.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is an employee benefit plan within the meaning of ERISA if the decision to invest in the Interests is",
+      "excess of $5 million.",
+      "made by a plan fiduciary, as defined in Section 3(21) of ERISA, which is either a bank, savings and loan association,"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box101",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      573.2,
+      48.9,
+      580.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a “family office,” as defined in rule 202(a)(11)(G)-1 under the Investment Advisers Act, that (i) has",
+      "investors.",
+      "assets under management in excess of $5 million; (ii) was not formed for the specific purpose of acquiring the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box102",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      505.1,
+      48.9,
+      512.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a “family client”, as defined in Rule 202(a)(11)(G)-1 under the Investment Advisers Act, of a family",
+      "prospective investment.",
+      "office meeting the requirements listed above and whose prospective investment in the Partnership is directed"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box103",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      461.8,
+      48.9,
+      468.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a trust with total assets in excess of $5,000,000, was not formed for the specific purpose of acquiring",
+      "by that family office.",
+      "Interests, and its purchase is directed by a person who has such knowledge and experience in financial and"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box104",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      417.8,
+      48.9,
+      424.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a trust having as its trustee or co-trustee a bank as defined in Section 3(a)(2) of the Securities Act,",
+      "a savings and loan association, or another institution as defined in Section 3(a)(5)(A) of the Securities Act, which",
+      "business matters that it is capable of evaluating the merits and risk of the prospective investment."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box105",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      375.2,
+      48.9,
+      382.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a revocable trust which may be amended or revoked at any time by the grantors thereof and all of",
+      "makes or participates in the investment decision.",
+      "the grantors are accredited investors."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box106",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      298.8,
+      48.9,
+      305.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "or Massachusetts or Similar Business Trusts:",
+      "The Investor has total assets in excess of $5,000,000 and was not formed for the specific purpose of acquiring",
+      "Interests.",
+      "(Please check all that apply.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box107",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      266.9,
+      48.9,
+      273.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "All of the Investor’s beneficial owners are accredited investors.",
+      "Interests.",
+      "The Investor represents and warranties, in addition to the other representations and warranties contained herein,",
+      "1"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 10,
+    "fieldName": "Check Box108",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      248.3,
+      48.9,
+      255.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor represents and warranties, in addition to the other representations and warranties contained herein,",
+      "All of the Investor’s beneficial owners are accredited investors.",
+      "that the Investor qualifies under the following categories",
+      "(initial all applicable categories):"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box109",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      637.2,
+      49.2,
+      643.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "For Natural Persons:",
+      "is a natural person (to include a natural person investing through an individual retirement account or a self-",
+      "directed employee benefit plan) who owns not less than $5,000,000 in “Investments”",
+      "(Please check all that apply.)",
+      "2"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box110",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      532.2,
+      49.2,
+      538.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "is an entity, acting for its own account or the accounts of other “qualified purchasers,” that in the",
+      "The Investor is not a Natural Person and:",
+      "aggregate owns and invests on a discretionary basis, not less than $25,000,000 in “Investments.”",
+      "(Please check all that apply.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box111",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      501.6,
+      49.2,
+      508.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "is a “family company”",
+      "aggregate owns and invests on a discretionary basis, not less than $25,000,000 in “Investments.”",
+      "is an entity (other than a trust), each of the beneficial owners of which is a “qualified purchaser.”",
+      "3"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box112",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      483.9,
+      49.2,
+      490.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "",
+      "is an entity (other than a trust), each of the beneficial owners of which is a “qualified purchaser.”",
+      "is a “family company”",
+      "is a trust (i) that is not Family Company owning at least $5,000,000 in “Investments,” (ii) that was not"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box113",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      465.2,
+      49.2,
+      472
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "is a trust (i) that is not Family Company owning at least $5,000,000 in “Investments,” (ii) that was not",
+      "is an entity (other than a trust), each of the beneficial owners of which is a “qualified purchaser.”",
+      "formed for the specific purpose of acquiring the Interest, (iii) for which each trustee (or other person",
+      "4"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box114",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      409.5,
+      49.2,
+      416.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "is a “qualified institutional buyer” (as defined in paragraph (a) of Rule 144A under the Securities Act) that",
+      "who has contributed assets to the trust) of which are “qualified purchasers.”",
+      "is (i) not an entity covered by the bullet point immediately below and (ii) acting for its own account, the",
+      "5"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box115",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      366.4,
+      49.2,
+      373.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "is a “qualified institutional buyer” (as defined in paragraph (a) of Rule 144A under the Securities Act) that",
+      "account of another “qualified institutional buyer,” or the account of a “qualified purchaser.”",
+      "is an entity that either (i) is a dealer described in paragraph (a)(1)(ii) of Rule 144A that owns and invests"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 11,
+    "fieldName": "Check Box116",
+    "type": "checkbox",
+    "rect": [
+      41.9,
+      261.7,
+      49.2,
+      268.5
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "OR",
+      "None of the above is applicable to the Investor."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box117",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      642.6,
+      49.1,
+      650
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "For Natural Persons",
+      "",
+      "Has a net worth in excess of $2,200,000 (including assets held jointly with such person’s spouse);",
+      "Has at least $1,100,000 under the management of the investment adviser;",
+      ": (Please check all that apply.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box118",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      623.9,
+      49.1,
+      631.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "",
+      "Has at least $1,100,000 under the management of the investment adviser;",
+      "Has a net worth in excess of $2,200,000 (including assets held jointly with such person’s spouse);",
+      "Is a “qualified purchaser” as defined in Section 2(a)(51) of the Investment Company Act; or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box119",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      606,
+      49.1,
+      613.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Is a “qualified purchaser” as defined in Section 2(a)(51) of the Investment Company Act; or",
+      "OR",
+      "Has at least $1,100,000 under the management of the investment adviser;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box120",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      550.1,
+      49.1,
+      557.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is not a Natural Person and",
+      "Is an entity which would be defined as an investment company under Section 3(a) of the Investment",
+      "Company Act, but solely for the exception from that definition provided by Section 3(c) (1) thereof;",
+      ": (Please check all that apply.)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box121",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      507.4,
+      49.1,
+      514.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Is an investment company registered, or required to be registered, under the Investment Company",
+      "(Please complete Follow Up Questions below)",
+      "Act; (Please complete Follow Up Questions below)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box122",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      476.3,
+      49.1,
+      483.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Is a business development company as defined in Section 202(a)(22) of the Investment Advisers Act of",
+      "Act; (Please complete Follow Up Questions below)",
+      "1940, as amended; (Please complete Follow Up Questions below)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box123",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      445.6,
+      49.1,
+      452.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Is not an entity described in the above and either:",
+      "1.",
+      "1940, as amended; (Please complete Follow Up Questions below)",
+      "Has a net worth in excess of $2,200,000;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 12,
+    "fieldName": "Check Box124",
+    "type": "checkbox",
+    "rect": [
+      41.8,
+      357.3,
+      49.1,
+      364.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "OR",
+      "None of the above is applicable to the Investor."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box125",
+    "type": "checkbox",
+    "rect": [
+      50,
+      698.2,
+      58.4,
+      706.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "TRUE",
+      "FALSE",
+      "",
+      "Each equity owner of the Investor (each an “",
+      "natural persons, assets held jointly with such person’s spouse) in excess of $2,200,000."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box126",
+    "type": "checkbox",
+    "rect": [
+      50,
+      667.4,
+      58.4,
+      675.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Each equity owner of each Investor Equity Owner that is also a “look-through entity” for purposes of the",
+      "natural persons, assets held jointly with such person’s spouse) in excess of $2,200,000.",
+      "Investment Advisers Act has a net worth (including, for natural persons, assets held jointly with such",
+      "7"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box127",
+    "type": "checkbox",
+    "rect": [
+      50,
+      624,
+      58.4,
+      631.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Each Investor Equity Owner has at least $1,100,000 under the management of the Management",
+      "person’s spouse) in excess of $2,200,000.",
+      "Company."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box128",
+    "type": "checkbox",
+    "rect": [
+      50,
+      593.1,
+      58.4,
+      601
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Each equity owner of each Investor Equity Owner that is also a “look-through entity” for purposes of the",
+      "Company.",
+      "Investment Advisers Act has at least $1,100,000 under the management of the Management Company."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box129",
+    "type": "checkbox",
+    "rect": [
+      50,
+      562.3,
+      58.4,
+      570.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Each Investor Equity Owner is a “qualified purchaser” as defined in Section 2(a)(51) of the Investment",
+      "Investment Advisers Act has at least $1,100,000 under the management of the Management Company.",
+      "Company Act.",
+      "8"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box130",
+    "type": "checkbox",
+    "rect": [
+      50,
+      531.5,
+      58.4,
+      539.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "Each equity owner of each Investor Equity Owner that is also a “look-through entity” for purposes of the",
+      "Company Act.",
+      "Investment Advisers Act is a “qualified purchaser” as defined in Section 2(a)(51) of the Investment",
+      "8"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box131",
+    "type": "checkbox",
+    "rect": [
+      50,
+      488.1,
+      58.4,
+      496
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "See Exhibit B for more information on the definition of “qualified purchaser”.",
+      "Company Act.",
+      "9"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box132",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      698.2,
+      97.3,
+      706.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "FALSE",
+      "Each equity owner of the Investor (each an “",
+      "natural persons, assets held jointly with such person’s spouse) in excess of $2,200,000.",
+      "",
+      "TRUE"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box133",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      667.4,
+      97.3,
+      675.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Each equity owner of each Investor Equity Owner that is also a “look-through entity” for purposes of the",
+      "natural persons, assets held jointly with such person’s spouse) in excess of $2,200,000.",
+      "Investment Advisers Act has a net worth (including, for natural persons, assets held jointly with such",
+      "",
+      "7"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box134",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      624.5,
+      97.3,
+      632.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Each Investor Equity Owner has at least $1,100,000 under the management of the Management",
+      "person’s spouse) in excess of $2,200,000.",
+      "Company.",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box135",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      593.7,
+      97.3,
+      601.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Each equity owner of each Investor Equity Owner that is also a “look-through entity” for purposes of the",
+      "Company.",
+      "Investment Advisers Act has at least $1,100,000 under the management of the Management Company.",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box136",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      563.3,
+      97.3,
+      571.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Each Investor Equity Owner is a “qualified purchaser” as defined in Section 2(a)(51) of the Investment",
+      "Investment Advisers Act has at least $1,100,000 under the management of the Management Company.",
+      "Company Act.",
+      "",
+      "8"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box137",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      531.5,
+      97.3,
+      539.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "Each equity owner of each Investor Equity Owner that is also a “look-through entity” for purposes of the",
+      "Company Act.",
+      "Investment Advisers Act is a “qualified purchaser” as defined in Section 2(a)(51) of the Investment",
+      "",
+      "8"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 13,
+    "fieldName": "Check Box138",
+    "type": "checkbox",
+    "rect": [
+      88.9,
+      488.6,
+      97.3,
+      496.5
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "See Exhibit B for more information on the definition of “qualified purchaser”.",
+      "Company Act.",
+      "",
+      "9"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Partnership will not exceed the following percentage",
+    "type": "text",
+    "rect": [
+      358.9,
+      578.9,
+      381.5,
+      590.3
+    ],
+    "inferredLabel": "Partnership will not exceed the following percentage. _____%",
+    "nearbyText": [
+      "Partnership will not exceed the following percentage. _____%",
+      "constitutes or may in the future constitute “plan assets” during the period of its investment in the",
+      "If “True”, the Investor certifies that the portion of the Investor’s investment in the Partnership that",
+      "The Investor is an entity that otherwise constitutes a “benefit plan investor” within the meaning of ERISA",
+      "",
+      ""
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Partnership will not exceed the following percentage_2",
+    "type": "text",
+    "rect": [
+      358.9,
+      492.5,
+      381.5,
+      503.9
+    ],
+    "inferredLabel": "Partnership will not exceed the following percentage. _____%",
+    "nearbyText": [
+      "Partnership will not exceed the following percentage. _____%",
+      "constitutes or may in the future constitute “plan assets” during the period of its investment in the",
+      "If “True”, the Investor certifies that the portion of the Investor’s investment in the Partnership that"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Number of beneficial owners of the Investor",
+    "type": "text",
+    "rect": [
+      243.7,
+      107.9,
+      432.8,
+      119.3
+    ],
+    "inferredLabel": "Number of beneficial owners of the Investor: __________________________________________",
+    "nearbyText": [
+      "Number of beneficial owners of the Investor: __________________________________________"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box140",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      698.5,
+      58.6,
+      706.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "TRUE",
+      "FALSE",
+      "",
+      "The Investor is an “employee benefit plan” (within the meaning of Section 3(3) of ERISA) subject to Title I",
+      "of ERISA."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box141",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      667.3,
+      58.6,
+      674.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is a “plan” (as defined in Section 4975(e)(1) of the Code, including an individual retirement",
+      "of ERISA.",
+      "account), subject to Section 4975 of the Code."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box142",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      637.1,
+      58.6,
+      644.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor certifies that it is an entity whose underlying assets include plan assets by reason of a plan’s",
+      "account), subject to Section 4975 of the Code.",
+      "investment in such entity."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box143",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      562.9,
+      58.6,
+      570.5
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is an entity that otherwise constitutes a “benefit plan investor” within the meaning of ERISA",
+      "Partnership will not exceed the following percentage. _____%",
+      "and the regulations issued thereunder, including but not limited to, an insurance company general"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box144",
+    "type": "checkbox",
+    "rect": [
+      88.8,
+      698,
+      97.3,
+      705.6
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "FALSE",
+      "The Investor is an “employee benefit plan” (within the meaning of Section 3(3) of ERISA) subject to Title I",
+      "of ERISA.",
+      "",
+      "TRUE"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box145",
+    "type": "checkbox",
+    "rect": [
+      88.8,
+      667.8,
+      97.3,
+      675.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is a “plan” (as defined in Section 4975(e)(1) of the Code, including an individual retirement",
+      "of ERISA.",
+      "account), subject to Section 4975 of the Code.",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box146",
+    "type": "checkbox",
+    "rect": [
+      88.8,
+      637.1,
+      97.3,
+      644.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor certifies that it is an entity whose underlying assets include plan assets by reason of a plan’s",
+      "account), subject to Section 4975 of the Code.",
+      "investment in such entity.",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box147",
+    "type": "checkbox",
+    "rect": [
+      88.8,
+      562.5,
+      97.3,
+      570.1
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is an entity that otherwise constitutes a “benefit plan investor” within the meaning of ERISA",
+      "Partnership will not exceed the following percentage. _____%",
+      "and the regulations issued thereunder, including but not limited to, an insurance company general",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box148",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      356.6,
+      58.1,
+      364.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "TRUE",
+      "FALSE",
+      "",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box149",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      338.6,
+      58.1,
+      346.3
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "",
+      "",
+      "The Investor’s investment in the Partnership constitutes, and after the closing date applicable to the",
+      "The Investor was formed, capitalized or recapitalized for the specific purpose of acquiring the Interest."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box150",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      295.2,
+      58.1,
+      302.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor is an investment company registered under the Investment Company Act or an investment",
+      "combined amount of the Investor’s total assets and committed capital.",
+      "company that is not registered under the Investment Company Act in reliance on Section 3(c)(1) or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box151",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      251.8,
+      58.1,
+      259.4
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "To the Investor’s knowledge, the Investor’s investment in the Partnership constitutes more than 10% of",
+      "Section 3(c)(7) thereof.",
+      "the outstanding voting securities of the Partnership."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box152",
+    "type": "checkbox",
+    "rect": [
+      50.1,
+      221.5,
+      58.1,
+      229.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor was formed on or before April 30, 1996.",
+      "the outstanding voting securities of the Partnership."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box153",
+    "type": "checkbox",
+    "rect": [
+      88.3,
+      356.6,
+      96.4,
+      364.2
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "FALSE",
+      "The Investor was formed, capitalized or recapitalized for the specific purpose of acquiring the Interest.",
+      "",
+      "The Investor’s investment in the Partnership constitutes, and after the closing date applicable to the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box154",
+    "type": "checkbox",
+    "rect": [
+      88.3,
+      338.2,
+      96.4,
+      345.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "",
+      "The Investor’s investment in the Partnership constitutes, and after the closing date applicable to the",
+      "The Investor was formed, capitalized or recapitalized for the specific purpose of acquiring the Interest.",
+      "",
+      "Investor, the Investor’s investment in the Partnership will continue to constitute, more than 40% of the"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box155",
+    "type": "checkbox",
+    "rect": [
+      88.3,
+      295.2,
+      96.4,
+      302.8
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor is an investment company registered under the Investment Company Act or an investment",
+      "combined amount of the Investor’s total assets and committed capital.",
+      "",
+      "company that is not registered under the Investment Company Act in reliance on Section 3(c)(1) or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box156",
+    "type": "checkbox",
+    "rect": [
+      88.3,
+      251.3,
+      96.4,
+      258.9
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "To the Investor’s knowledge, the Investor’s investment in the Partnership constitutes more than 10% of",
+      "Section 3(c)(7) thereof.",
+      "",
+      "the outstanding voting securities of the Partnership."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 14,
+    "fieldName": "Check Box157",
+    "type": "checkbox",
+    "rect": [
+      88.3,
+      221.1,
+      96.4,
+      228.7
+    ],
+    "inferredLabel": "",
+    "nearbyText": [
+      "",
+      "The Investor was formed on or before April 30, 1996.",
+      "the outstanding voting securities of the Partnership.",
+      ""
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Provide the name of the person that is authorized to make this investment and sign on behalf of this trust or legal entity If this investment decision is being made by a third party Administrator such as a Trust attorney or financial institution provide the name and contact information of the Administrator",
+    "type": "text",
+    "rect": [
+      306.4,
+      314.4,
+      568.9,
+      394.4
+    ],
+    "inferredLabel": "If this investment decision is being made by a third-",
+    "nearbyText": [
+      "If this investment decision is being made by a third-",
+      "party Administrator (such as a Trust attorney or",
+      "or legal entity.",
+      "financial institution), provide the name and contact",
+      "make this investment and sign on behalf of this trust"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 15,
+    "fieldName": "Provide Tax ID Number of this Trust or Legal Entity Trust Corp LLC LP or Corp",
+    "type": "text",
+    "rect": [
+      306.1,
+      284.9,
+      569.2,
+      313.7
+    ],
+    "inferredLabel": "Provide Tax ID Number of this Trust or Legal Entity",
+    "nearbyText": [
+      "Provide Tax ID Number of this Trust or Legal Entity",
+      "(Trust, Corp, LLC, LP or Corp)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 15,
+    "fieldName": "If Trust provide the title of the Trust or if Legal Entity provide the name of the Legal Entity",
+    "type": "text",
+    "rect": [
+      306.4,
+      243.4,
+      568.9,
+      283.1
+    ],
+    "inferredLabel": "if Legal Entity, provide the name of the Legal",
+    "nearbyText": [
+      "or",
+      "if Legal Entity, provide the name of the Legal",
+      "Entity.",
+      "If Trust, provide the title of the Trust;"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 15,
+    "fieldName": "If Trust provide date of Trust Agreement",
+    "type": "text",
+    "rect": [
+      306,
+      219.4,
+      569.3,
+      241.9
+    ],
+    "inferredLabel": "If Trust, provide date of Trust Agreement",
+    "nearbyText": [
+      "If Trust, provide date of Trust Agreement",
+      "Entity."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 15,
+    "fieldName": "If Trust provide date of last amendment if any",
+    "type": "text",
+    "rect": [
+      306,
+      195.6,
+      569.3,
+      217.9
+    ],
+    "inferredLabel": "If Trust, provide date of last amendment (if any)",
+    "nearbyText": [
+      "If Trust, provide date of last amendment (if any)",
+      "If Trust, provide date of Trust Agreement"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 15,
+    "fieldName": "Check Box158",
+    "type": "checkbox",
+    "rect": [
+      88.4,
+      477.6,
+      106.4,
+      495.6
+    ],
+    "inferredLabel": "CHOOSE TYPE OF",
+    "nearbyText": [
+      "Revocable Trust",
+      "CHOOSE TYPE OF",
+      "OWNERSHIP (choose one):",
+      "Irrevocable Trust"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Check Box159",
+    "type": "checkbox",
+    "rect": [
+      88.4,
+      452.7,
+      106.4,
+      470.7
+    ],
+    "inferredLabel": "Revocable Trust",
+    "nearbyText": [
+      "Limited Liability Company (LLC)",
+      "Revocable Trust",
+      "Limited Partnership (LP)",
+      "Irrevocable Trust",
+      "Corporation"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Check Box160",
+    "type": "checkbox",
+    "rect": [
+      88.4,
+      426.1,
+      106.4,
+      444.1
+    ],
+    "inferredLabel": "Limited Liability Company (LLC)",
+    "nearbyText": [
+      "Other (describe):",
+      "Limited Liability Company (LLC)",
+      "__________________________________________________________",
+      "Limited Partnership (LP)",
+      "Corporation"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Check Box161",
+    "type": "checkbox",
+    "rect": [
+      274.8,
+      477.6,
+      292.8,
+      495.6
+    ],
+    "inferredLabel": "Irrevocable Trust",
+    "nearbyText": [
+      "Irrevocable Trust",
+      "OWNERSHIP (choose one):",
+      "Revocable Trust",
+      "CHOOSE TYPE OF"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Check Box162",
+    "type": "checkbox",
+    "rect": [
+      274.8,
+      453.7,
+      292.8,
+      471.7
+    ],
+    "inferredLabel": "Limited Partnership (LP)",
+    "nearbyText": [
+      "Limited Partnership (LP)",
+      "Irrevocable Trust",
+      "Limited Liability Company (LLC)",
+      "Revocable Trust",
+      "Corporation"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Check Box163",
+    "type": "checkbox",
+    "rect": [
+      446.7,
+      454.7,
+      464.7,
+      472.7
+    ],
+    "inferredLabel": "Limited Partnership (LP)",
+    "nearbyText": [
+      "Corporation",
+      "Limited Partnership (LP)",
+      "Irrevocable Trust",
+      "Limited Liability Company (LLC)",
+      "Revocable Trust"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 15,
+    "fieldName": "Text164",
+    "type": "text",
+    "rect": [
+      195.2,
+      428.6,
+      453.7,
+      446.5
+    ],
+    "inferredLabel": "Limited Liability Company (LLC)",
+    "nearbyText": [
+      "__________________________________________________________",
+      "Other (describe):",
+      "Limited Liability Company (LLC)",
+      "Limited Partnership (LP)",
+      "Corporation"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Trustees or ManagerRow1",
+    "type": "text",
+    "rect": [
+      47.3,
+      568.1,
+      211.1,
+      616.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow1",
+    "type": "text",
+    "rect": [
+      213.8,
+      568.1,
+      283.1,
+      616.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow1",
+    "type": "text",
+    "rect": [
+      285.8,
+      568.1,
+      346.2,
+      616.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow1",
+    "type": "text",
+    "rect": [
+      349,
+      568.1,
+      562.2,
+      616.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Trustees or ManagerRow2",
+    "type": "text",
+    "rect": [
+      47.3,
+      517.7,
+      211.1,
+      566.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow2",
+    "type": "text",
+    "rect": [
+      213.8,
+      517.7,
+      283.1,
+      566.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow2",
+    "type": "text",
+    "rect": [
+      285.8,
+      517.7,
+      346.2,
+      566.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow2",
+    "type": "text",
+    "rect": [
+      349,
+      517.7,
+      562.2,
+      566.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "If any beneficial owner is an entity provide the entity name AND the names of each beneficial owner of that",
+    "type": "checkbox",
+    "rect": [
+      90.7,
+      418.8,
+      103,
+      431
+    ],
+    "inferredLabel": "of equity interest in the entity.",
+    "nearbyText": [
+      "Check here if there is no owner that owns more than 25% of equity interest in the entity",
+      "If any beneficial owner is an entity, provide the entity name AND the name(s) of each beneficial owner of that",
+      "of equity interest in the entity."
+    ],
+    "exportValue": "On"
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Beneficial OwnersRow1",
+    "type": "text",
+    "rect": [
+      43,
+      259.3,
+      211.1,
+      300.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow1_2",
+    "type": "text",
+    "rect": [
+      213.8,
+      259.3,
+      283.1,
+      300.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow1_2",
+    "type": "text",
+    "rect": [
+      285.8,
+      259.3,
+      355.1,
+      300.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow1_2",
+    "type": "text",
+    "rect": [
+      357.8,
+      259.3,
+      526.2,
+      300.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": " OwnedRow1",
+    "type": "text",
+    "rect": [
+      529,
+      259.3,
+      580.2,
+      300.7
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Beneficial OwnersRow2",
+    "type": "text",
+    "rect": [
+      43,
+      216.1,
+      211.1,
+      257.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow2_2",
+    "type": "text",
+    "rect": [
+      213.8,
+      216.1,
+      283.1,
+      257.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow2_2",
+    "type": "text",
+    "rect": [
+      285.8,
+      216.1,
+      355.1,
+      257.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow2_2",
+    "type": "text",
+    "rect": [
+      357.8,
+      216.1,
+      526.2,
+      257.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": " OwnedRow2",
+    "type": "text",
+    "rect": [
+      529,
+      216.1,
+      580.2,
+      257.5
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Beneficial OwnersRow3",
+    "type": "text",
+    "rect": [
+      43,
+      172.9,
+      211.1,
+      214.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow3",
+    "type": "text",
+    "rect": [
+      213.8,
+      172.9,
+      283.1,
+      214.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow3",
+    "type": "text",
+    "rect": [
+      285.8,
+      172.9,
+      355.1,
+      214.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow3",
+    "type": "text",
+    "rect": [
+      357.8,
+      172.9,
+      526.2,
+      214.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": " OwnedRow3",
+    "type": "text",
+    "rect": [
+      529,
+      172.9,
+      580.2,
+      214.3
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Beneficial OwnersRow4",
+    "type": "text",
+    "rect": [
+      43,
+      129.7,
+      211.1,
+      171.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow4",
+    "type": "text",
+    "rect": [
+      213.8,
+      129.7,
+      283.1,
+      171.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow4",
+    "type": "text",
+    "rect": [
+      285.8,
+      129.7,
+      355.1,
+      171.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow4",
+    "type": "text",
+    "rect": [
+      357.8,
+      129.7,
+      526.2,
+      171.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": " OwnedRow4",
+    "type": "text",
+    "rect": [
+      529,
+      129.7,
+      580.2,
+      171.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Legal Name of Beneficial OwnersRow5",
+    "type": "text",
+    "rect": [
+      43,
+      86.5,
+      211.1,
+      127.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Date of BirthRow5",
+    "type": "text",
+    "rect": [
+      213.8,
+      86.5,
+      283.1,
+      127.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Social Security NoRow5",
+    "type": "text",
+    "rect": [
+      285.8,
+      86.5,
+      355.1,
+      127.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": "Residential AddressRow5",
+    "type": "text",
+    "rect": [
+      357.8,
+      86.5,
+      526.2,
+      127.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 16,
+    "fieldName": " OwnedRow5",
+    "type": "text",
+    "rect": [
+      529,
+      86.5,
+      580.2,
+      127.9
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 17,
+    "fieldName": "As Beneficial Owner I may act independently as provided in the Trust or CompanyPartnership",
+    "type": "checkbox",
+    "rect": [
+      87,
+      655.9,
+      97.1,
+      669.4
+    ],
+    "inferredLabel": "□",
+    "nearbyText": [
+      "□",
+      "As Beneficial Owner, I may act independently as provided in the Trust or Company/Partnership",
+      "Agreement.",
+      "Please select one of the following, as applies to your authority to make this investment:"
+    ],
+    "exportValue": "On"
+  },
+  {
+    "page": 17,
+    "fieldName": "The Beneficial Owners listed above may act as a majority as provided in the Trust or Company",
+    "type": "checkbox",
+    "rect": [
+      87,
+      622,
+      97.1,
+      635.4
+    ],
+    "inferredLabel": "□",
+    "nearbyText": [
+      "□",
+      "The Beneficial Owner(s) listed above may act as a majority as provided in the Trust or Company/",
+      "Agreement.",
+      "Partnership Agreement."
+    ],
+    "exportValue": "On"
+  },
+  {
+    "page": 17,
+    "fieldName": "The Beneficial Owners listed above must act unanimously as provided in the Trust or Company",
+    "type": "checkbox",
+    "rect": [
+      87,
+      588.6,
+      97.1,
+      602
+    ],
+    "inferredLabel": "□",
+    "nearbyText": [
+      "□",
+      "The Beneficial Owner(s) listed above must act unanimously as provided in the Trust or Company/",
+      "Partnership Agreement.",
+      "Partnership Agreement, and the authorization of all Beneficial Owners is required."
+    ],
+    "exportValue": "On"
+  },
+  {
+    "page": 17,
+    "fieldName": "Print CoBeneficial Owner Legal Name if applies",
+    "type": "text",
+    "rect": [
+      325,
+      319.4,
+      541.1,
+      348.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 17,
+    "fieldName": "Text165",
+    "type": "text",
+    "rect": [
+      72.3,
+      319.4,
+      288.4,
+      348.2
+    ],
+    "inferredLabel": null,
+    "nearbyText": [],
+    "exportValue": null
+  },
+  {
+    "page": 17,
+    "fieldName": "Text166",
+    "type": "text",
+    "rect": [
+      71.5,
+      227.9,
+      287.6,
+      256.7
+    ],
+    "inferredLabel": "Signature of Beneficial Owner/Authorized Signor",
+    "nearbyText": [
+      "Signature of Beneficial Owner/Authorized Signor",
+      "Date Signed by Beneficial Owner/Authorized Signor",
+      "Signature of Co-Beneficial Owner (if applicable)",
+      "Date Signed by Co-Beneficial Owner (if applicable)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 17,
+    "fieldName": "Text167",
+    "type": "text",
+    "rect": [
+      324.6,
+      228.5,
+      540.7,
+      257.3
+    ],
+    "inferredLabel": "Signature of Co-Beneficial Owner (if applicable)",
+    "nearbyText": [
+      "Signature of Co-Beneficial Owner (if applicable)",
+      "Date Signed by Co-Beneficial Owner (if applicable)",
+      "Signature of Beneficial Owner/Authorized Signor",
+      "Date Signed by Beneficial Owner/Authorized Signor"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 23,
+    "fieldName": "Date_3",
+    "type": "text",
+    "rect": [
+      377.2,
+      600,
+      557.3,
+      627.1
+    ],
+    "inferredLabel": null,
+    "nearbyText": [
+      "attorney-in-fact."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 23,
+    "fieldName": "Date_4",
+    "type": "text",
+    "rect": [
+      377.2,
+      553.6,
+      557.3,
+      580.7
+    ],
+    "inferredLabel": "Date",
+    "nearbyText": [
+      "Date",
+      "Account Holder Signature"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 23,
+    "fieldName": "Date_5",
+    "type": "text",
+    "rect": [
+      377.2,
+      511.6,
+      557.3,
+      538.7
+    ],
+    "inferredLabel": "Date",
+    "nearbyText": [
+      "Date",
+      "Date",
+      "Second Account Holder Signature",
+      "Custodian Signature"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 24,
+    "fieldName": "Text168",
+    "type": "text",
+    "rect": [
+      37,
+      621.4,
+      301,
+      643.4
+    ],
+    "inferredLabel": "[For BD/RIA Use Only]",
+    "nearbyText": [
+      "has requested that the undersigned provide",
+      "Trellis Energy Partners, LLC",
+      "[",
+      "insert name of potential investor",
+      "(the “",
+      "Company"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box169",
+    "type": "checkbox",
+    "rect": [
+      37,
+      529.8,
+      69.4,
+      547.8
+    ],
+    "inferredLabel": "The verifier is (",
+    "nearbyText": [
+      "The verifier is (",
+      "a registered broker-dealer, as defined in the Securities Exchange Act of 1934;",
+      "please check the appropriate blank",
+      "):"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box170",
+    "type": "checkbox",
+    "rect": [
+      37,
+      506.5,
+      69.4,
+      524.5
+    ],
+    "inferredLabel": "a registered broker-dealer, as defined in the Securities Exchange Act of 1934;",
+    "nearbyText": [
+      "an investment adviser registered with the Securities and Exchange Commission;",
+      "a registered broker-dealer, as defined in the Securities Exchange Act of 1934;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box171",
+    "type": "checkbox",
+    "rect": [
+      37,
+      483.2,
+      69.4,
+      501.2
+    ],
+    "inferredLabel": "an investment adviser registered with the Securities and Exchange Commission;",
+    "nearbyText": [
+      "a licensed attorney in good standing under the laws of the jurisdictions in which I am admitted to practice law;",
+      "an investment adviser registered with the Securities and Exchange Commission;",
+      "or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box172",
+    "type": "checkbox",
+    "rect": [
+      37,
+      448.6,
+      69.4,
+      466.6
+    ],
+    "inferredLabel": "or",
+    "nearbyText": [
+      "a certified public accountant in good standing under the laws of the place of my residence or principal office.",
+      "or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box173",
+    "type": "checkbox",
+    "rect": [
+      37,
+      391.6,
+      69.4,
+      409.6
+    ],
+    "inferredLabel": "Client satisfies one or more of the following criteria (",
+    "nearbyText": [
+      "Client satisfies one or more of the following criteria (",
+      "a natural person whose individual net worth, or joint net worth with",
+      "purposes of calculating net worth exclude as an asset the value of Client’s primary residence and exclude as",
+      "check all blanks that apply",
+      "Client’s",
+      "):"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box174",
+    "type": "checkbox",
+    "rect": [
+      37,
+      321.7,
+      69.4,
+      339.7
+    ],
+    "inferredLabel": "residence).",
+    "nearbyText": [
+      "a natural person who had an individual income in excess of $200,000 in each of the two most recent years or",
+      "residence).",
+      "joint income with Client’s spouse in excess of $300,000 in each of those years and has stated that he or she"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box175",
+    "type": "checkbox",
+    "rect": [
+      37,
+      275.9,
+      69.4,
+      293.9
+    ],
+    "inferredLabel": "expects at least the same income level in the current calendar year.",
+    "nearbyText": [
+      "an individual retirement account owned by a natural person, or a revocable trust where the grantor is a",
+      "expects at least the same income level in the current calendar year.",
+      "natural person, and the natural person meets at least one of the two criteria listed above."
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box176",
+    "type": "checkbox",
+    "rect": [
+      37,
+      241.4,
+      69.4,
+      259.4
+    ],
+    "inferredLabel": "natural person, and the natural person meets at least one of the two criteria listed above.",
+    "nearbyText": [
+      "Corporation, Massachusetts or similar business trust, partnership, limited liability company or organization",
+      "natural person, and the natural person meets at least one of the two criteria listed above.",
+      "described in Code Section 501(c)(3), not formed for the specific purpose of acquiring the securities offered,"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box177",
+    "type": "checkbox",
+    "rect": [
+      37,
+      195.6,
+      69.4,
+      213.6
+    ],
+    "inferredLabel": "with total assets over $5,000,000;",
+    "nearbyText": [
+      "Holder in good standing of certain professional certifications or designations, including the Financial Industry",
+      "with total assets over $5,000,000;",
+      "Regulatory",
+      "Authority,",
+      "Inc.",
+      "Licensed"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box178",
+    "type": "checkbox",
+    "rect": [
+      37,
+      138.5,
+      69.4,
+      156.5
+    ],
+    "inferredLabel": "certifications;",
+    "nearbyText": [
+      "Entity with investments (as defined in Section 2a51-1(b) of the Investment Company Act) exceeding",
+      "certifications;",
+      "$5,000,000, not formed for the specific purpose of acquiring the securities offered;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box179",
+    "type": "checkbox",
+    "rect": [
+      37,
+      103.2,
+      69.4,
+      121.2
+    ],
+    "inferredLabel": "$5,000,000, not formed for the specific purpose of acquiring the securities offered;",
+    "nearbyText": [
+      "Investment adviser registered under the Investment Advisers Act of 1940 (the “Advisers Act”), or an exempt",
+      "$5,000,000, not formed for the specific purpose of acquiring the securities offered;",
+      "reporting adviser (as defined in Section 203(l) or Section 203(m) of the Advisers Act), or a state-registered"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 24,
+    "fieldName": "Check Box180",
+    "type": "checkbox",
+    "rect": [
+      37,
+      55.8,
+      69.4,
+      73.8
+    ],
+    "inferredLabel": "investment adviser;",
+    "nearbyText": [
+      "Trust, with total assets over $5,000,000, not formed for the specific purpose of acquiring securities offered",
+      "investment adviser;",
+      "and whose purchase is directed by a person who has such knowledge and experience in financial and"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box181",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      644.7,
+      68.6,
+      662.7
+    ],
+    "inferredLabel": "offered as described in Rule 506(b)(2)(ii) under the Securities Act;",
+    "nearbyText": [
+      "Family client of family office, with total assets of at least $5,000,000, not formed for the specific purpose of",
+      "offered as described in Rule 506(b)(2)(ii) under the Securities Act;",
+      "acquiring the securities offered and whose purchase is directed by a person who has such knowledge and"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box182",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      586.8,
+      68.6,
+      604.8
+    ],
+    "inferredLabel": "of an investment in the securities offered as described in Section 202(a)(11)(G)- 1(b) under the Advisers Act;",
+    "nearbyText": [
+      "Broker-dealer registered under Section 15 of the Securities Exchange Act of 1934, as amended;",
+      "of an investment in the securities offered as described in Section 202(a)(11)(G)- 1(b) under the Advisers Act;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box183",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      563.5,
+      68.6,
+      581.5
+    ],
+    "inferredLabel": "Broker-dealer registered under Section 15 of the Securities Exchange Act of 1934, as amended;",
+    "nearbyText": [
+      "Investment company registered under the Investment Company Act of 1940 (the",
+      "Broker-dealer registered under Section 15 of the Securities Exchange Act of 1934, as amended;",
+      "or a business development company (as defined in Section 2(a)(48) of the Investment Company Act);",
+      "“Investment Company",
+      "Act”)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box184",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      529,
+      68.6,
+      547
+    ],
+    "inferredLabel": "or a business development company (as defined in Section 2(a)(48) of the Investment Company Act);",
+    "nearbyText": [
+      "Small business investment company licensed by the Small Business Administration under Section 301(c) or",
+      "or a business development company (as defined in Section 2(a)(48) of the Investment Company Act);",
+      "(d) or the Small Business Investment Act of 1958, as amended;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box185",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      495.2,
+      68.6,
+      513.2
+    ],
+    "inferredLabel": "(d) or the Small Business Investment Act of 1958, as amended;",
+    "nearbyText": [
+      "Rural business investment company (as defined in Section 384A of the Consolidated Farm and Rural",
+      "(d) or the Small Business Investment Act of 1958, as amended;",
+      "Development Act);"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box186",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      459.9,
+      68.6,
+      477.9
+    ],
+    "inferredLabel": "Development Act);",
+    "nearbyText": [
+      "An employee benefit plan within the meaning of ERISA, if the investment decision is made by a plan fiduciary",
+      "Development Act);",
+      "(as defined in Section 3(21) of ERISA), which is either a bank, savings and loan association, insurance"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box187",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      390.8,
+      68.6,
+      408.8
+    ],
+    "inferredLabel": "Investors;",
+    "nearbyText": [
+      "Private business development company (as defined in Section 202(a)(22) of the Investment Advisers Act of",
+      "Investors;",
+      "1940, as amended);"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box188",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      356.2,
+      68.6,
+      374.2
+    ],
+    "inferredLabel": "1940, as amended);",
+    "nearbyText": [
+      "Bank as defined in Section 3(a)(2) of the Securities Act, any savings and loan association or other institution",
+      "1940, as amended);",
+      "as defined in Section 3(a)(5)(A) of the Securities Act whether acting in its individual or fiduciary capacity, or"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box189",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      311.3,
+      68.6,
+      329.3
+    ],
+    "inferredLabel": "any insurance company as defined in Section 2(13) of the Securities Act;",
+    "nearbyText": [
+      "Plan established and maintained by a state, its political subdivisions, or any agency or instrumentality of a",
+      "any insurance company as defined in Section 2(13) of the Securities Act;",
+      "state or its political subdivisions, for the benefit of its employees, if such plan has total assets of more than"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box190",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      264.7,
+      68.6,
+      282.7
+    ],
+    "inferredLabel": "$5,000,000;",
+    "nearbyText": [
+      "One of our officers, directors, advisory board members or trustees or persons serving in a similar capacity; or,",
+      "$5,000,000;"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 25,
+    "fieldName": "Check Box191",
+    "type": "checkbox",
+    "rect": [
+      36.2,
+      241.4,
+      68.6,
+      259.4
+    ],
+    "inferredLabel": "One of our officers, directors, advisory board members or trustees or persons serving in a similar capacity; or,",
+    "nearbyText": [
+      "An entity in which all of the equity owners are Accredited Investors.",
+      "One of our officers, directors, advisory board members or trustees or persons serving in a similar capacity; or,"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 26,
+    "fieldName": "Dated",
+    "type": "text",
+    "rect": [
+      65.6,
+      305.5,
+      185.9,
+      327.6
+    ],
+    "inferredLabel": "Partnership’s determination of the status of Client as an accredited investor.",
+    "nearbyText": [
+      "Dated:",
+      "Partnership’s determination of the status of Client as an accredited investor."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 26,
+    "fieldName": "Name_2",
+    "type": "text",
+    "rect": [
+      68.9,
+      282.5,
+      293.9,
+      304.6
+    ],
+    "inferredLabel": "Dated:",
+    "nearbyText": [
+      "Name:",
+      "Dated:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 26,
+    "fieldName": "By",
+    "type": "text",
+    "rect": [
+      53.9,
+      236.5,
+      291.2,
+      258.6
+    ],
+    "inferredLabel": "Signature:",
+    "nearbyText": [
+      "By:",
+      "Signature:",
+      "(",
+      "if applicable",
+      ")"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 26,
+    "fieldName": "Title",
+    "type": "text",
+    "rect": [
+      61.1,
+      213.6,
+      291.2,
+      235.7
+    ],
+    "inferredLabel": "By:",
+    "nearbyText": [
+      "Title:",
+      "By:",
+      "(",
+      "(",
+      "if applicable",
+      "if applicable"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 26,
+    "fieldName": "State Bar Number and Issuing State",
+    "type": "text",
+    "rect": [
+      202.3,
+      190.4,
+      435.2,
+      212.5
+    ],
+    "inferredLabel": "(",
+    "nearbyText": [
+      "(",
+      "if applicable",
+      ")",
+      "State Bar Number and Issuing State:",
+      "Title:",
+      "("
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 26,
+    "fieldName": "Or CPA Certificate Number and Issuing State",
+    "type": "text",
+    "rect": [
+      242.9,
+      167.5,
+      435.2,
+      189.6
+    ],
+    "inferredLabel": "(",
+    "nearbyText": [
+      "(",
+      "(",
+      "if applicable",
+      "if applicable",
+      "Or CPA Certificate Number and Issuing State:",
+      "State Bar Number and Issuing State:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 26,
+    "fieldName": "Or CRD Number or SEC Registration Number",
+    "type": "text",
+    "rect": [
+      245.6,
+      144.5,
+      435.2,
+      166.6
+    ],
+    "inferredLabel": "(",
+    "nearbyText": [
+      "(",
+      "(",
+      "if applicable",
+      "if applicable",
+      "Or CRD Number or SEC Registration Number:",
+      "Or CPA Certificate Number and Issuing State:"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "1 Name of entityIndividual An entry Is required For a sole proprietor or disregarded entity enter the owners name on line 1 and enter the businessdisregarded entitys name on line 2",
+    "type": "text",
+    "rect": [
+      59,
+      659.8,
+      572.2,
+      678.7
+    ],
+    "inferredLabel": "entity's name on line 2.)",
+    "nearbyText": [
+      "2",
+      "1",
+      "entity's name on line 2.)",
+      "Name of entity/Individual. An entry Is required. (For a sole proprietor or disregarded entity, enter the owner's name on line 1, and enter the business/disregarded",
+      "Business name/disregarded entity name, If different from above."
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "classlficatlon of the LLC unless It Is a disregarded entity A disregarded entity should Instead check the appropriate",
+    "type": "text",
+    "rect": [
+      419.9,
+      584.6,
+      444.1,
+      595.7
+    ],
+    "inferredLabel": "LLC. Enter the tax classlficatlon (C = C corporation, 8 = 8 corporation, P = Partnership)",
+    "nearbyText": [
+      "Trust/estate",
+      "Exempt payee code (If any)",
+      "D",
+      "Exemption from Foreign Account Tax",
+      "see Instructions on page 3):",
+      "Partnership"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "3b If on line 3a you checked Partnership or Trustestate or checked LLC and entered P as Its tax classlflcatlon",
+    "type": "checkbox",
+    "rect": [
+      72.5,
+      553.4,
+      81.7,
+      572.8
+    ],
+    "inferredLabel": "ls �",
+    "nearbyText": [
+      "□",
+      "box for the tax classlficatlon of Its owner.",
+      "Other (see Instructions)",
+      "classlficatlon of the LLC, unless It Is a disregarded entity. A disregarded entity should Instead check the appropriate",
+      "Note:",
+      "ls �"
+    ],
+    "exportValue": "On"
+  },
+  {
+    "page": 33,
+    "fieldName": "Applies to accounts maintained",
+    "type": "text",
+    "rect": [
+      497,
+      551.8,
+      573.2,
+      562.8
+    ],
+    "inferredLabel": "code (if any)",
+    "nearbyText": [
+      "code (if any)",
+      "Compliance Act (FATCA) reporting",
+      "Exemption from Foreign Account Tax",
+      "(Applies to accounts maintained",
+      "Other (see Instructions)",
+      "Check the \"LLC\" box above and, In the entry space, enter the appropriate code (C, 8, or P) for the ta-x --"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Requesters name and address optional",
+    "type": "checkbox",
+    "rect": [
+      437,
+      520,
+      446.3,
+      539.3
+    ],
+    "inferredLabel": "and you are providing this form to a partnership, trust, or estate In which you have an ownership Interest, check",
+    "nearbyText": [
+      "□",
+      "(Applies to accounts maintained",
+      "outside the United States.)",
+      "Requester's name and address (optional)",
+      "and you are providing this form to a partnership, trust, or estate In which you have an ownership Interest, check",
+      "this box If you have any foreign partners, owners, or beneficiaries. See Instructions"
+    ],
+    "exportValue": "On"
+  },
+  {
+    "page": 33,
+    "fieldName": "6 City state and ZIP code",
+    "type": "text",
+    "rect": [
+      58.9,
+      467.8,
+      385.6,
+      483.2
+    ],
+    "inferredLabel": "6",
+    "nearbyText": [
+      "6",
+      "7",
+      "City, state, and ZIP code",
+      "List account number(s) here (optional)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Requesters name and address optional_2",
+    "type": "text",
+    "rect": [
+      388,
+      467.8,
+      572.4,
+      506.3
+    ],
+    "inferredLabel": "City, state, and ZIP code",
+    "nearbyText": [
+      "Requester's name and address (optional)",
+      "City, state, and ZIP code",
+      "6",
+      "Address (number, street, and apt. or suite no.). See Instructions.",
+      "5",
+      "Q)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text192",
+    "type": "text",
+    "rect": [
+      60.2,
+      636,
+      573.3,
+      650.9
+    ],
+    "inferredLabel": "2",
+    "nearbyText": [
+      "2",
+      "3a",
+      "Business name/disregarded entity name, If different from above.",
+      "r.vS",
+      "Check the appropriate box for federal tax classification of the entity/individual whose name is entered on line 1. Check",
+      "Q)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Check Box193",
+    "type": "checkbox",
+    "rect": [
+      72.2,
+      603.2,
+      81.8,
+      612.3
+    ],
+    "inferredLabel": "□",
+    "nearbyText": [
+      "□",
+      "only",
+      "□",
+      "lndlvldual/sole proprietor",
+      "Check the appropriate box for federal tax classification of the entity/individual whose name is entered on line 1. Check",
+      "one"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 33,
+    "fieldName": "Check Box194",
+    "type": "checkbox",
+    "rect": [
+      71.8,
+      590.1,
+      81.4,
+      599.3
+    ],
+    "inferredLabel": "□",
+    "nearbyText": [
+      "□",
+      "□",
+      "LLC. Enter the tax classlficatlon (C = C corporation, 8 = 8 corporation, P = Partnership)",
+      "lndlvldual/sole proprietor",
+      "only",
+      "0"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 33,
+    "fieldName": "Check Box195",
+    "type": "checkbox",
+    "rect": [
+      178.3,
+      602.2,
+      187.9,
+      611.3
+    ],
+    "inferredLabel": "D",
+    "nearbyText": [
+      "D",
+      "C corporation",
+      "D",
+      "of the following seven boxes.",
+      "8 corporation",
+      "lndlvldual/sole proprietor"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 33,
+    "fieldName": "Check Box196",
+    "type": "checkbox",
+    "rect": [
+      250.2,
+      602.2,
+      259.8,
+      611.3
+    ],
+    "inferredLabel": "D",
+    "nearbyText": [
+      "D",
+      "8 corporation",
+      "C corporation",
+      "D",
+      "D",
+      "Partnership"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 33,
+    "fieldName": "Check Box197",
+    "type": "checkbox",
+    "rect": [
+      320.5,
+      602.2,
+      330.1,
+      611.3
+    ],
+    "inferredLabel": "D",
+    "nearbyText": [
+      "D",
+      "Partnership",
+      "8 corporation",
+      "D",
+      "D",
+      "Trust/estate"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 33,
+    "fieldName": "Check Box198",
+    "type": "checkbox",
+    "rect": [
+      385.6,
+      602.2,
+      395.2,
+      611.3
+    ],
+    "inferredLabel": "D",
+    "nearbyText": [
+      "D",
+      "Trust/estate",
+      "Partnership",
+      "D",
+      "see Instructions on page 3):",
+      "Exempt payee code (If any)"
+    ],
+    "exportValue": "Yes"
+  },
+  {
+    "page": 33,
+    "fieldName": "Text199",
+    "type": "text",
+    "rect": [
+      161.9,
+      549.7,
+      446.1,
+      563.2
+    ],
+    "inferredLabel": "Other (see Instructions)",
+    "nearbyText": [
+      "Other (see Instructions)",
+      "box for the tax classlficatlon of Its owner.",
+      "classlficatlon of the LLC, unless It Is a disregarded entity. A disregarded entity should Instead check the appropriate",
+      "□",
+      "If on line 3a you checked \"Partnership\" or \"Trust/estate,\" or checked \"LLC\" and entered \"P\" as Its tax classlflcatlon,",
+      "3b"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text200",
+    "type": "text",
+    "rect": [
+      541.4,
+      586.5,
+      575.6,
+      601.3
+    ],
+    "inferredLabel": "Exempt payee code (If any)",
+    "nearbyText": [
+      "Exempt payee code (If any)",
+      "see Instructions on page 3):",
+      "certain entities, not Individuals;",
+      "Exemption from Foreign Account Tax",
+      "Trust/estate",
+      "D"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text201",
+    "type": "text",
+    "rect": [
+      71.8,
+      491.2,
+      384.9,
+      505.3
+    ],
+    "inferredLabel": "Address (number, street, and apt. or suite no.). See Instructions.",
+    "nearbyText": [
+      "Address (number, street, and apt. or suite no.). See Instructions.",
+      "City, state, and ZIP code",
+      "5",
+      "this box If you have any foreign partners, owners, or beneficiaries. See Instructions",
+      "6",
+      "Q)"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text202",
+    "type": "text",
+    "rect": [
+      415.8,
+      393.8,
+      574.3,
+      419.8
+    ],
+    "inferredLabel": "backup withholding. For Individuals, this is generally your social security number (SSN). However, for a",
+    "nearbyText": [
+      "DJJ-[[J-1 I I I I",
+      "I Social security number",
+      "or",
+      "How to get a",
+      "I",
+      "backup withholding. For Individuals, this is generally your social security number (SSN). However, for a"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text203",
+    "type": "text",
+    "rect": [
+      417.1,
+      347.8,
+      562.5,
+      369.8
+    ],
+    "inferredLabel": "What Name and",
+    "nearbyText": [
+      "I Employer identification number",
+      "What Name and",
+      "for guidelines on whose number to enter.",
+      "Certification",
+      "If the account is in more than one name, see the Instructions for line 1. See also",
+      "Number To Give the Requester"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text204",
+    "type": "text",
+    "rect": [
+      400.6,
+      191.9,
+      550.6,
+      213.9
+    ],
+    "inferredLabel": "Signature of",
+    "nearbyText": [
+      "Date",
+      "Signature of",
+      "I",
+      "u.s. person",
+      "_",
+      "Sign"
+    ],
+    "exportValue": null
+  },
+  {
+    "page": 33,
+    "fieldName": "Text205",
+    "type": "text",
+    "rect": [
+      67.5,
+      443.5,
+      571.9,
+      459.7
+    ],
+    "inferredLabel": "List account number(s) here (optional)",
+    "nearbyText": [
+      "List account number(s) here (optional)",
+      "7",
+      "Taxpayer Identification Number {TIN)",
+      "limD"
+    ],
+    "exportValue": null
+  }
+]

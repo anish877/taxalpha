@@ -6,10 +6,16 @@ import express, { type ErrorRequestHandler, type Express } from 'express';
 import { getRuntimeConfig } from './config/env.js';
 import { HttpError } from './lib/http-error.js';
 import { prisma } from './lib/prisma.js';
+import { createAdminFormsRouter } from './routes/admin-forms.js';
 import { createAuthRouter } from './routes/auth.js';
 import { createBaiv506cRouter } from './routes/baiv-506c.js';
 import { createBaiodfRouter } from './routes/baiodf.js';
+import { createClientDocumentsRouter } from './routes/client-documents.js';
+import { createClientPdfFillsRouter } from './routes/client-pdf-fills.js';
 import { createClientsRouter } from './routes/clients.js';
+import { createDynamicFormsRouter } from './routes/dynamic-forms.js';
+import { createDynamicStepsRouter } from './routes/dynamic-steps.js';
+import { getProfileLookup } from './lib/profile/lookup.js';
 import { createFormsRouter } from './routes/forms.js';
 import { createN8nRouter } from './routes/n8n.js';
 import { createStatementOfFinancialConditionRouter } from './routes/statement-of-financial-condition.js';
@@ -33,7 +39,7 @@ export function createApp(options: CreateAppOptions = {}): Express {
     })
   );
   app.use(cookieParser());
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: '32mb' }));
 
   app.get('/api/health', (_request, response) => {
     response.json({ status: 'ok' });
@@ -43,7 +49,18 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/auth', createAuthRouter({ prisma: prismaClient, config }));
   app.use('/api/uploads', createUploadsRouter({ prisma: prismaClient, config }));
   app.use('/api/forms', createFormsRouter({ prisma: prismaClient, config }));
+  app.use('/api/admin', createAdminFormsRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createClientDocumentsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientsRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createClientPdfFillsRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createDynamicFormsRouter({ prisma: prismaClient, config }));
+  app.use(
+    '/api/clients',
+    createDynamicStepsRouter(
+      { prisma: prismaClient, config },
+      { profileLookup: (clientId) => getProfileLookup(prismaClient, clientId) }
+    )
+  );
   app.use('/api/clients', createStatementOfFinancialConditionRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createBaiodfRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createBaiv506cRouter({ prisma: prismaClient, config }));
@@ -57,6 +74,24 @@ export function createApp(options: CreateAppOptions = {}): Express {
       response.status(error.statusCode).json({
         message: error.message,
         fieldErrors: error.fieldErrors
+      });
+      return;
+    }
+
+    const statusCode =
+      typeof error === 'object' &&
+      error !== null &&
+      'status' in error &&
+      typeof error.status === 'number'
+        ? error.status
+        : null;
+
+    if (statusCode && statusCode >= 400 && statusCode < 500) {
+      response.status(statusCode).json({
+        message:
+          statusCode === 413
+            ? 'Uploaded file is too large. Maximum size is 50 MB.'
+            : 'Invalid request.'
       });
       return;
     }

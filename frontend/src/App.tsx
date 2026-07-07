@@ -1,8 +1,13 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import { AdminProtectedRoute } from './components/AdminProtectedRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicOnlyRoute } from './components/PublicOnlyRoute';
 import { PdfUpdatesProvider } from './context/PdfUpdatesContext';
+import { AdminFormsPage } from './pages/AdminFormsPage';
+import { AdminReviewFormPage } from './pages/AdminReviewFormPage';
+import { DynamicFormPage } from './pages/DynamicFormPage';
+import { SchemaWizardPage } from './pages/SchemaWizardPage';
 import { BrokerageAlternativeInvestmentOrderDisclosureStep1Page } from './pages/BrokerageAlternativeInvestmentOrderDisclosureStep1Page';
 import { BrokerageAlternativeInvestmentOrderDisclosureStep2Page } from './pages/BrokerageAlternativeInvestmentOrderDisclosureStep2Page';
 import { BrokerageAlternativeInvestmentOrderDisclosureStep3Page } from './pages/BrokerageAlternativeInvestmentOrderDisclosureStep3Page';
@@ -10,6 +15,7 @@ import { BrokerageAccreditedInvestorVerificationStep1Page } from './pages/Broker
 import { BrokerageAccreditedInvestorVerificationStep2Page } from './pages/BrokerageAccreditedInvestorVerificationStep2Page';
 import { ClientFormReviewPage } from './pages/ClientFormReviewPage';
 import { ClientFormsWorkspacePage } from './pages/ClientFormsWorkspacePage';
+import { ClientPdfFillReviewPage } from './pages/ClientPdfFillReviewPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { InvestorProfileStep1Page } from './pages/InvestorProfileStep1Page';
 import { InvestorProfileStep2Page } from './pages/InvestorProfileStep2Page';
@@ -61,6 +67,14 @@ export function App() {
               </ProtectedRoute>
             }
             path="/clients/:clientId/forms"
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <ClientPdfFillReviewPage />
+              </ProtectedRoute>
+            }
+            path="/clients/:clientId/pdf-fills/:fillId"
           />
           <Route
             element={
@@ -181,6 +195,38 @@ export function App() {
               </ProtectedRoute>
             }
             path="/clients/:clientId/brokerage-accredited-investor-verification/step-2"
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <DynamicFormPage />
+              </ProtectedRoute>
+            }
+            path="/clients/:clientId/forms/:code/fill"
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <SchemaWizardPage />
+              </ProtectedRoute>
+            }
+            path="/clients/:clientId/forms/:code/step/:n"
+          />
+          <Route
+            element={
+              <AdminProtectedRoute>
+                <AdminFormsPage />
+              </AdminProtectedRoute>
+            }
+            path="/admin/forms"
+          />
+          <Route
+            element={
+              <AdminProtectedRoute>
+                <AdminReviewFormPage />
+              </AdminProtectedRoute>
+            }
+            path="/admin/forms/:id"
           />
           <Route element={<Navigate replace to="/" />} path="*" />
         </Routes>

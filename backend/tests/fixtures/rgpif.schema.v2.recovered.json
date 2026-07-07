@@ -1,0 +1,2546 @@
+{
+  "version": 2,
+  "code": "RGP_INCOME_FUND_II_SUB",
+  "title": "RGP Income Fund II Subscription Agreement",
+  "description": null,
+  "steps": [
+    {
+      "number": 1,
+      "key": "STEP_1_INVESTMENT",
+      "label": "STEP 1. INVESTMENT",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 2,
+      "key": "STEP_2_OWNERSHIP_TYPE",
+      "label": "STEP 2. OWNERSHIP TYPE",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 3,
+      "key": "STEP_3_ENTITY_DETAILS",
+      "label": "STEP 3. ENTITY DETAILS",
+      "requiredIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "isTerminal": false
+    },
+    {
+      "number": 4,
+      "key": "STEP_4_PRIMARY_OWNER",
+      "label": "STEP 4. PRIMARY OWNER INFORMATION",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 5,
+      "key": "STEP_5_JOINT_OWNER",
+      "label": "STEP 5. JOINT OWNER INFORMATION",
+      "requiredIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "isTerminal": false
+    },
+    {
+      "number": 6,
+      "key": "STEP_6_BENEFICIAL_OWNERS",
+      "label": "STEP 6. BENEFICIAL OWNERSHIP (FOR ENTITY)",
+      "requiredIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "isTerminal": false
+    },
+    {
+      "number": 7,
+      "key": "STEP_7_SUITABILITY",
+      "label": "STEP 7. INVESTOR SUITABILITY & CERTIFICATIONS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 8,
+      "key": "STEP_8_DISTRIBUTION",
+      "label": "STEP 8. DISTRIBUTION INSTRUCTIONS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 9,
+      "key": "STEP_9_SIGNATURE",
+      "label": "STEP 9. SIGNATURE",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 10,
+      "key": "STEP_10_BROKER_DEALER",
+      "label": "STEP 10. BROKER-DEALER INFORMATION (IF APPLICABLE)",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 11,
+      "key": "STEP_11_RIA",
+      "label": "STEP 11. REGISTERED INVESTMENT ADVISOR (IF APPLICABLE)",
+      "requiredIf": null,
+      "isTerminal": false
+    }
+  ],
+  "items": [
+    {
+      "id": "investment.amount",
+      "step": 1,
+      "order": 0,
+      "title": "Total Purchase Price (Subscription Payment)",
+      "helper": null,
+      "type": "currency",
+      "required": true,
+      "pdfField": "Investment",
+      "showIf": null,
+      "validation": {
+        "rule": "positiveNumber"
+      },
+      "canonicalField": "investment.amount"
+    },
+    {
+      "id": "investment.partnerType",
+      "step": 1,
+      "order": 1,
+      "title": "Purchasing Units as",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Limited Partner",
+          "value": "limited",
+          "description": null,
+          "pdfField": "Check Box1",
+          "required": false
+        },
+        {
+          "label": "General Partner",
+          "value": "general",
+          "description": null,
+          "pdfField": "Check Box2",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ownershipType",
+      "step": 2,
+      "order": 0,
+      "title": "Ownership Type",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Individual or Separate Property",
+          "value": "individual",
+          "description": null,
+          "pdfField": "Check Box3",
+          "required": false
+        },
+        {
+          "label": "Husband and Wife as Community Property",
+          "value": "community",
+          "description": null,
+          "pdfField": "Check Box4",
+          "required": false
+        },
+        {
+          "label": "Joint Tenants with Right of Survivorship",
+          "value": "joint_survivorship",
+          "description": null,
+          "pdfField": "Check Box5",
+          "required": false
+        },
+        {
+          "label": "Tenants in Common",
+          "value": "tenants_common",
+          "description": null,
+          "pdfField": "Check Box6",
+          "required": false
+        },
+        {
+          "label": "Trust",
+          "value": "trust",
+          "description": null,
+          "pdfField": "Check Box7",
+          "required": false
+        },
+        {
+          "label": "Partnership",
+          "value": "partnership",
+          "description": null,
+          "pdfField": "Check Box8",
+          "required": false
+        },
+        {
+          "label": "Limited Liability Company",
+          "value": "llc",
+          "description": null,
+          "pdfField": "Check Box9",
+          "required": false
+        },
+        {
+          "label": "Corporation",
+          "value": "corporation",
+          "description": null,
+          "pdfField": "Check Box10",
+          "required": false
+        },
+        {
+          "label": "Other",
+          "value": "other",
+          "description": null,
+          "pdfField": "Check Box11",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": "account.registrationType"
+    },
+    {
+      "id": "entity.trustDetails",
+      "step": 3,
+      "order": 0,
+      "title": "Trust Details (name of trust, name of trustee, date formed)",
+      "helper": null,
+      "type": "textarea",
+      "required": true,
+      "pdfField": "Trust Include name of trust name of trustee and date trust was formed",
+      "showIf": "ownershipType == 'trust'",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "entity.otherType",
+      "step": 3,
+      "order": 1,
+      "title": "Other Type (describe)",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Corporation Include evidence of corporate authority for person who executes required documents",
+      "showIf": "ownershipType == 'other'",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "entity.taxForm",
+      "step": 3,
+      "order": 2,
+      "title": "Tax Form Used for Annual Filing",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Form 1065 (Partnership)",
+          "value": "f1065",
+          "description": null,
+          "pdfField": "Check Box12",
+          "required": false
+        },
+        {
+          "label": "Form 1120 (Corporation)",
+          "value": "f1120",
+          "description": null,
+          "pdfField": "Check Box13",
+          "required": false
+        },
+        {
+          "label": "Form 1120S (S Corporation)",
+          "value": "f1120s",
+          "description": null,
+          "pdfField": "Check Box14",
+          "required": false
+        },
+        {
+          "label": "Form 1040 (Disregarded)",
+          "value": "f1040",
+          "description": null,
+          "pdfField": "Check Box15",
+          "required": false
+        }
+      ],
+      "showIf": "ownershipType in ['llc','corporation']",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.clarification",
+      "step": 3,
+      "order": 3,
+      "title": "Additional Clarification (if trust, forward copy of trust agreement)",
+      "helper": null,
+      "type": "textarea",
+      "required": false,
+      "pdfField": "may require clarification",
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.name",
+      "step": 4,
+      "order": 0,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary Owner Information",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": "person.fullName"
+    },
+    {
+      "id": "primary.address",
+      "step": 4,
+      "order": 1,
+      "title": "Address of Principal Place of Residence (no P.O. Box)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": "address.legal",
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box",
+          "canonicalField": "address.legal.line1",
+          "validation": {
+            "rule": "noPoBox"
+          }
+        },
+        {
+          "key": "line2",
+          "label": "Address Line 2",
+          "type": "text",
+          "required": false,
+          "pdfField": "1_2",
+          "canonicalField": "address.legal.line2"
+        },
+        {
+          "key": "cityStateZip",
+          "label": "City, State, Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "2_2",
+          "canonicalField": "address.legal.cityStateZip"
+        }
+      ]
+    },
+    {
+      "id": "primary.phones",
+      "step": 4,
+      "order": 2,
+      "title": "Phone Numbers",
+      "helper": null,
+      "type": "phones-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "business",
+          "label": "Business",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Phone Business",
+          "canonicalField": "phone.business",
+          "validation": {
+            "rule": "phone"
+          }
+        },
+        {
+          "key": "home",
+          "label": "Home",
+          "type": "phone",
+          "required": true,
+          "pdfField": "Home",
+          "canonicalField": "person.phone",
+          "validation": {
+            "rule": "phone"
+          }
+        }
+      ]
+    },
+    {
+      "id": "primary.stateOfResidence",
+      "step": 4,
+      "order": 3,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary State of Residence",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": "identity.stateOfResidence"
+    },
+    {
+      "id": "primary.dateOfBirth",
+      "step": 4,
+      "order": 4,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth",
+      "showIf": null,
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": "person.dateOfBirth"
+    },
+    {
+      "id": "primary.tin",
+      "step": 4,
+      "order": 5,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Social Security or Federal Tax ID Number TIN",
+      "showIf": null,
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": "person.ssn"
+    },
+    {
+      "id": "primary.email",
+      "step": 4,
+      "order": 6,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": "person.email"
+    },
+    {
+      "id": "primary.paperDelivery",
+      "step": 4,
+      "order": 7,
+      "title": "Paper Delivery Election",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box48",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name",
+      "step": 5,
+      "order": 0,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Name",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address",
+      "step": 5,
+      "order": 1,
+      "title": "Address of Principal Place of Residence (no P.O. Box)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box 1",
+          "canonicalField": null,
+          "validation": {
+            "rule": "noPoBox"
+          }
+        },
+        {
+          "key": "line2",
+          "label": "Address Line 2",
+          "type": "text",
+          "required": false,
+          "pdfField": "Address of Principal Place of Residence no PO Box 2",
+          "canonicalField": null
+        },
+        {
+          "key": "cityStateZip",
+          "label": "City, State, Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box 3",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "joint.phones",
+      "step": 5,
+      "order": 2,
+      "title": "Phone Numbers",
+      "helper": null,
+      "type": "phones-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "business",
+          "label": "Business",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Phone Business_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "phone"
+          }
+        },
+        {
+          "key": "home",
+          "label": "Home",
+          "type": "phone",
+          "required": true,
+          "pdfField": "Home_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "phone"
+          }
+        }
+      ]
+    },
+    {
+      "id": "joint.stateOfResidence",
+      "step": 5,
+      "order": 3,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary State of Residence_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.dateOfBirth",
+      "step": 5,
+      "order": 4,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.tin",
+      "step": 5,
+      "order": 5,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.email",
+      "step": 5,
+      "order": 6,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.paperDelivery",
+      "step": 5,
+      "order": 7,
+      "title": "Paper Delivery Election",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box47",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.controlPerson",
+      "step": 6,
+      "order": 0,
+      "title": "Control Person (for Entity)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "pdfField": "Name_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "requiredString"
+          }
+        },
+        {
+          "key": "addressLine1",
+          "label": "Address Line 1",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "noPoBox"
+          }
+        },
+        {
+          "key": "addressLine2",
+          "label": "Address Line 2",
+          "type": "text",
+          "required": false,
+          "pdfField": "undefined_5",
+          "canonicalField": null
+        },
+        {
+          "key": "cityStateZip",
+          "label": "City, State, Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "undefined_6",
+          "canonicalField": null
+        },
+        {
+          "key": "businessPhone",
+          "label": "Business Phone",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Phone Business_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "phone"
+          }
+        },
+        {
+          "key": "homePhone",
+          "label": "Home Phone",
+          "type": "phone",
+          "required": true,
+          "pdfField": "Home_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "phone"
+          }
+        },
+        {
+          "key": "stateOfResidence",
+          "label": "Primary State of Residence",
+          "type": "text",
+          "required": true,
+          "pdfField": "Primary State of Residence_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "requiredString"
+          }
+        },
+        {
+          "key": "dateOfBirth",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date of Birth_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "pastDate"
+          }
+        },
+        {
+          "key": "tin",
+          "label": "Social Security or Federal Tax ID Number",
+          "type": "ssn-ein",
+          "required": true,
+          "pdfField": "Social Security or Federal Tax ID Number TIN_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "ssnOrEin"
+          }
+        },
+        {
+          "key": "email",
+          "label": "E-mail Address",
+          "type": "email",
+          "required": true,
+          "pdfField": "Email Address_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "email"
+          }
+        }
+      ]
+    },
+    {
+      "id": "entity.noBeneficialOwner",
+      "step": 6,
+      "order": 1,
+      "title": "No Individual Owns 25% or More",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box46",
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.beneficialOwners",
+      "step": 6,
+      "order": 2,
+      "title": "Beneficial Owners (25% or more ownership)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other'] && !entity.noBeneficialOwner",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "requiredString"
+          }
+        },
+        {
+          "key": "addressLine1",
+          "label": "Address Line 1",
+          "type": "text",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "noPoBox"
+          }
+        },
+        {
+          "key": "addressLine2",
+          "label": "Address Line 2",
+          "type": "text",
+          "required": false,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "cityStateZip",
+          "label": "City, State, Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "businessPhone",
+          "label": "Business Phone",
+          "type": "phone",
+          "required": false,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "phone"
+          }
+        },
+        {
+          "key": "homePhone",
+          "label": "Home Phone",
+          "type": "phone",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "phone"
+          }
+        },
+        {
+          "key": "stateOfResidence",
+          "label": "Primary State of Residence",
+          "type": "text",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "dateOfBirth",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "pastDate"
+          }
+        },
+        {
+          "key": "tin",
+          "label": "Social Security or Federal Tax ID Number",
+          "type": "ssn-ein",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "ssnOrEin"
+          }
+        },
+        {
+          "key": "email",
+          "label": "E-mail Address",
+          "type": "email",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "email"
+          }
+        },
+        {
+          "key": "ownershipPct",
+          "label": "Ownership Percentage (%)",
+          "type": "number",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null,
+          "validation": {
+            "rule": "positiveNumber"
+          }
+        },
+        {
+          "key": "ownershipType",
+          "label": "Ownership Type",
+          "type": "single-choice-cards",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "paperDelivery",
+          "label": "Check if you prefer paper copies",
+          "type": "checkbox",
+          "required": false,
+          "pdfField": null,
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "suitability.netWorth",
+      "step": 7,
+      "order": 0,
+      "title": "Net Worth Qualification",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box27",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.income",
+      "step": 7,
+      "order": 1,
+      "title": "Income Qualification",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box28",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.licensedProfessional",
+      "step": 7,
+      "order": 2,
+      "title": "Licensed Professional",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box26",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.directorOfficer",
+      "step": 7,
+      "order": 3,
+      "title": "Director/Executive Officer",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box25",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.preExistingRelationship",
+      "step": 7,
+      "order": 4,
+      "title": "Pre-existing Relationship",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box22",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.accreditedEntity",
+      "step": 7,
+      "order": 5,
+      "title": "Accredited Entity",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box24",
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.experienceDescription",
+      "step": 7,
+      "order": 6,
+      "title": "Description of Experience in Financial and Business Matters",
+      "helper": null,
+      "type": "textarea",
+      "required": true,
+      "pdfField": "financial and business matters",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.bankHoldingAct",
+      "step": 7,
+      "order": 7,
+      "title": "Bank Holding Company Act",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box19",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.finraAssociated",
+      "step": 7,
+      "order": 8,
+      "title": "FINRA Association",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box20",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.method",
+      "step": 8,
+      "order": 0,
+      "title": "Distribution Method",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Deposit via ACH",
+          "value": "ach",
+          "description": null,
+          "pdfField": "Check Box55",
+          "required": false
+        },
+        {
+          "label": "Mail Paper Check",
+          "value": "check",
+          "description": null,
+          "pdfField": "Check Box29",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.accountType",
+      "step": 8,
+      "order": 1,
+      "title": "Account Type",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Checking",
+          "value": "checking",
+          "description": null,
+          "pdfField": "Check Box31",
+          "required": false
+        },
+        {
+          "label": "Savings",
+          "value": "savings",
+          "description": null,
+          "pdfField": "Check Box32",
+          "required": false
+        },
+        {
+          "label": "Brokerage",
+          "value": "brokerage",
+          "description": null,
+          "pdfField": "Check Box30",
+          "required": false
+        }
+      ],
+      "showIf": "distribution.method == 'ach'",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.financialInstitution",
+      "step": 8,
+      "order": 2,
+      "title": "Name of Financial Institution",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Name of Financial Institution",
+      "showIf": "distribution.method == 'ach'",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.accountNumber",
+      "step": 8,
+      "order": 3,
+      "title": "Account Number",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Account",
+      "showIf": "distribution.method == 'ach'",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.routingNumber",
+      "step": 8,
+      "order": 4,
+      "title": "ABA Routing Number",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "ABA Routing",
+      "showIf": "distribution.method == 'ach'",
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.checkAddress",
+      "step": 8,
+      "order": 5,
+      "title": "Mailing Address for Check (if different from Section 4)",
+      "helper": null,
+      "type": "address-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": "distribution.method == 'check'",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name_8",
+          "canonicalField": null
+        },
+        {
+          "key": "institutionName",
+          "label": "Institution Name (if applicable)",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name if applicable",
+          "canonicalField": null
+        },
+        {
+          "key": "institutionNumber",
+          "label": "Institution Number",
+          "type": "text",
+          "required": false,
+          "pdfField": "Number",
+          "canonicalField": null
+        },
+        {
+          "key": "addressLine1",
+          "label": "Address Line 1",
+          "type": "text",
+          "required": false,
+          "pdfField": "Address 1",
+          "canonicalField": null
+        },
+        {
+          "key": "addressLine2",
+          "label": "Address Line 2",
+          "type": "text",
+          "required": false,
+          "pdfField": "Address 2",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "signature.investorSignature",
+      "step": 9,
+      "order": 0,
+      "title": "Investor Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Signature Investor or authorized signature_2",
+          "canonicalField": null
+        },
+        {
+          "key": "printedName",
+          "label": "Printed Name",
+          "type": "text",
+          "required": true,
+          "pdfField": "Name_7",
+          "canonicalField": null,
+          "validation": {
+            "rule": "requiredString"
+          }
+        },
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date",
+          "required": true,
+          "pdfField": "BEHALF OF THE PERSONS OR ENTITY REGISTERED IN SECTION 4 ABOVE",
+          "canonicalField": null,
+          "validation": {
+            "rule": "notFutureDate"
+          }
+        }
+      ]
+    },
+    {
+      "id": "signature.consentElectronic",
+      "step": 9,
+      "order": 1,
+      "title": "Consent to Electronic Signature",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box18",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "signature.electronicSignature",
+      "step": 9,
+      "order": 2,
+      "title": "Electronic Signature (if consenting)",
+      "helper": null,
+      "type": "signature",
+      "required": false,
+      "pdfField": "Signature50",
+      "showIf": "signature.consentElectronic",
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.firmName",
+      "step": 10,
+      "order": 0,
+      "title": "Broker-Dealer Firm Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "BrokerDealer Firm Name",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.repName",
+      "step": 10,
+      "order": 1,
+      "title": "Registered Representative Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representative Name Print",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.bdCrd",
+      "step": 10,
+      "order": 2,
+      "title": "Broker-Dealer CRD No.",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "BrokerDealer",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.repCrd",
+      "step": 10,
+      "order": 3,
+      "title": "Registered Representative CRD No.",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representative",
+      "showIf": null,
+      "validation": {
+        "rule": "requiredString"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.branchAddress",
+      "step": 10,
+      "order": 4,
+      "title": "Registered Representative's Branch Address",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representatives Branch Address City State Zip",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.branchPhone",
+      "step": 10,
+      "order": 5,
+      "title": "Branch Phone Number",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Branch Phone Number",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.email",
+      "step": 10,
+      "order": 6,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_8",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.repSignature",
+      "step": 10,
+      "order": 7,
+      "title": "Registered Representative Signature",
+      "helper": null,
+      "type": "signature",
+      "required": false,
+      "pdfField": "Text51",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.principalSignature",
+      "step": 10,
+      "order": 8,
+      "title": "Broker-Dealer Principal Approval Signature",
+      "helper": null,
+      "type": "signature",
+      "required": false,
+      "pdfField": "Text52",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.firmName",
+      "step": 11,
+      "order": 0,
+      "title": "Name of RIA Firm",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name of RIA Firm",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.repName",
+      "step": 11,
+      "order": 1,
+      "title": "Name of Representative",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Representative",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.phone",
+      "step": 11,
+      "order": 2,
+      "title": "Telephone Number",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Telephone Number",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "ria.crdNo",
+      "step": 11,
+      "order": 3,
+      "title": "RIA CRD No.",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "No",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.repCrdNo",
+      "step": 11,
+      "order": 4,
+      "title": "IA Representative CRD No.",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "CRD No_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.address",
+      "step": 11,
+      "order": 5,
+      "title": "Address",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.email",
+      "step": 11,
+      "order": 6,
+      "title": "Email",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "ria.registeredWith",
+      "step": 11,
+      "order": 7,
+      "title": "Registered With",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "SEC",
+          "value": "sec",
+          "description": null,
+          "pdfField": "Check Box16",
+          "required": false
+        },
+        {
+          "label": "State",
+          "value": "state",
+          "description": null,
+          "pdfField": "Check Box17",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.stateName",
+      "step": 11,
+      "order": 8,
+      "title": "State Name (if registered with state)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "2 Unless noted below a he or she is not a member of FINRA and based on the activities he or she performs",
+      "showIf": "ria.registeredWith == 'state'",
+      "canonicalField": null
+    },
+    {
+      "id": "ria.finraMember",
+      "step": 11,
+      "order": 9,
+      "title": "FINRA Member Status",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Advisor is a member of FINRA",
+          "value": "member",
+          "description": null,
+          "pdfField": "Check Box56",
+          "required": false
+        },
+        {
+          "label": "Advisor is affiliated with FINRA member",
+          "value": "affiliated",
+          "description": null,
+          "pdfField": "Check Box57",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.finraAffiliation",
+      "step": 11,
+      "order": 10,
+      "title": "FINRA Member Affiliation (include CRD #)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Advisor is affiliated with the following FINRA member include CRD",
+      "showIf": "ria.finraMember == 'affiliated'",
+      "canonicalField": null
+    },
+    {
+      "id": "ria.repSignature",
+      "step": 11,
+      "order": 11,
+      "title": "Signature of Representative",
+      "helper": null,
+      "type": "signature",
+      "required": false,
+      "pdfField": "Signature of Representative",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.approvalSignature",
+      "step": 11,
+      "order": 12,
+      "title": "RIA Approval Signature",
+      "helper": null,
+      "type": "signature",
+      "required": false,
+      "pdfField": "RIA Approval Signature REQUIRED",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.repDate",
+      "step": 11,
+      "order": 13,
+      "title": "Representative Signature Date",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "Date",
+      "showIf": null,
+      "validation": {
+        "rule": "notFutureDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "ria.approvalDate",
+      "step": 11,
+      "order": 14,
+      "title": "Approval Signature Date",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "Date_2",
+      "showIf": null,
+      "validation": {
+        "rule": "notFutureDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name__i3",
+      "step": 5,
+      "order": 8,
+      "title": "Name (3)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_3",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line1__i2",
+      "step": 5,
+      "order": 9,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Street Address (2)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 1_2",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line2__i2",
+      "step": 5,
+      "order": 10,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Address Line 2 (2)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 2_2",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.cityStateZip__i2",
+      "step": 5,
+      "order": 11,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — City, State, Zip (2)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 3_2",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.business__i4",
+      "step": 4,
+      "order": 8,
+      "title": "Phone Numbers — Business (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_4",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.home__i4",
+      "step": 4,
+      "order": 9,
+      "title": "Phone Numbers — Home (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_4",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.stateOfResidence__i4",
+      "step": 4,
+      "order": 10,
+      "title": "Primary State of Residence (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_4",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.dateOfBirth__i4",
+      "step": 4,
+      "order": 11,
+      "title": "Date of Birth (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_4",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.tin__i4",
+      "step": 4,
+      "order": 12,
+      "title": "Social Security or Federal Tax ID Number (TIN) (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_4",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.email__i4",
+      "step": 4,
+      "order": 13,
+      "title": "E-mail Address (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_4",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name__i4",
+      "step": 5,
+      "order": 12,
+      "title": "Name (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_4",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line1__i3",
+      "step": 5,
+      "order": 13,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Street Address (3)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 1_3",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line2__i3",
+      "step": 5,
+      "order": 14,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Address Line 2 (3)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 2_3",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.cityStateZip__i3",
+      "step": 5,
+      "order": 15,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — City, State, Zip (3)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 3_3",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.business__i5",
+      "step": 4,
+      "order": 14,
+      "title": "Phone Numbers — Business (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_5",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.home__i5",
+      "step": 4,
+      "order": 15,
+      "title": "Phone Numbers — Home (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_5",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.stateOfResidence__i5",
+      "step": 4,
+      "order": 16,
+      "title": "Primary State of Residence (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_5",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.dateOfBirth__i5",
+      "step": 4,
+      "order": 17,
+      "title": "Date of Birth (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_5",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.tin__i5",
+      "step": 4,
+      "order": 18,
+      "title": "Social Security or Federal Tax ID Number (TIN) (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_5",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.email__i5",
+      "step": 4,
+      "order": 19,
+      "title": "E-mail Address (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_5",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name__i5",
+      "step": 5,
+      "order": 16,
+      "title": "Name (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_5",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line1__i4",
+      "step": 5,
+      "order": 17,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Street Address (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 1_4",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line2__i4",
+      "step": 5,
+      "order": 18,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Address Line 2 (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 2_4",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.cityStateZip__i4",
+      "step": 5,
+      "order": 19,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — City, State, Zip (4)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 3_4",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.business__i6",
+      "step": 4,
+      "order": 20,
+      "title": "Phone Numbers — Business (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_6",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.home__i6",
+      "step": 4,
+      "order": 21,
+      "title": "Phone Numbers — Home (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_6",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.stateOfResidence__i6",
+      "step": 4,
+      "order": 22,
+      "title": "Primary State of Residence (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_6",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.dateOfBirth__i6",
+      "step": 4,
+      "order": 23,
+      "title": "Date of Birth (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_6",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.tin__i6",
+      "step": 4,
+      "order": 24,
+      "title": "Social Security or Federal Tax ID Number (TIN) (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_6",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.email__i6",
+      "step": 4,
+      "order": 25,
+      "title": "E-mail Address (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_6",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name__i6",
+      "step": 5,
+      "order": 20,
+      "title": "Name (6)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_6",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line1__i5",
+      "step": 5,
+      "order": 21,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Street Address (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 1_5",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.line2__i5",
+      "step": 5,
+      "order": 22,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — Address Line 2 (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 2_5",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address.cityStateZip__i5",
+      "step": 5,
+      "order": 23,
+      "title": "Address of Principal Place of Residence (no P.O. Box) — City, State, Zip (5)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 3_5",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.business__i7",
+      "step": 4,
+      "order": 26,
+      "title": "Phone Numbers — Business (7)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_7",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.phones.home__i7",
+      "step": 4,
+      "order": 27,
+      "title": "Phone Numbers — Home (7)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_7",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.stateOfResidence__i7",
+      "step": 4,
+      "order": 28,
+      "title": "Primary State of Residence (7)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_7",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.dateOfBirth__i7",
+      "step": 4,
+      "order": 29,
+      "title": "Date of Birth (7)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_7",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.tin__i7",
+      "step": 4,
+      "order": 30,
+      "title": "Social Security or Federal Tax ID Number (TIN) (7)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_7",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.email__i7",
+      "step": 4,
+      "order": 31,
+      "title": "E-mail Address (7)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_7",
+      "canonicalField": null
+    },
+    {
+      "id": "signature.investorSignature.signature__i1",
+      "step": 9,
+      "order": 3,
+      "title": "Investor Signature — Signature (1)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "signature",
+      "required": false,
+      "pdfField": "Signature Investor or authorized signature",
+      "canonicalField": null
+    },
+    {
+      "id": "signature.investorSignature.signature__i3",
+      "step": 9,
+      "order": 4,
+      "title": "Investor Signature — Signature (3)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "signature",
+      "required": false,
+      "pdfField": "Signature Investor or authorized signature_3",
+      "canonicalField": null
+    },
+    {
+      "id": "ria.repCrdNo__i1",
+      "step": 11,
+      "order": 15,
+      "title": "IA Representative CRD No. (1)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "CRD No",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name__i9",
+      "step": 5,
+      "order": 24,
+      "title": "Name (9)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_9",
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.trust_details",
+      "step": 3,
+      "order": 4,
+      "title": "Trust Details",
+      "type": "text",
+      "required": true,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Text49",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_1_contact_information",
+      "step": 6,
+      "order": 3,
+      "title": "Beneficial Owner 1 - Contact Information",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_1_phone_numbers",
+      "step": 6,
+      "order": 4,
+      "title": "Beneficial Owner 1 - Phone Numbers",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_1_ownership_percentage",
+      "step": 6,
+      "order": 5,
+      "title": "Beneficial Owner 1 - Ownership Percentage",
+      "type": "text",
+      "required": true,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Ownership Percentage",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_1_ownership_type",
+      "step": 6,
+      "order": 6,
+      "title": "Beneficial Owner 1 - Ownership Type",
+      "type": "single-choice-cards",
+      "required": true,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Ownership",
+          "value": "direct",
+          "pdfField": "Check Box44",
+          "required": false
+        },
+        {
+          "label": "Indirect Ownership",
+          "value": "indirect",
+          "pdfField": "Check Box40",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_2_contact_information",
+      "step": 6,
+      "order": 7,
+      "title": "Beneficial Owner 2 - Contact Information",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_9",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_2_phone_numbers",
+      "step": 6,
+      "order": 8,
+      "title": "Beneficial Owner 2 - Phone Numbers",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_10",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_2_ownership_percentage",
+      "step": 6,
+      "order": 9,
+      "title": "Beneficial Owner 2 - Ownership Percentage",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Ownership Percentage_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_2_ownership_type",
+      "step": 6,
+      "order": 10,
+      "title": "Beneficial Owner 2 - Ownership Type",
+      "type": "single-choice-cards",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Ownership",
+          "value": "direct",
+          "pdfField": "Check Box41",
+          "required": false
+        },
+        {
+          "label": "Indirect Ownership",
+          "value": "indirect",
+          "pdfField": "Check Box42",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_3_contact_information",
+      "step": 6,
+      "order": 11,
+      "title": "Beneficial Owner 3 - Contact Information",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_11",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_3_phone_numbers",
+      "step": 6,
+      "order": 12,
+      "title": "Beneficial Owner 3 - Phone Numbers",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_12",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_3_ownership_percentage",
+      "step": 6,
+      "order": 13,
+      "title": "Beneficial Owner 3 - Ownership Percentage",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Ownership Percentage_3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_3_ownership_type",
+      "step": 6,
+      "order": 14,
+      "title": "Beneficial Owner 3 - Ownership Type",
+      "type": "single-choice-cards",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Ownership",
+          "value": "direct",
+          "pdfField": "Check Box37",
+          "required": false
+        },
+        {
+          "label": "Indirect Ownership",
+          "value": "indirect",
+          "pdfField": "Check Box38",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_4_contact_information",
+      "step": 6,
+      "order": 15,
+      "title": "Beneficial Owner 4 - Contact Information",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_13",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_4_phone_numbers",
+      "step": 6,
+      "order": 16,
+      "title": "Beneficial Owner 4 - Phone Numbers",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_14",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_4_ownership_percentage",
+      "step": 6,
+      "order": 17,
+      "title": "Beneficial Owner 4 - Ownership Percentage",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Ownership Percentage_4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_4_ownership_type",
+      "step": 6,
+      "order": 18,
+      "title": "Beneficial Owner 4 - Ownership Type",
+      "type": "single-choice-cards",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Ownership",
+          "value": "direct",
+          "pdfField": "Check Box35",
+          "required": false
+        },
+        {
+          "label": "Indirect Ownership",
+          "value": "indirect",
+          "pdfField": "Check Box34",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_5_contact_information",
+      "step": 6,
+      "order": 19,
+      "title": "Beneficial Owner 5 - Contact Information",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_15",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_5_phone_numbers",
+      "step": 6,
+      "order": 20,
+      "title": "Beneficial Owner 5 - Phone Numbers",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_16",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.additional_investor_qualifications",
+      "step": 7,
+      "order": 9,
+      "title": "Additional Investor Qualifications",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Check all applicable boxes Note that additional information may be requested",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.primary_owner_additional_contact",
+      "step": 4,
+      "order": 32,
+      "title": "Primary Owner - Additional Contact",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_7",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.primary_owner_phone_numbers",
+      "step": 4,
+      "order": 33,
+      "title": "Primary Owner - Phone Numbers",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_8",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.joint_owner_additional_contact",
+      "step": 5,
+      "order": 25,
+      "title": "Joint Owner - Additional Contact",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.broker_dealer_branch_phone",
+      "step": 10,
+      "order": 9,
+      "title": "Broker-Dealer Branch Phone",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_19",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.broker_dealer_email",
+      "step": 10,
+      "order": 10,
+      "title": "Broker-Dealer Email",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "undefined_20",
+      "showIf": null,
+      "canonicalField": null
+    }
+  ],
+  "pdfFieldCount": 195,
+  "unmappedFields": [
+    "undefined",
+    "Check Box43",
+    "Check Box45",
+    "Check Box53",
+    "Check Box54",
+    "Check Box33",
+    "Check Box36",
+    "Check Box39",
+    "Check Box23",
+    "Check Box21",
+    "undefined_17",
+    "undefined_18",
+    "undefined_21",
+    "day of",
+    "undefined_22",
+    "Dated this",
+    "By"
+  ],
+  "unmappedDetails": [
+    {
+      "name": "undefined",
+      "page": 2,
+      "hint": "Phone number field (area code / number) — “Phone: Business   Home”",
+      "category": "phone"
+    },
+    {
+      "name": "Check Box43",
+      "page": 3,
+      "hint": "Checkbox: By not checking this box, you conserve natural resources, reduce costs",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box45",
+      "page": 3,
+      "hint": "Checkbox: the legal entity and that you agree to inform the",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box53",
+      "page": 3,
+      "hint": "Checkbox: By not checking this box, you conserve natural resources, reduce costs",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box54",
+      "page": 3,
+      "hint": "Checkbox: By not checking this box, you conserve natural resources, reduce costs",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box33",
+      "page": 4,
+      "hint": "Checkbox: the legal entity and that you agree to inform the",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box36",
+      "page": 4,
+      "hint": "Checkbox: By not checking this box, you conserve natural resources, reduce costs",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box39",
+      "page": 4,
+      "hint": "Checkbox: the legal entity and that you agree to inform the",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box23",
+      "page": 6,
+      "hint": "Checkbox: In addition, the undersigned subscriber certifies as qualifying under ",
+      "category": "checkbox"
+    },
+    {
+      "name": "Check Box21",
+      "page": 7,
+      "hint": "Checkbox: evaluating the merits and risks of an investment in the Units. The fol",
+      "category": "checkbox"
+    },
+    {
+      "name": "undefined_17",
+      "page": 10,
+      "hint": "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE.",
+      "category": "other"
+    },
+    {
+      "name": "undefined_18",
+      "page": 10,
+      "hint": "BEHALF OF THE PERSON(S) OR ENTITY REGISTERED IN SECTION 4 ABOVE.",
+      "category": "other"
+    },
+    {
+      "name": "undefined_21",
+      "page": 14,
+      "hint": "Phone number field (area code / number) — “Representative:   Telephone Number:”",
+      "category": "phone"
+    },
+    {
+      "name": "day of",
+      "page": 14,
+      "hint": "terms of the Partnership Agreement.",
+      "category": "other"
+    },
+    {
+      "name": "undefined_22",
+      "page": 14,
+      "hint": "terms of the Partnership Agreement.",
+      "category": "other"
+    },
+    {
+      "name": "Dated this",
+      "page": 14,
+      "hint": "terms of the Partnership Agreement.",
+      "category": "other"
+    },
+    {
+      "name": "By",
+      "page": 14,
+      "hint": "Renaissance Growth Partners, LLC, its sole member",
+      "category": "other"
+    }
+  ]
+}

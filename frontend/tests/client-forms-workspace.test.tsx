@@ -48,6 +48,13 @@ describe('Client forms workspace', () => {
         );
       }
 
+      if (url.includes('/api/clients/broker-users')) {
+        return new Response(JSON.stringify({ users: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
       if (url.endsWith('/api/clients')) {
         return new Response(
           JSON.stringify({
@@ -82,6 +89,20 @@ describe('Client forms workspace', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
+      }
+
+      if (url.includes('/api/clients/client_1/documents')) {
+        return new Response(JSON.stringify({ documents: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (url.includes('/api/clients/client_1/pdf-fills')) {
+        return new Response(JSON.stringify({ fills: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
 
       if (url.includes('/api/clients/client_1/forms/workspace')) {
@@ -255,6 +276,7 @@ describe('Client forms workspace', () => {
       expect(window.location.pathname).toBe('/clients/client_1/forms');
       expect(screen.getByText('Client Workspace')).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Client One' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Upload PDF to Fill' })).toBeInTheDocument();
     });
 
     await user.click(screen.getByRole('checkbox', { name: 'Select Investor Profile' }));
@@ -267,6 +289,143 @@ describe('Client forms workspace', () => {
       expect(postCall).toBeTruthy();
       expect(window.location.pathname).toBe('/clients/client_1/forms');
     });
+  });
+
+  it('uploads and lists general client documents from the workspace', async () => {
+    const user = userEvent.setup();
+    let uploaded = false;
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return new Response(
+          JSON.stringify({
+            user: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/documents') && init?.method === 'POST') {
+        uploaded = true;
+        expect(init.headers).toMatchObject({
+          'X-File-Name': encodeURIComponent('Operating Agreement.docx')
+        });
+
+        return new Response(
+          JSON.stringify({
+            document: {
+              id: 'doc_2',
+              clientId: 'client_1',
+              fileName: 'Operating Agreement.docx',
+              contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              sizeBytes: 12,
+              uploadedByName: 'Advisor One',
+              createdAt: '2026-07-07T10:00:00.000Z',
+              viewUrl: '/api/clients/client_1/documents/doc_2/view'
+            }
+          }),
+          { status: 201, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/documents')) {
+        return new Response(
+          JSON.stringify({
+            documents: [
+              {
+                id: 'doc_1',
+                clientId: 'client_1',
+                fileName: 'Tax Return.pdf',
+                contentType: 'application/pdf',
+                sizeBytes: 4096,
+                uploadedByName: 'Advisor One',
+                createdAt: '2026-07-07T09:00:00.000Z',
+                viewUrl: '/api/clients/client_1/documents/doc_1/view'
+              }
+            ]
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/pdf-fills')) {
+        return new Response(JSON.stringify({ fills: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (url.includes('/api/clients/client_1/forms/workspace')) {
+        return new Response(
+          JSON.stringify({
+            workspace: {
+              clientId: 'client_1',
+              clientName: 'Client One',
+              forms: [
+                {
+                  code: 'INVESTOR_PROFILE',
+                  title: 'Investor Profile',
+                  selected: true,
+                  onboardingStatus: 'COMPLETED',
+                  resumeRoute: '/clients/client_1/investor-profile/step-7',
+                  viewRoute: '/clients/client_1/forms/INVESTOR_PROFILE/view/step/1',
+                  editRoute: '/clients/client_1/forms/INVESTOR_PROFILE/edit/step/1',
+                  totalSteps: 7,
+                  pdfCount: 0,
+                  latestPdfReceivedAt: null
+                }
+              ]
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/forms');
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Tax Return.pdf')).toBeInTheDocument();
+    });
+
+    const file = new File(['agreement'], 'Operating Agreement.docx', {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+    const input = screen.getByLabelText('Client document upload') as HTMLInputElement;
+
+    await user.upload(input, file);
+
+    await waitFor(() => {
+      expect(uploaded).toBe(true);
+      expect(screen.getByText('Operating Agreement.docx')).toBeInTheDocument();
+      expect(screen.getByText('Document uploaded.')).toBeInTheDocument();
+    });
+
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Open' })
+        .some((link) => link.getAttribute('href') === 'http://localhost:4000/api/clients/client_1/documents/doc_2/view')
+    ).toBe(true);
   });
 
   it('opens the PDFs drawer and shows PDF history with readable timestamps', async () => {
@@ -286,6 +445,20 @@ describe('Client forms workspace', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
+      }
+
+      if (url.includes('/api/clients/client_1/documents')) {
+        return new Response(JSON.stringify({ documents: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (url.includes('/api/clients/client_1/pdf-fills')) {
+        return new Response(JSON.stringify({ fills: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
 
       if (url.includes('/api/clients/client_1/forms/workspace')) {
@@ -407,6 +580,13 @@ describe('Client forms workspace', () => {
         );
       }
 
+      if (url.includes('/api/clients/client_1/documents')) {
+        return new Response(JSON.stringify({ documents: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
       if (url.includes('/api/clients/pdfs/updates')) {
         return new Response(
           JSON.stringify({
@@ -428,6 +608,26 @@ describe('Client forms workspace', () => {
             ],
             affectedClientIds: ['client_1'],
             serverTime: '2026-03-16T10:06:00.000Z'
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/pdf-fills')) {
+        return new Response(
+          JSON.stringify({
+            fills: [
+              {
+                id: 'fill_1',
+                fileName: 'Subscription.pdf',
+                status: 'DRAFT',
+                generatedPdfUrl: null,
+                generatedAt: null,
+                createdAt: '2026-07-01T10:00:00.000Z',
+                updatedAt: '2026-07-01T10:30:00.000Z',
+                warningCount: 2
+              }
+            ]
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );

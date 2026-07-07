@@ -71,6 +71,7 @@ import {
   type PrimaryTypeKey
 } from '../lib/investor-profile-step1.js';
 import { normalizeStep7Fields } from '../lib/investor-profile-step7.js';
+import { clientAccessWhere } from '../lib/client-access.js';
 import { zodFieldErrors } from '../lib/validation.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
@@ -571,7 +572,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     return deps.prisma.client.findFirst({
       where: {
         id: clientId,
-        ownerUserId
+        ...clientAccessWhere(ownerUserId)
       },
       select: {
         id: true,

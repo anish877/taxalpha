@@ -33,7 +33,17 @@ const envSchema = z.object({
   // role). Uploads stay disabled unless S3_BUCKET is set.
   AWS_REGION: z.string().min(1).default('us-east-1'),
   S3_BUCKET: z.string().min(1).optional(),
-  S3_UPLOAD_PREFIX: z.string().default('investor-profile/government-id')
+  S3_UPLOAD_PREFIX: z.string().default('investor-profile/government-id'),
+  CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
+  CLOUDINARY_API_KEY: z.string().min(1).optional(),
+  CLOUDINARY_API_SECRET: z.string().min(1).optional(),
+  CLOUDINARY_CLIENT_DOCUMENT_FOLDER: z.string().default('taxalpha/client-documents'),
+  // AI form-ingestion (OpenRouter, OpenAI-compatible). Ingestion stays disabled
+  // unless OPENROUTER_API_KEY is set.
+  OPENROUTER_API_KEY: z.string().min(1).optional(),
+  OPENROUTER_MODEL: z.string().default('openai/gpt-5.5'),
+  OPENROUTER_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
+  OPENROUTER_REASONING_EFFORT: z.enum(['low', 'medium', 'high']).default('high')
 });
 
 export type Environment = z.infer<typeof envSchema>;
@@ -119,6 +129,18 @@ export function getRuntimeConfig(env: Environment = getEnv()): RuntimeConfig {
       region: env.AWS_REGION,
       bucket: env.S3_BUCKET ?? null,
       uploadPrefix: env.S3_UPLOAD_PREFIX.replace(/^\/+|\/+$/g, '')
+    },
+    cloudinary: {
+      cloudName: env.CLOUDINARY_CLOUD_NAME ?? null,
+      apiKey: env.CLOUDINARY_API_KEY ?? null,
+      apiSecret: env.CLOUDINARY_API_SECRET ?? null,
+      folder: env.CLOUDINARY_CLIENT_DOCUMENT_FOLDER.replace(/^\/+|\/+$/g, '')
+    },
+    openrouter: {
+      apiKey: env.OPENROUTER_API_KEY ?? null,
+      model: env.OPENROUTER_MODEL,
+      baseUrl: env.OPENROUTER_BASE_URL,
+      reasoningEffort: env.OPENROUTER_REASONING_EFFORT
     }
   };
 }

@@ -160,6 +160,7 @@ import {
   INVESTOR_PROFILE_FORM_CODE as WEBHOOK_INVESTOR_PROFILE_FORM_CODE,
   syncFormsToN8n
 } from '../lib/form-webhook-sync.js';
+import { clientAccessWhere } from '../lib/client-access.js';
 import { getWorkspaceFormTitle } from '../lib/form-pdf-utils.js';
 import { HttpError } from '../lib/http-error.js';
 import { zodFieldErrors } from '../lib/validation.js';
@@ -212,6 +213,7 @@ const createClientSchema = z.object({
       })
     )
     .default([]),
+  additionalBrokerUserIds: z.array(z.string().trim().min(1)).default([]),
   selectedFormCodes: z
     .array(z.string().trim().min(1))
     .default([INVESTOR_PROFILE_FORM_CODE])
@@ -589,6 +591,12 @@ interface FormWorkspaceItem {
   totalSteps: number | null;
   pdfCount: number;
   latestPdfReceivedAt: string | null;
+  /** AI-ingested (schema-driven) form filled via the generic runtime. */
+  dynamic: boolean;
+  /** Uploaded PDF template driven by admin variable mappings, not a wizard. */
+  mappingTemplate: boolean;
+  fillRoute: string | null;
+  generateRoute: string | null;
 }
 
 interface FormWorkspaceRecord {
@@ -1178,7 +1186,7 @@ function getNextOnboardingRouteForClient(client: HydratedClient, filterCodes?: S
 
 function toFormWorkspaceRecord(
   client: HydratedClient,
-  activeForms: Array<{ code: string; title: string }>,
+  activeForms: Array<{ code: string; title: string; source?: string }>,
   pdfSummaries: Map<string, { pdfCount: number; latestPdfReceivedAt: string | null }> = new Map()
 ): FormWorkspaceRecord {
   const selectedCodes = getSelectedFormCodes(client);
@@ -1201,8 +1209,9 @@ function toFormWorkspaceRecord(
     clientName: client.name,
     forms: sortedForms.map((form) => {
       const selected = selectedCodes.has(form.code);
-      const status = selected ? getOnboardingStatusForForm(client, form.code) : null;
-      const resumeRoute = selected ? getResumeRouteForForm(client, form.code) : null;
+      const mappingTemplate = form.source === 'UPLOAD';
+      const status = selected && !mappingTemplate ? getOnboardingStatusForForm(client, form.code) : null;
+      const resumeRoute = selected && !mappingTemplate ? getResumeRouteForForm(client, form.code) : null;
       const canRoute = selected && SUPPORTED_CLIENT_FORM_CODES.has(form.code);
       const pdfSummary = pdfSummaries.get(form.code);
 
@@ -1218,7 +1227,11 @@ function toFormWorkspaceRecord(
           ? FORM_STEP_COUNT[form.code as (typeof FORM_SEQUENCE)[number]]
           : null,
         pdfCount: pdfSummary?.pdfCount ?? 0,
-        latestPdfReceivedAt: pdfSummary?.latestPdfReceivedAt ?? null
+        latestPdfReceivedAt: pdfSummary?.latestPdfReceivedAt ?? null,
+        dynamic: mappingTemplate,
+        mappingTemplate,
+        fillRoute: null,
+        generateRoute: selected && mappingTemplate ? `/api/clients/${client.id}/forms/${form.code}/generate` : null
       };
     })
   };
@@ -1738,9 +1751,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
   router.get('/', requireAuth(deps), async (request, response, next) => {
     try {
       const clients = await deps.prisma.client.findMany({
-        where: {
-          ownerUserId: request.authUser!.id
-        },
+        where: clientAccessWhere(request.authUser!.id),
         include: clientInclude,
         orderBy: {
           createdAt: 'desc'
@@ -1748,6 +1759,35 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       });
 
       response.json({ clients: clients.map(toClientDto) });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get('/broker-users', requireAuth(deps), async (request, response, next) => {
+    try {
+      const users = await deps.prisma.user.findMany({
+        where: {
+          id: {
+            not: request.authUser!.id
+          }
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true
+        },
+        orderBy: [
+          {
+            name: 'asc'
+          },
+          {
+            email: 'asc'
+          }
+        ]
+      });
+
+      response.json({ users });
     } catch (error) {
       next(error);
     }
@@ -1768,6 +1808,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     const clientName = parsed.data.clientName.trim();
     const clientEmail = normalizeEmail(parsed.data.clientEmail);
     const clientPhone = parsed.data.clientPhone?.trim() ?? null;
+    const additionalBrokerUserIds = [
+      ...new Set(parsed.data.additionalBrokerUserIds.filter((userId) => userId !== authUser.id))
+    ];
 
     const additionalBrokerMap = new Map<string, { name: string; email: string }>();
 
@@ -1809,18 +1852,34 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     }
 
     try {
-      const selectedForms = await deps.prisma.formCatalog.findMany({
-        where: {
-          code: {
-            in: selectedFormCodes
+      const [selectedForms, additionalBrokerUsers] = await Promise.all([
+        deps.prisma.formCatalog.findMany({
+          where: {
+            code: {
+              in: selectedFormCodes
+            },
+            active: true
           },
-          active: true
-        },
-        select: {
-          id: true,
-          code: true
-        }
-      });
+          select: {
+            id: true,
+            code: true
+          }
+        }),
+        additionalBrokerUserIds.length > 0
+          ? deps.prisma.user.findMany({
+              where: {
+                id: {
+                  in: additionalBrokerUserIds
+                }
+              },
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            })
+          : Promise.resolve([])
+      ]);
 
       if (selectedForms.length !== selectedFormCodes.length) {
         const foundCodes = new Set(selectedForms.map((form) => form.code));
@@ -1829,6 +1888,18 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           message: 'Some selected forms are inactive or missing.',
           fieldErrors: {
             selectedFormCodes: `Unavailable form code(s): ${missingCodes.join(', ')}.`
+          }
+        });
+        return;
+      }
+
+      if (additionalBrokerUsers.length !== additionalBrokerUserIds.length) {
+        const foundUserIds = new Set(additionalBrokerUsers.map((user) => user.id));
+        const missingUserIds = additionalBrokerUserIds.filter((userId) => !foundUserIds.has(userId));
+        response.status(400).json({
+          message: 'Some selected brokers are no longer available.',
+          fieldErrors: {
+            additionalBrokerUserIds: `Unavailable broker user id(s): ${missingUserIds.join(', ')}.`
           }
         });
         return;
@@ -1871,6 +1942,31 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
 
         const additionalBrokerIds = new Set<string>();
+
+        for (const brokerUser of additionalBrokerUsers) {
+          const brokerRecord = await transactionClient.broker.upsert({
+            where: {
+              ownerUserId_email: {
+                ownerUserId: brokerUser.id,
+                email: brokerUser.email
+              }
+            },
+            update: {
+              name: brokerUser.name,
+              kind: 'SELF'
+            },
+            create: {
+              ownerUserId: brokerUser.id,
+              name: brokerUser.name,
+              email: brokerUser.email,
+              kind: 'SELF'
+            }
+          });
+
+          if (brokerRecord.id !== primaryBroker.id) {
+            additionalBrokerIds.add(brokerRecord.id);
+          }
+        }
 
         for (const broker of additionalBrokerMap.values()) {
           const brokerRecord = await transactionClient.broker.upsert({
@@ -2031,9 +2127,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           receivedAt: {
             gt: after
           },
-          client: {
-            ownerUserId: authUser.id
-          }
+          client: clientAccessWhere(authUser.id)
         },
         include: {
           client: {
@@ -2068,18 +2162,13 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     }
 
     const { clientId, formCode } = parsedParams.data;
-    if (!SUPPORTED_CLIENT_FORM_CODES.has(formCode)) {
-      response.status(400).json({ message: 'Unsupported form code.' });
-      return;
-    }
-
     const authUser = request.authUser!;
 
     try {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         include: {
           formSelections: {
@@ -2150,7 +2239,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         deps.prisma.client.findFirst({
           where: {
             id: clientId,
-            ownerUserId: authUser.id
+            ...clientAccessWhere(authUser.id)
           },
           include: clientInclude
         }),
@@ -2160,7 +2249,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           },
           select: {
             code: true,
-            title: true
+            title: true,
+            source: true
           }
         }),
         deps.prisma.clientFormPdf.findMany({
@@ -2209,17 +2299,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     const requestedCodes = [
       ...new Set(parsedBody.data.formCodes.map((code) => code.trim().toUpperCase()).filter(Boolean))
     ];
-    const unsupportedCodes = requestedCodes.filter((code) => !SUPPORTED_CLIENT_FORM_CODES.has(code));
-
-    if (unsupportedCodes.length > 0) {
-      response.status(400).json({
-        message: 'Unsupported form selection.',
-        fieldErrors: {
-          formCodes: `Unsupported form code(s): ${unsupportedCodes.join(', ')}.`
-        }
-      });
-      return;
-    }
+    // Any active catalog form is selectable (including AI-uploaded forms). The
+    // catalog-existence check below rejects unknown/inactive codes.
 
     const authUser = request.authUser!;
     const clientId = parsedParams.data.clientId;
@@ -2229,7 +2310,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         deps.prisma.client.findFirst({
           where: {
             id: clientId,
-            ownerUserId: authUser.id
+            ...clientAccessWhere(authUser.id)
           },
           include: clientInclude
         }),
@@ -2336,7 +2417,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         deps.prisma.client.findFirst({
           where: {
             id: clientId,
-            ownerUserId: authUser.id
+            ...clientAccessWhere(authUser.id)
           },
           include: clientInclude
         }),
@@ -2344,7 +2425,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           where: { active: true },
           select: {
             code: true,
-            title: true
+            title: true,
+            source: true
           }
         }),
         deps.prisma.clientFormPdf.findMany({
@@ -2375,8 +2457,11 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         workspace: toFormWorkspaceRecord(hydratedClient, activeForms, summarizeClientFormPdfs(pdfs))
       };
 
-      const formCodesToSync = requestedCodes.filter((code) =>
-        hydratedClient.formSelections.some((selection) => selection.form.code === code)
+      const formCodesToSync = requestedCodes.filter(
+        (code) =>
+          // AI-uploaded forms are filled via the generic runtime, not n8n — skip them.
+          SUPPORTED_CLIENT_FORM_CODES.has(code) &&
+          hydratedClient.formSelections.some((selection) => selection.form.code === code)
       );
 
       if (formCodesToSync.length > 0) {
@@ -2410,7 +2495,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -2498,7 +2583,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -2610,7 +2695,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: { id: true }
       });
@@ -2689,7 +2774,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: { id: true }
       });
@@ -2754,7 +2839,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -2861,7 +2946,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -2996,7 +3081,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -3106,7 +3191,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -3242,7 +3327,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: { id: true }
       });
@@ -3312,7 +3397,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: { id: true }
       });
@@ -3405,7 +3490,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: { id: true }
       });
@@ -3474,7 +3559,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: { id: true }
       });
@@ -3565,7 +3650,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -3689,7 +3774,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const client = await deps.prisma.client.findFirst({
         where: {
           id: clientId,
-          ownerUserId: authUser.id
+          ...clientAccessWhere(authUser.id)
         },
         select: {
           id: true,
@@ -3888,7 +3973,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         const client = await deps.prisma.client.findFirst({
           where: {
             id: clientId,
-            ownerUserId: authUser.id
+            ...clientAccessWhere(authUser.id)
           },
           select: {
             id: true,
@@ -4017,7 +4102,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         const client = await deps.prisma.client.findFirst({
           where: {
             id: clientId,
-            ownerUserId: authUser.id
+            ...clientAccessWhere(authUser.id)
           },
           select: {
             id: true,

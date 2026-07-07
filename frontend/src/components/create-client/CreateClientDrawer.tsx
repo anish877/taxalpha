@@ -2,18 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { ApiError, apiRequest } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
-import type { ClientRecord, FormCatalogItem, User } from '../../types/api';
-
-interface AdditionalBrokerInput {
-  id: string;
-  name: string;
-  email: string;
-}
+import type { BrokerUserOption, ClientRecord, FormCatalogItem, User } from '../../types/api';
 
 interface CreateClientDrawerProps {
   open: boolean;
   onClose: () => void;
   forms: FormCatalogItem[];
+  brokerUsers: BrokerUserOption[];
   primaryBroker: User;
   onClientCreated: (client: ClientRecord) => void;
 }
@@ -21,18 +16,11 @@ interface CreateClientDrawerProps {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[+\d()\-.\s]{7,20}$/;
 
-function createBrokerRow(): AdditionalBrokerInput {
-  return {
-    id: `broker_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
-    name: '',
-    email: ''
-  };
-}
-
 export function CreateClientDrawer({
   open,
   onClose,
   forms,
+  brokerUsers,
   primaryBroker,
   onClientCreated
 }: CreateClientDrawerProps) {
@@ -59,7 +47,7 @@ export function CreateClientDrawer({
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientPhone, setClientPhone] = useState('');
-  const [additionalBrokers, setAdditionalBrokers] = useState<AdditionalBrokerInput[]>([]);
+  const [selectedBrokerUserIds, setSelectedBrokerUserIds] = useState<string[]>([]);
   const [includeStatementOfFinancialCondition, setIncludeStatementOfFinancialCondition] = useState(false);
   const [includeBaiodf, setIncludeBaiodf] = useState(false);
   const [includeBaiv506c, setIncludeBaiv506c] = useState(false);
@@ -79,12 +67,24 @@ export function CreateClientDrawer({
     return 'Form Selection';
   }, [step]);
 
-  const brokerSectionError =
-    errors.additionalBrokers ||
-    errors['additionalBrokers.0.name'] ||
-    errors['additionalBrokers.0.email'] ||
-    errors.additionalBrokersName ||
-    errors.additionalBrokersEmail;
+  const selectedBrokerUsers = useMemo(
+    () =>
+      selectedBrokerUserIds
+        .map((userId) => brokerUsers.find((brokerUser) => brokerUser.id === userId))
+        .filter((brokerUser): brokerUser is BrokerUserOption => Boolean(brokerUser)),
+    [brokerUsers, selectedBrokerUserIds]
+  );
+
+  const availableBrokerUsers = useMemo(
+    () =>
+      brokerUsers.filter(
+        (brokerUser) =>
+          brokerUser.id !== primaryBroker.id && !selectedBrokerUserIds.includes(brokerUser.id)
+      ),
+    [brokerUsers, primaryBroker.id, selectedBrokerUserIds]
+  );
+
+  const brokerSectionError = errors.additionalBrokerUserIds ?? errors.additionalBrokers;
 
   useEffect(() => {
     if (!open) {
@@ -92,7 +92,7 @@ export function CreateClientDrawer({
       setClientName('');
       setClientEmail('');
       setClientPhone('');
-      setAdditionalBrokers([]);
+      setSelectedBrokerUserIds([]);
       setIncludeStatementOfFinancialCondition(false);
       setIncludeBaiodf(false);
       setIncludeBaiv506c(false);
@@ -122,20 +122,8 @@ export function CreateClientDrawer({
   };
 
   const validateStepTwo = () => {
-    const nextErrors: Record<string, string> = {};
-
-    for (const broker of additionalBrokers) {
-      if (!broker.name.trim()) {
-        nextErrors[`broker_name_${broker.id}`] = 'Broker name is required.';
-      }
-
-      if (!broker.email.trim() || !emailPattern.test(broker.email.trim())) {
-        nextErrors[`broker_email_${broker.id}`] = 'Enter a valid broker email.';
-      }
-    }
-
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const validateStepThree = () => {
@@ -194,24 +182,22 @@ export function CreateClientDrawer({
     setStep((current) => Math.max(current - 1, 0));
   };
 
-  const addBrokerRow = () => {
-    setAdditionalBrokers((current) => [...current, createBrokerRow()]);
-  };
+  const addBrokerUser = (userId: string) => {
+    if (!userId) {
+      return;
+    }
 
-  const removeBrokerRow = (id: string) => {
-    setAdditionalBrokers((current) => current.filter((item) => item.id !== id));
+    setSelectedBrokerUserIds((current) => (current.includes(userId) ? current : [...current, userId]));
     setErrors((current) => {
       const next = { ...current };
-      delete next[`broker_name_${id}`];
-      delete next[`broker_email_${id}`];
+      delete next.additionalBrokerUserIds;
+      delete next.additionalBrokers;
       return next;
     });
   };
 
-  const updateBrokerField = (id: string, field: 'name' | 'email', value: string) => {
-    setAdditionalBrokers((current) =>
-      current.map((broker) => (broker.id === id ? { ...broker, [field]: value } : broker))
-    );
+  const removeBrokerUser = (userId: string) => {
+    setSelectedBrokerUserIds((current) => current.filter((selectedUserId) => selectedUserId !== userId));
   };
 
   const handleSubmit = async () => {
@@ -233,10 +219,7 @@ export function CreateClientDrawer({
         clientName: clientName.trim(),
         clientEmail: clientEmail.trim(),
         clientPhone: clientPhone.trim() || undefined,
-        additionalBrokers: additionalBrokers.map((broker) => ({
-          name: broker.name.trim(),
-          email: broker.email.trim()
-        })),
+        additionalBrokerUserIds: selectedBrokerUserIds,
         selectedFormCodes: [
           'INVESTOR_PROFILE',
           ...(includeStatementOfFinancialCondition ? ['SFC'] : []),
@@ -260,6 +243,14 @@ export function CreateClientDrawer({
 
         if (fieldErrors.clientEmail) {
           setStep(0);
+        }
+
+        if (fieldErrors.additionalBrokerUserIds) {
+          setStep(1);
+        }
+
+        if (fieldErrors.selectedFormCodes) {
+          setStep(2);
         }
 
         setSubmitError(error.message);
@@ -368,20 +359,7 @@ export function CreateClientDrawer({
                 <div>
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-sm font-medium tracking-wide text-ink">Additional Brokers</h3>
-                    <button
-                      className="rounded-full border border-line px-3 py-1 text-xs uppercase tracking-[0.14em] text-ink transition hover:border-black"
-                      type="button"
-                      onClick={addBrokerRow}
-                    >
-                      Add Broker
-                    </button>
                   </div>
-
-                  {additionalBrokers.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-line p-4 text-sm text-mute">
-                      No additional brokers added.
-                    </div>
-                  )}
 
                   {brokerSectionError && (
                     <div className="mb-3 rounded-xl border border-black/15 bg-black px-3 py-2 text-xs text-white">
@@ -389,48 +367,48 @@ export function CreateClientDrawer({
                     </div>
                   )}
 
-                  <div className="space-y-4">
-                    {additionalBrokers.map((broker) => (
-                      <div key={broker.id} className="rounded-2xl border border-line p-4">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs uppercase tracking-[0.2em] text-mute">Broker</p>
-                          <button
-                            className="text-xs uppercase tracking-[0.14em] text-mute hover:text-ink"
-                            type="button"
-                            onClick={() => removeBrokerRow(broker.id)}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        <div className="mt-3 space-y-3">
-                          <label className="block">
-                            <span className="mb-1 block text-xs text-mute">Name</span>
-                            <input
-                              className="w-full rounded-xl border border-line px-3 py-2 text-sm font-light outline-none ring-accent focus:border-accent focus:ring-1"
-                              value={broker.name}
-                              onChange={(event) =>
-                                updateBrokerField(broker.id, 'name', event.target.value)
-                              }
-                            />
-                            {errors[`broker_name_${broker.id}`] && (
-                              <p className="mt-1 text-xs text-black">{errors[`broker_name_${broker.id}`]}</p>
-                            )}
-                          </label>
+                  <label className="block">
+                    <span className="mb-2 block text-sm text-mute">Select Website User</span>
+                    <select
+                      className="w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm font-light text-ink outline-none ring-accent transition focus:border-accent focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={availableBrokerUsers.length === 0}
+                      value=""
+                      onChange={(event) => addBrokerUser(event.target.value)}
+                    >
+                      <option value="">
+                        {availableBrokerUsers.length === 0 ? 'No more users available' : 'Choose a broker'}
+                      </option>
+                      {availableBrokerUsers.map((brokerUser) => (
+                        <option key={brokerUser.id} value={brokerUser.id}>
+                          {brokerUser.name} ({brokerUser.email})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-                          <label className="block">
-                            <span className="mb-1 block text-xs text-mute">Email</span>
-                            <input
-                              className="w-full rounded-xl border border-line px-3 py-2 text-sm font-light outline-none ring-accent focus:border-accent focus:ring-1"
-                              value={broker.email}
-                              onChange={(event) =>
-                                updateBrokerField(broker.id, 'email', event.target.value)
-                              }
-                            />
-                            {errors[`broker_email_${broker.id}`] && (
-                              <p className="mt-1 text-xs text-black">{errors[`broker_email_${broker.id}`]}</p>
-                            )}
-                          </label>
+                  {selectedBrokerUsers.length === 0 && (
+                    <div className="mt-4 rounded-2xl border border-dashed border-line p-4 text-sm text-mute">
+                      No additional brokers selected.
+                    </div>
+                  )}
+
+                  <div className="mt-4 space-y-3">
+                    {selectedBrokerUsers.map((brokerUser) => (
+                      <div
+                        key={brokerUser.id}
+                        className="flex items-center justify-between gap-3 rounded-2xl border border-line px-4 py-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-light text-ink">{brokerUser.name}</p>
+                          <p className="mt-1 truncate text-xs text-mute">{brokerUser.email}</p>
                         </div>
+                        <button
+                          className="shrink-0 text-xs uppercase tracking-[0.14em] text-mute transition hover:text-ink"
+                          type="button"
+                          onClick={() => removeBrokerUser(brokerUser.id)}
+                        >
+                          Remove
+                        </button>
                       </div>
                     ))}
                   </div>

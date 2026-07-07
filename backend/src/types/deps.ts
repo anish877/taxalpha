@@ -20,6 +20,22 @@ export interface S3UploadConfig {
   uploadPrefix: string;
 }
 
+export interface CloudinaryConfig {
+  /** Missing credentials keep client-document uploads on local disk. */
+  cloudName: string | null;
+  apiKey: string | null;
+  apiSecret: string | null;
+  folder: string;
+}
+
+export interface OpenRouterConfig {
+  /** Null disables AI form ingestion. */
+  apiKey: string | null;
+  model: string;
+  baseUrl: string;
+  reasoningEffort: 'low' | 'medium' | 'high';
+}
+
 export interface RuntimeConfig {
   nodeEnv: NodeEnvironment;
   frontendUrl: string;
@@ -29,6 +45,10 @@ export interface RuntimeConfig {
   n8nWebhooks: N8nWebhookConfig;
   /** Present when the app is configured; absent disables document uploads. */
   s3?: S3UploadConfig;
+  /** Client document storage. When configured, documents are stored in Cloudinary. */
+  cloudinary?: CloudinaryConfig;
+  /** AI form-ingestion (OpenRouter). */
+  openrouter?: OpenRouterConfig;
 }
 
 export interface RouteDeps {

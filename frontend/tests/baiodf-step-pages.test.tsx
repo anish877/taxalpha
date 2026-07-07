@@ -127,8 +127,12 @@ describe('BAIODF step pages', () => {
       expect(screen.getByText('Now a few quick order basics.')).toBeInTheDocument();
     });
 
-    await user.clear(screen.getByRole('spinbutton', { name: 'Proposed Principal Amount' }));
-    await user.type(screen.getByRole('spinbutton', { name: 'Proposed Principal Amount' }), '50000');
+    const proposedPrincipalInput = screen.getByRole('spinbutton', {
+      name: 'Proposed Principal Amount'
+    }) as HTMLInputElement;
+    await user.clear(proposedPrincipalInput);
+    expect(proposedPrincipalInput.value).toBe('');
+    await user.type(proposedPrincipalInput, '50000');
 
     const yesCheckboxes = screen.getAllByRole('checkbox', { name: 'Yes' });
     await user.click(yesCheckboxes[0]);
@@ -336,6 +340,192 @@ describe('BAIODF step pages', () => {
         '/clients/client_1/brokerage-alternative-investment-order-disclosure/step-3'
       );
     });
+  });
+
+  it('lets 0-valued step 2 amount inputs be cleared without restoring 0', async () => {
+    const user = userEvent.setup();
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return mockAuthResponse();
+      }
+
+      if (url.includes('/api/clients/client_1/brokerage-alternative-investment-order-disclosure/step-2')) {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'IN_PROGRESS',
+              step: {
+                key: 'STEP_2_CUSTOMER_ORDER_INFORMATION',
+                label: 'STEP 2. CUSTOMER ORDER INFORMATION',
+                currentQuestionId: 'step2.existingAltPositions',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['step2.existingAltPositions'],
+                fields: {
+                  custodianAndProduct: {
+                    custodian: {
+                      firstClearing: false,
+                      direct: false,
+                      mainStar: false,
+                      cnb: false,
+                      kingdomTrust: false,
+                      other: false
+                    },
+                    custodianOther: null,
+                    nameOfProduct: '',
+                    sponsorIssuer: '',
+                    dateOfPpm: null,
+                    datePpmSent: null
+                  },
+                  existingAltPositions: {
+                    existingIlliquidAltPositions: 0,
+                    existingSemiLiquidAltPositions: 0,
+                    existingTaxAdvantageAltPositions: 0
+                  },
+                  netWorthAndConcentration: {
+                    totalNetWorth: 0,
+                    liquidNetWorth: 0
+                  }
+                },
+                concentrations: {
+                  existingIlliquidAltConcentrationPercent: 0,
+                  existingSemiLiquidAltConcentrationPercent: 0,
+                  existingTaxAdvantageAltConcentrationPercent: 0,
+                  totalConcentrationPercent: 0
+                }
+              }
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState(
+      {},
+      '',
+      '/clients/client_1/brokerage-alternative-investment-order-disclosure/step-2'
+    );
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await screen.findByText('What existing alternative positions should we include?');
+
+    const illiquidInput = screen.getByRole('spinbutton', {
+      name: 'Existing Illiquid Alt Positions'
+    }) as HTMLInputElement;
+    expect(illiquidInput.value).toBe('0');
+
+    await user.clear(illiquidInput);
+    expect(illiquidInput.value).toBe('');
+  });
+
+  it('lets 0-valued step 2 net worth inputs be cleared without restoring 0', async () => {
+    const user = userEvent.setup();
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return mockAuthResponse();
+      }
+
+      if (url.includes('/api/clients/client_1/brokerage-alternative-investment-order-disclosure/step-2')) {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'IN_PROGRESS',
+              step: {
+                key: 'STEP_2_CUSTOMER_ORDER_INFORMATION',
+                label: 'STEP 2. CUSTOMER ORDER INFORMATION',
+                currentQuestionId: 'step2.netWorthAndConcentration',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['step2.netWorthAndConcentration'],
+                fields: {
+                  custodianAndProduct: {
+                    custodian: {
+                      firstClearing: false,
+                      direct: false,
+                      mainStar: false,
+                      cnb: false,
+                      kingdomTrust: false,
+                      other: false
+                    },
+                    custodianOther: null,
+                    nameOfProduct: '',
+                    sponsorIssuer: '',
+                    dateOfPpm: null,
+                    datePpmSent: null
+                  },
+                  existingAltPositions: {
+                    existingIlliquidAltPositions: 0,
+                    existingSemiLiquidAltPositions: 0,
+                    existingTaxAdvantageAltPositions: 0
+                  },
+                  netWorthAndConcentration: {
+                    totalNetWorth: 0,
+                    liquidNetWorth: 0
+                  }
+                },
+                concentrations: {
+                  existingIlliquidAltConcentrationPercent: 0,
+                  existingSemiLiquidAltConcentrationPercent: 0,
+                  existingTaxAdvantageAltConcentrationPercent: 0,
+                  totalConcentrationPercent: 0
+                }
+              }
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState(
+      {},
+      '',
+      '/clients/client_1/brokerage-alternative-investment-order-disclosure/step-2'
+    );
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await screen.findByText('Last check: net worth and concentration.');
+
+    const totalNetWorthInput = screen.getByRole('spinbutton', {
+      name: 'Total Net Worth'
+    }) as HTMLInputElement;
+    expect(totalNetWorthInput.value).toBe('0');
+
+    await user.clear(totalNetWorthInput);
+    expect(totalNetWorthInput.value).toBe('');
   });
 
   it('shows validation error mapping in step 3 and then completes to dashboard', async () => {

@@ -1,0 +1,2033 @@
+{
+  "version": 2,
+  "code": "RGP_INCOME_FUND_II_SUB",
+  "title": "RGP Income Fund II, LP — Subscription Agreement",
+  "description": null,
+  "steps": [
+    {
+      "number": 1,
+      "key": "STEP_1_INVESTMENT",
+      "label": "STEP 1. INVESTMENT",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 2,
+      "key": "STEP_2_OWNERSHIP_TYPE",
+      "label": "STEP 2. OWNERSHIP TYPE",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 3,
+      "key": "STEP_3_ENTITY_TAX",
+      "label": "STEP 3. ENTITY TAX FORM",
+      "requiredIf": "ownershipType in ['llc','corporation']",
+      "isTerminal": false
+    },
+    {
+      "number": 4,
+      "key": "STEP_4_PRIMARY_OWNER",
+      "label": "STEP 4. PRIMARY OWNER INFORMATION",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 5,
+      "key": "STEP_5_JOINT_OWNER",
+      "label": "STEP 5. JOINT OWNER INFORMATION",
+      "requiredIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "isTerminal": false
+    },
+    {
+      "number": 6,
+      "key": "STEP_6_BENEFICIAL_OWNERS",
+      "label": "STEP 6. BENEFICIAL OWNERSHIP (FOR ENTITY)",
+      "requiredIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "isTerminal": false
+    },
+    {
+      "number": 7,
+      "key": "STEP_7_SUITABILITY",
+      "label": "STEP 7. INVESTOR SUITABILITY & CERTIFICATIONS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 8,
+      "key": "STEP_8_DISTRIBUTION",
+      "label": "STEP 8. DISTRIBUTION INSTRUCTIONS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 9,
+      "key": "STEP_9_SIGNATURE",
+      "label": "STEP 9. SIGNATURE",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 10,
+      "key": "STEP_10_BROKER_DEALER",
+      "label": "STEP 10. BROKER-DEALER (IF APPLICABLE)",
+      "requiredIf": "false",
+      "isTerminal": false
+    },
+    {
+      "number": 11,
+      "key": "STEP_11_RIA",
+      "label": "STEP 11. REGISTERED INVESTMENT ADVISOR (IF APPLICABLE)",
+      "requiredIf": "false",
+      "isTerminal": false
+    }
+  ],
+  "items": [
+    {
+      "id": "investment.amount",
+      "step": 1,
+      "order": 0,
+      "title": "Total Purchase Price (Subscription Payment)",
+      "helper": null,
+      "type": "currency",
+      "required": true,
+      "pdfField": "Investment",
+      "showIf": null,
+      "validation": {
+        "rule": "positiveNumber"
+      },
+      "canonicalField": "investment.amount"
+    },
+    {
+      "id": "investment.partnerType",
+      "step": 1,
+      "order": 1,
+      "title": "Purchasing Units as",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Limited Partner",
+          "value": "limited",
+          "description": null,
+          "pdfField": "Check Box1",
+          "required": false
+        },
+        {
+          "label": "General Partner",
+          "value": "general",
+          "description": null,
+          "pdfField": "Check Box2",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ownershipType",
+      "step": 2,
+      "order": 0,
+      "title": "Ownership type",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Individual or Separate Property",
+          "value": "individual",
+          "description": null,
+          "pdfField": "Check Box3",
+          "required": false
+        },
+        {
+          "label": "Husband and Wife as community property",
+          "value": "community",
+          "description": null,
+          "pdfField": "Check Box4",
+          "required": false
+        },
+        {
+          "label": "Joint Tenants with Right of Survivorship",
+          "value": "joint_survivorship",
+          "description": null,
+          "pdfField": "Check Box5",
+          "required": false
+        },
+        {
+          "label": "Tenants in Common",
+          "value": "tenants_common",
+          "description": null,
+          "pdfField": "Check Box6",
+          "required": false
+        },
+        {
+          "label": "Trust",
+          "value": "trust",
+          "description": null,
+          "pdfField": "Check Box7",
+          "required": false
+        },
+        {
+          "label": "Partnership",
+          "value": "partnership",
+          "description": null,
+          "pdfField": "Check Box8",
+          "required": false
+        },
+        {
+          "label": "Limited Liability Company",
+          "value": "llc",
+          "description": null,
+          "pdfField": "Check Box9",
+          "required": false
+        },
+        {
+          "label": "Corporation",
+          "value": "corporation",
+          "description": null,
+          "pdfField": "Check Box10",
+          "required": false
+        },
+        {
+          "label": "Other",
+          "value": "other",
+          "description": null,
+          "pdfField": "Check Box11",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": "account.registrationType"
+    },
+    {
+      "id": "entity.trustDetails",
+      "step": 2,
+      "order": 1,
+      "title": "Trust details (name of trust, name of trustee, date formed)",
+      "helper": null,
+      "type": "textarea",
+      "required": true,
+      "pdfField": "Trust Include name of trust name of trustee and date trust was formed",
+      "showIf": "ownershipType == 'trust'",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.otherType",
+      "step": 2,
+      "order": 2,
+      "title": "Other ownership type (describe)",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Corporation Include evidence of corporate authority for person who executes required documents",
+      "showIf": "ownershipType == 'other'",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.taxForm",
+      "step": 3,
+      "order": 0,
+      "title": "Tax form used for annual tax filing",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Form 1065 (Partnership)",
+          "value": "f1065",
+          "description": null,
+          "pdfField": "Check Box12",
+          "required": false
+        },
+        {
+          "label": "Form 1120 (Corporation)",
+          "value": "f1120",
+          "description": null,
+          "pdfField": "Check Box13",
+          "required": false
+        },
+        {
+          "label": "Form 1120S (S Corporation)",
+          "value": "f1120s",
+          "description": null,
+          "pdfField": "Check Box14",
+          "required": false
+        },
+        {
+          "label": "Form 1040 (disregarded)",
+          "value": "f1040",
+          "description": null,
+          "pdfField": "Check Box15",
+          "required": false
+        }
+      ],
+      "showIf": "ownershipType in ['llc','corporation']",
+      "canonicalField": null
+    },
+    {
+      "id": "primary.name",
+      "step": 4,
+      "order": 0,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary Owner Information",
+      "showIf": null,
+      "canonicalField": "identity.fullName"
+    },
+    {
+      "id": "primary.address",
+      "step": 4,
+      "order": 1,
+      "title": "Address of Principal Place of Residence (no P.O. Box)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": "address.legal",
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box",
+          "canonicalField": "address.legal.line1"
+        },
+        {
+          "key": "line2",
+          "label": "Apt/Suite",
+          "type": "text",
+          "required": false,
+          "pdfField": "1_2",
+          "canonicalField": "address.legal.line2"
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": true,
+          "pdfField": "2_2",
+          "canonicalField": "address.legal.city"
+        }
+      ]
+    },
+    {
+      "id": "primary.phones",
+      "step": 4,
+      "order": 2,
+      "title": "Phone numbers",
+      "helper": null,
+      "type": "phones-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "business",
+          "label": "Business",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Phone Business",
+          "canonicalField": "phone.business"
+        },
+        {
+          "key": "home",
+          "label": "Home",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Home",
+          "canonicalField": "phone.home"
+        }
+      ]
+    },
+    {
+      "id": "primary.stateOfResidence",
+      "step": 4,
+      "order": 3,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary State of Residence",
+      "showIf": null,
+      "validation": {
+        "rule": "countryCode2"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "primary.dateOfBirth",
+      "step": 4,
+      "order": 4,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth",
+      "showIf": null,
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": "identity.dateOfBirth"
+    },
+    {
+      "id": "primary.tin",
+      "step": 4,
+      "order": 5,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Social Security or Federal Tax ID Number TIN",
+      "showIf": null,
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": "identity.taxId"
+    },
+    {
+      "id": "primary.email",
+      "step": 4,
+      "order": 6,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": "contact.email"
+    },
+    {
+      "id": "primary.paperDelivery",
+      "step": 4,
+      "order": 7,
+      "title": "Paper Delivery Election",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box47",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "joint.name",
+      "step": 5,
+      "order": 0,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Name",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null
+    },
+    {
+      "id": "joint.address",
+      "step": 5,
+      "order": 1,
+      "title": "Address of Principal Place of Residence (no P.O. Box)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box 1",
+          "canonicalField": null
+        },
+        {
+          "key": "line2",
+          "label": "Apt/Suite",
+          "type": "text",
+          "required": false,
+          "pdfField": "Address of Principal Place of Residence no PO Box 2",
+          "canonicalField": null
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": true,
+          "pdfField": "Address of Principal Place of Residence no PO Box 3",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "joint.phones",
+      "step": 5,
+      "order": 2,
+      "title": "Phone numbers",
+      "helper": null,
+      "type": "phones-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "business",
+          "label": "Business",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Phone Business_2",
+          "canonicalField": null
+        },
+        {
+          "key": "home",
+          "label": "Home",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Home_2",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "joint.stateOfResidence",
+      "step": 5,
+      "order": 3,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary State of Residence_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "countryCode2"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.dateOfBirth",
+      "step": 5,
+      "order": 4,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.tin",
+      "step": 5,
+      "order": 5,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.email",
+      "step": 5,
+      "order": 6,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address_2",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "joint.paperDelivery",
+      "step": 5,
+      "order": 7,
+      "title": "Paper Delivery Election",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box48",
+      "showIf": "ownershipType in ['community','joint_survivorship','tenants_common']",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.noOwner25Percent",
+      "step": 6,
+      "order": 0,
+      "title": "No individual owns 25% or more",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box46",
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null
+    },
+    {
+      "id": "beneficialOwners",
+      "step": 6,
+      "order": 1,
+      "title": "Beneficial Owners (25% or more ownership)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other'] && !entity.noOwner25Percent",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "pdfField": "Name_2",
+          "canonicalField": null
+        },
+        {
+          "key": "address",
+          "label": "Address",
+          "type": "address-block",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "phones",
+          "label": "Phones",
+          "type": "phones-block",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "stateOfResidence",
+          "label": "Primary State of Residence",
+          "type": "text",
+          "required": true,
+          "pdfField": "Primary State of Residence_3",
+          "canonicalField": null
+        },
+        {
+          "key": "dateOfBirth",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date of Birth_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "pastDate"
+          }
+        },
+        {
+          "key": "tin",
+          "label": "Social Security or Federal Tax ID Number (TIN)",
+          "type": "ssn-ein",
+          "required": true,
+          "pdfField": "Social Security or Federal Tax ID Number TIN_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "ssnOrEin"
+          }
+        },
+        {
+          "key": "email",
+          "label": "E-mail Address",
+          "type": "email",
+          "required": true,
+          "pdfField": "Email Address_3",
+          "canonicalField": null,
+          "validation": {
+            "rule": "email"
+          }
+        },
+        {
+          "key": "paperDelivery",
+          "label": "Paper Delivery",
+          "type": "checkbox",
+          "required": false,
+          "pdfField": "Check Box43",
+          "canonicalField": null
+        },
+        {
+          "key": "ownershipType",
+          "label": "Ownership Type",
+          "type": "single-choice-cards",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "ownershipPercentage",
+          "label": "Ownership Percentage (%)",
+          "type": "number",
+          "required": true,
+          "pdfField": "Ownership Percentage",
+          "canonicalField": null,
+          "validation": {
+            "rule": "positiveNumber"
+          }
+        }
+      ]
+    },
+    {
+      "id": "entity.controlPerson",
+      "step": 6,
+      "order": 2,
+      "title": "Control Person (Officer, Director or Otherwise Controlling Entity)",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": null,
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": true,
+          "pdfField": "Name_6",
+          "canonicalField": null
+        },
+        {
+          "key": "address",
+          "label": "Address",
+          "type": "address-block",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "phones",
+          "label": "Phones",
+          "type": "phones-block",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "stateOfResidence",
+          "label": "Primary State of Residence",
+          "type": "text",
+          "required": true,
+          "pdfField": "Primary State of Residence_7",
+          "canonicalField": null
+        },
+        {
+          "key": "dateOfBirth",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date of Birth_7",
+          "canonicalField": null,
+          "validation": {
+            "rule": "pastDate"
+          }
+        },
+        {
+          "key": "tin",
+          "label": "Social Security or Federal Tax ID Number (TIN)",
+          "type": "ssn-ein",
+          "required": true,
+          "pdfField": "Social Security or Federal Tax ID Number TIN_7",
+          "canonicalField": null,
+          "validation": {
+            "rule": "ssnOrEin"
+          }
+        },
+        {
+          "key": "email",
+          "label": "E-mail Address",
+          "type": "email",
+          "required": true,
+          "pdfField": "Email Address_7",
+          "canonicalField": null,
+          "validation": {
+            "rule": "email"
+          }
+        }
+      ]
+    },
+    {
+      "id": "suitability.accreditedInvestor",
+      "step": 7,
+      "order": 0,
+      "title": "Accredited Investor Status",
+      "helper": null,
+      "type": "certification-checklist",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "validation": {
+        "rule": "allRequiredChecks"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.financialExperience",
+      "step": 7,
+      "order": 1,
+      "title": "Description of experience in financial and business matters",
+      "helper": null,
+      "type": "textarea",
+      "required": false,
+      "pdfField": "financial and business matters",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.additionalInfo",
+      "step": 7,
+      "order": 2,
+      "title": "Additional information (check all applicable)",
+      "helper": null,
+      "type": "multi-select",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Investor is subject to the U.S. Bank Holding Company Act of 1956 or directly or indirectly 'controlled'",
+          "value": "bank_holding",
+          "description": null,
+          "pdfField": "Check Box19",
+          "required": false
+        },
+        {
+          "label": "Investor is associated with Financial Industry Regulatory Authority, Inc. (FINRA) member firm",
+          "value": "finra_member",
+          "description": null,
+          "pdfField": "Check Box20",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.preExistingRelationship",
+      "step": 7,
+      "order": 3,
+      "title": "Pre-existing relationship certification",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box22",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.additionalCategories",
+      "step": 7,
+      "order": 4,
+      "title": "Additional qualifying categories",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box23",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "suitability.accreditedEntity",
+      "step": 7,
+      "order": 5,
+      "title": "Accredited investor entity certification",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box24",
+      "showIf": "ownershipType in ['trust','partnership','llc','corporation','other']",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.method",
+      "step": 8,
+      "order": 0,
+      "title": "Distribution method",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Deposit via ACH",
+          "value": "ach",
+          "description": null,
+          "pdfField": "Check Box55",
+          "required": false
+        },
+        {
+          "label": "Mail Paper Check",
+          "value": "mail",
+          "description": null,
+          "pdfField": "Check Box29",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.ach",
+      "step": 8,
+      "order": 1,
+      "title": "ACH Account Details",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": null,
+      "showIf": "distribution.method == 'ach'",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "accountType",
+          "label": "Account Type",
+          "type": "single-choice-cards",
+          "required": true,
+          "pdfField": null,
+          "canonicalField": null
+        },
+        {
+          "key": "institutionName",
+          "label": "Name of Financial Institution",
+          "type": "text",
+          "required": true,
+          "pdfField": "Name of Financial Institution",
+          "canonicalField": null
+        },
+        {
+          "key": "accountNumber",
+          "label": "Account #",
+          "type": "text",
+          "required": true,
+          "pdfField": "Account",
+          "canonicalField": null
+        },
+        {
+          "key": "routingNumber",
+          "label": "ABA Routing #",
+          "type": "text",
+          "required": true,
+          "pdfField": "ABA Routing",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "distribution.mailAddress",
+      "step": 8,
+      "order": 2,
+      "title": "Mailing Address (if different from Section 4)",
+      "helper": null,
+      "type": "address-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": "distribution.method == 'mail'",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name_8",
+          "canonicalField": null
+        },
+        {
+          "key": "institutionName",
+          "label": "Institution Name (if applicable)",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name if applicable",
+          "canonicalField": null
+        },
+        {
+          "key": "institutionNumber",
+          "label": "Institution Number",
+          "type": "text",
+          "required": false,
+          "pdfField": "Number",
+          "canonicalField": null
+        },
+        {
+          "key": "line1",
+          "label": "Address",
+          "type": "text",
+          "required": false,
+          "pdfField": "Address 1",
+          "canonicalField": null
+        },
+        {
+          "key": "line2",
+          "label": "Address (cont.)",
+          "type": "text",
+          "required": false,
+          "pdfField": "Address 2",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "signature.investor",
+      "step": 9,
+      "order": 0,
+      "title": "Investor Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature (Investor, or authorized signature)",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Signature Investor or authorized signature_2",
+          "canonicalField": null
+        },
+        {
+          "key": "printedName",
+          "label": "Name (Indicate if different from Section 4)",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name_7",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "signature.executionDate",
+      "step": 9,
+      "order": 1,
+      "title": "Execution Date",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "day",
+          "label": "Day",
+          "type": "text",
+          "required": true,
+          "pdfField": "BEHALF OF THE PERSONS OR ENTITY REGISTERED IN SECTION 4 ABOVE",
+          "canonicalField": null
+        },
+        {
+          "key": "month",
+          "label": "Month",
+          "type": "text",
+          "required": true,
+          "pdfField": "undefined_17",
+          "canonicalField": null
+        },
+        {
+          "key": "year",
+          "label": "Year",
+          "type": "text",
+          "required": true,
+          "pdfField": "undefined_18",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "signature.finalSignature",
+      "step": 9,
+      "order": 2,
+      "title": "Final Signature",
+      "helper": null,
+      "type": "signature",
+      "required": true,
+      "pdfField": "Signature Investor or authorized signature_3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "signature.electronicConsent",
+      "step": 9,
+      "order": 3,
+      "title": "Consent to Electronic Signature",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box18",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "signature.electronicSignature",
+      "step": 9,
+      "order": 4,
+      "title": "Electronic Signature",
+      "helper": null,
+      "type": "signature",
+      "required": false,
+      "pdfField": "Signature50",
+      "showIf": "signature.electronicConsent",
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.firmName",
+      "step": 10,
+      "order": 0,
+      "title": "Broker-Dealer Firm Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "BrokerDealer Firm Name",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.repName",
+      "step": 10,
+      "order": 1,
+      "title": "Registered Representative Name (Print)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representative Name Print",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "brokerDealer.crdNumbers",
+      "step": 10,
+      "order": 2,
+      "title": "CRD Numbers",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "brokerDealer",
+          "label": "Broker-Dealer CRD No.",
+          "type": "text",
+          "required": false,
+          "pdfField": "BrokerDealer",
+          "canonicalField": null
+        },
+        {
+          "key": "representative",
+          "label": "Registered Representative CRD No.",
+          "type": "text",
+          "required": false,
+          "pdfField": "Registered Representative",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "brokerDealer.branchInfo",
+      "step": 10,
+      "order": 3,
+      "title": "Branch Information",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "address",
+          "label": "Registered Representative's Branch Address, City, State, Zip",
+          "type": "text",
+          "required": false,
+          "pdfField": "Registered Representatives Branch Address City State Zip",
+          "canonicalField": null
+        },
+        {
+          "key": "phone",
+          "label": "Branch Phone Number",
+          "type": "phone",
+          "required": false,
+          "pdfField": "undefined_19",
+          "canonicalField": null
+        },
+        {
+          "key": "email",
+          "label": "E-mail Address",
+          "type": "email",
+          "required": false,
+          "pdfField": "undefined_20",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "brokerDealer.signatures",
+      "step": 10,
+      "order": 4,
+      "title": "Broker-Dealer Signatures",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "repSignature",
+          "label": "Signature of Registered Representative",
+          "type": "signature",
+          "required": false,
+          "pdfField": "Text51",
+          "canonicalField": null
+        },
+        {
+          "key": "principalSignature",
+          "label": "Broker-Dealer Principal Approval Signature (REQUIRED)",
+          "type": "signature",
+          "required": false,
+          "pdfField": "Text52",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "ria.registeredWith",
+      "step": 11,
+      "order": 0,
+      "title": "Registered with",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "the SEC",
+          "value": "sec",
+          "description": null,
+          "pdfField": "Check Box16",
+          "required": false
+        },
+        {
+          "label": "the State",
+          "value": "state",
+          "description": null,
+          "pdfField": "Check Box17",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.finraStatus",
+      "step": 11,
+      "order": 1,
+      "title": "FINRA Status",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Advisor is a member of FINRA",
+          "value": "member",
+          "description": null,
+          "pdfField": "Check Box56",
+          "required": false
+        },
+        {
+          "label": "Advisor is affiliated with FINRA member",
+          "value": "affiliated",
+          "description": null,
+          "pdfField": "Check Box57",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.finraDetails",
+      "step": 11,
+      "order": 2,
+      "title": "FINRA member details (include CRD #)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Advisor is affiliated with the following FINRA member include CRD",
+      "showIf": "ria.finraStatus == 'affiliated'",
+      "canonicalField": null
+    },
+    {
+      "id": "ria.firmName",
+      "step": 11,
+      "order": 3,
+      "title": "Name of RIA Firm",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name of RIA Firm",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.representative",
+      "step": 11,
+      "order": 4,
+      "title": "Representative Information",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "name",
+          "label": "Name of Representative",
+          "type": "text",
+          "required": false,
+          "pdfField": "Representative",
+          "canonicalField": null
+        },
+        {
+          "key": "phone",
+          "label": "Telephone Number",
+          "type": "phone",
+          "required": false,
+          "pdfField": "Telephone Number",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "ria.crdNumbers",
+      "step": 11,
+      "order": 5,
+      "title": "CRD Numbers",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "ria",
+          "label": "RIA CRD No.",
+          "type": "text",
+          "required": false,
+          "pdfField": "No",
+          "canonicalField": null
+        },
+        {
+          "key": "representative",
+          "label": "IA Representative CRD No.",
+          "type": "text",
+          "required": false,
+          "pdfField": "CRD No_2",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "ria.address",
+      "step": 11,
+      "order": 6,
+      "title": "Address",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "ria.email",
+      "step": 11,
+      "order": 7,
+      "title": "Email",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "ria.signatures",
+      "step": 11,
+      "order": 8,
+      "title": "RIA Signatures",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "repSignature",
+          "label": "Signature of Representative",
+          "type": "signature",
+          "required": false,
+          "pdfField": "Signature of Representative",
+          "canonicalField": null
+        },
+        {
+          "key": "approvalSignature",
+          "label": "RIA Approval Signature (REQUIRED)",
+          "type": "signature",
+          "required": false,
+          "pdfField": "RIA Approval Signature REQUIRED",
+          "canonicalField": null
+        },
+        {
+          "key": "repDate",
+          "label": "Date",
+          "type": "date",
+          "required": false,
+          "pdfField": "Date",
+          "canonicalField": null
+        },
+        {
+          "key": "approvalDate",
+          "label": "Date",
+          "type": "date",
+          "required": false,
+          "pdfField": "Date_2",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "acceptance.date",
+      "step": 11,
+      "order": 9,
+      "title": "Acceptance Date",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "day",
+          "label": "Day",
+          "type": "text",
+          "required": false,
+          "pdfField": "Dated this",
+          "canonicalField": null
+        },
+        {
+          "key": "month",
+          "label": "Month",
+          "type": "text",
+          "required": false,
+          "pdfField": "day of",
+          "canonicalField": null
+        },
+        {
+          "key": "year",
+          "label": "Year",
+          "type": "text",
+          "required": false,
+          "pdfField": "undefined_22",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "acceptance.signature",
+      "step": 11,
+      "order": 10,
+      "title": "Acceptance Signature",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "by",
+          "label": "By",
+          "type": "text",
+          "required": false,
+          "pdfField": "By",
+          "canonicalField": null
+        },
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name_9",
+          "canonicalField": null
+        }
+      ]
+    }
+  ],
+  "pdfFieldCount": 195,
+  "unmappedFields": [
+    "may require clarification",
+    "Text49",
+    "undefined",
+    "undefined_2",
+    "undefined_3",
+    "undefined_4",
+    "Address of Principal Place of Residence no PO Box_2",
+    "undefined_5",
+    "undefined_6",
+    "Phone Business_3",
+    "undefined_7",
+    "Home_3",
+    "undefined_8",
+    "Name_3",
+    "Address of Principal Place of Residence no PO Box 1_2",
+    "Address of Principal Place of Residence no PO Box 2_2",
+    "Address of Principal Place of Residence no PO Box 3_2",
+    "Phone Business_4",
+    "undefined_9",
+    "Home_4",
+    "undefined_10",
+    "Primary State of Residence_4",
+    "Date of Birth_4",
+    "Social Security or Federal Tax ID Number TIN_4",
+    "Email Address_4",
+    "Ownership Percentage_2",
+    "Name_4",
+    "Address of Principal Place of Residence no PO Box 1_3",
+    "Address of Principal Place of Residence no PO Box 2_3",
+    "Address of Principal Place of Residence no PO Box 3_3",
+    "Phone Business_5",
+    "undefined_11",
+    "Home_5",
+    "undefined_12",
+    "Primary State of Residence_5",
+    "Date of Birth_5",
+    "Social Security or Federal Tax ID Number TIN_5",
+    "Email Address_5",
+    "Check Box40",
+    "Check Box41",
+    "Check Box42",
+    "Check Box44",
+    "Check Box45",
+    "Check Box53",
+    "Check Box54",
+    "Ownership Percentage_3",
+    "Name_5",
+    "Address of Principal Place of Residence no PO Box 1_4",
+    "Address of Principal Place of Residence no PO Box 2_4",
+    "Address of Principal Place of Residence no PO Box 3_4",
+    "Phone Business_6",
+    "undefined_13",
+    "Home_6",
+    "undefined_14",
+    "Primary State of Residence_6",
+    "Date of Birth_6",
+    "Social Security or Federal Tax ID Number TIN_6",
+    "Email Address_6",
+    "Ownership Percentage_4",
+    "Address of Principal Place of Residence no PO Box 1_5",
+    "Address of Principal Place of Residence no PO Box 2_5",
+    "Address of Principal Place of Residence no PO Box 3_5",
+    "Phone Business_7",
+    "undefined_15",
+    "Home_7",
+    "undefined_16",
+    "Check Box33",
+    "Check Box34",
+    "Check Box35",
+    "Check Box36",
+    "Check Box37",
+    "Check Box38",
+    "Check Box39",
+    "Signature Investor or authorized signature",
+    "Check Box26",
+    "Check Box27",
+    "Check Box28",
+    "Check Box30",
+    "Check Box31",
+    "Check Box32",
+    "Check Box25",
+    "Check all applicable boxes Note that additional information may be requested",
+    "Check Box21",
+    "CRD No",
+    "Branch Phone Number",
+    "Email Address_8",
+    "2 Unless noted below a he or she is not a member of FINRA and based on the activities he or she performs",
+    "undefined_21"
+  ],
+  "unmappedDetails": [
+    {
+      "name": "may require clarification",
+      "page": 1,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Text49",
+      "page": 1,
+      "hint": "Trust (Include name of trust, name of trustee and date trust was formed.) ________________________"
+    },
+    {
+      "name": "undefined",
+      "page": 2,
+      "hint": ")"
+    },
+    {
+      "name": "undefined_2",
+      "page": 2,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "undefined_3",
+      "page": 2,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "undefined_4",
+      "page": 2,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box_2",
+      "page": 2,
+      "hint": "Information"
+    },
+    {
+      "name": "undefined_5",
+      "page": 2,
+      "hint": "For Entity"
+    },
+    {
+      "name": "undefined_6",
+      "page": 2,
+      "hint": "___________________________________________________________________________________________"
+    },
+    {
+      "name": "Phone Business_3",
+      "page": 2,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "undefined_7",
+      "page": 2,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Home_3",
+      "page": 2,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "undefined_8",
+      "page": 2,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "Name_3",
+      "page": 3,
+      "hint": "Beneficial Owner 2 Information"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 1_2",
+      "page": 3,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________ · Name: __________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 2_2",
+      "page": 3,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 3_2",
+      "page": 3,
+      "hint": "___________________________________________________________________________________________"
+    },
+    {
+      "name": "Phone Business_4",
+      "page": 3,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "undefined_9",
+      "page": 3,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Home_4",
+      "page": 3,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "undefined_10",
+      "page": 3,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "Primary State of Residence_4",
+      "page": 3,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    },
+    {
+      "name": "Date of Birth_4",
+      "page": 3,
+      "hint": "Primary State of Residence: ____________________ Date of Birth: ___________________________________ · Phone: Business (_"
+    },
+    {
+      "name": "Social Security or Federal Tax ID Number TIN_4",
+      "page": 3,
+      "hint": "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    },
+    {
+      "name": "Email Address_4",
+      "page": 3,
+      "hint": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    },
+    {
+      "name": "Ownership Percentage_2",
+      "page": 3,
+      "hint": "box if you would prefer to receive paper copies."
+    },
+    {
+      "name": "Name_4",
+      "page": 3,
+      "hint": "Beneficial Owner 3 Information"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 1_3",
+      "page": 3,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________ · Name: __________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 2_3",
+      "page": 3,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 3_3",
+      "page": 3,
+      "hint": "___________________________________________________________________________________________"
+    },
+    {
+      "name": "Phone Business_5",
+      "page": 3,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "undefined_11",
+      "page": 3,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Home_5",
+      "page": 3,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "undefined_12",
+      "page": 3,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "Primary State of Residence_5",
+      "page": 3,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    },
+    {
+      "name": "Date of Birth_5",
+      "page": 3,
+      "hint": "Primary State of Residence: ____________________ Date of Birth: ___________________________________ · Phone: Business (_"
+    },
+    {
+      "name": "Social Security or Federal Tax ID Number TIN_5",
+      "page": 3,
+      "hint": "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    },
+    {
+      "name": "Email Address_5",
+      "page": 3,
+      "hint": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    },
+    {
+      "name": "Check Box40",
+      "page": 3,
+      "hint": "Indirect Ownership"
+    },
+    {
+      "name": "Check Box41",
+      "page": 3,
+      "hint": "box if you would prefer to receive paper copies."
+    },
+    {
+      "name": "Check Box42",
+      "page": 3,
+      "hint": "the legal entity and that you agree to inform the"
+    },
+    {
+      "name": "Check Box44",
+      "page": 3,
+      "hint": "Direct Ownership · Check here if no individual owns 25% or more of · _______________________ · the legal entity and that"
+    },
+    {
+      "name": "Check Box45",
+      "page": 3,
+      "hint": "Ownership Percentage (%)"
+    },
+    {
+      "name": "Check Box53",
+      "page": 3,
+      "hint": "Paper Delivery"
+    },
+    {
+      "name": "Check Box54",
+      "page": 3,
+      "hint": "Paper Delivery"
+    },
+    {
+      "name": "Ownership Percentage_3",
+      "page": 4,
+      "hint": "_______________________ · Direct Ownership · Check here if no individual owns 25% or more of · the legal entity and that"
+    },
+    {
+      "name": "Name_5",
+      "page": 4,
+      "hint": "Beneficial Owner 4 Information"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 1_4",
+      "page": 4,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________ · Name: __________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 2_4",
+      "page": 4,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 3_4",
+      "page": 4,
+      "hint": "___________________________________________________________________________________________"
+    },
+    {
+      "name": "Phone Business_6",
+      "page": 4,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "undefined_13",
+      "page": 4,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Home_6",
+      "page": 4,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "undefined_14",
+      "page": 4,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "Primary State of Residence_6",
+      "page": 4,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________"
+    },
+    {
+      "name": "Date of Birth_6",
+      "page": 4,
+      "hint": "Primary State of Residence: ____________________ Date of Birth: ___________________________________ · Phone: Business (_"
+    },
+    {
+      "name": "Social Security or Federal Tax ID Number TIN_6",
+      "page": 4,
+      "hint": "Primary State of Residence: ____________________ Date of Birth: ___________________________________"
+    },
+    {
+      "name": "Email Address_6",
+      "page": 4,
+      "hint": "Social Security or Federal Tax ID Number (“TIN”): _________________________________________________"
+    },
+    {
+      "name": "Ownership Percentage_4",
+      "page": 4,
+      "hint": "box if you would prefer to receive paper copies."
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 1_5",
+      "page": 4,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________ · Name: __________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 2_5",
+      "page": 4,
+      "hint": "Address of Principal Place of Residence (no P.O. Box): ______________________________________________"
+    },
+    {
+      "name": "Address of Principal Place of Residence no PO Box 3_5",
+      "page": 4,
+      "hint": "___________________________________________________________________________________________"
+    },
+    {
+      "name": "Phone Business_7",
+      "page": 4,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "undefined_15",
+      "page": 4,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Home_7",
+      "page": 4,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "undefined_16",
+      "page": 4,
+      "hint": "Phone: Business (_____)________________________ Home (_____)__________________________________ · _______________________"
+    },
+    {
+      "name": "Check Box33",
+      "page": 4,
+      "hint": "_______________________"
+    },
+    {
+      "name": "Check Box34",
+      "page": 4,
+      "hint": "Indirect Ownership"
+    },
+    {
+      "name": "Check Box35",
+      "page": 4,
+      "hint": "Direct Ownership"
+    },
+    {
+      "name": "Check Box36",
+      "page": 4,
+      "hint": "Paper Delivery"
+    },
+    {
+      "name": "Check Box37",
+      "page": 4,
+      "hint": "Direct Ownership · Check here if no individual owns 25% or more of · _______________________ · the legal entity and that"
+    },
+    {
+      "name": "Check Box38",
+      "page": 4,
+      "hint": "Ownership Percentage (%)"
+    },
+    {
+      "name": "Check Box39",
+      "page": 4,
+      "hint": "Direct Ownership"
+    },
+    {
+      "name": "Signature Investor or authorized signature",
+      "page": 5,
+      "hint": "Agreement other than the certifications required to avoid backup withholding."
+    },
+    {
+      "name": "Check Box26",
+      "page": 5,
+      "hint": "current year."
+    },
+    {
+      "name": "Check Box27",
+      "page": 5,
+      "hint": "Suitability"
+    },
+    {
+      "name": "Check Box28",
+      "page": 5,
+      "hint": "Investor &"
+    },
+    {
+      "name": "Check Box30",
+      "page": 5,
+      "hint": "("
+    },
+    {
+      "name": "Check Box31",
+      "page": 5,
+      "hint": "Checking"
+    },
+    {
+      "name": "Check Box32",
+      "page": 5,
+      "hint": "Savings"
+    },
+    {
+      "name": "Check Box25",
+      "page": 6,
+      "hint": "A director, executive officer, or general partner of the Fund, or any director, executive officer, or general · partner "
+    },
+    {
+      "name": "Check all applicable boxes Note that additional information may be requested",
+      "page": 7,
+      "hint": "__________________________________________________________________________________________"
+    },
+    {
+      "name": "Check Box21",
+      "page": 7,
+      "hint": "evaluating the merits and risks of an investment in the Units. The following is a description of my experience in · By r"
+    },
+    {
+      "name": "CRD No",
+      "page": 12,
+      "hint": "___________________________________________________________________________________________"
+    },
+    {
+      "name": "Branch Phone Number",
+      "page": 12,
+      "hint": "________________________________________"
+    },
+    {
+      "name": "Email Address_8",
+      "page": 12,
+      "hint": "________________________________________________"
+    },
+    {
+      "name": "2 Unless noted below a he or she is not a member of FINRA and based on the activities he or she performs",
+      "page": 13,
+      "hint": "The undersigned registered investment advisor further certifies that:"
+    },
+    {
+      "name": "undefined_21",
+      "page": 14,
+      "hint": "Name of"
+    }
+  ]
+}

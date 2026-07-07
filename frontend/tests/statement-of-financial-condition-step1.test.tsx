@@ -256,5 +256,134 @@ describe('StatementOfFinancialConditionStep1Page', () => {
       expect(window.location.pathname).toBe('/clients/client_1/statement-of-financial-condition/step-2');
     });
   });
-});
 
+  it('lets 0-valued amount inputs be cleared without restoring 0', async () => {
+    const user = userEvent.setup();
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes('/api/auth/me')) {
+        return new Response(
+          JSON.stringify({
+            user: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      if (url.includes('/api/clients/client_1/statement-of-financial-condition/step-1')) {
+        return new Response(
+          JSON.stringify({
+            onboarding: {
+              clientId: 'client_1',
+              status: 'IN_PROGRESS',
+              step: {
+                key: 'STEP_1_FINANCIALS',
+                label: 'STEP 1. STATEMENT OF FINANCIAL CONDITION',
+                currentQuestionId: 'step1.liquidNonQualifiedAssets',
+                currentQuestionIndex: 0,
+                visibleQuestionIds: ['step1.liquidNonQualifiedAssets'],
+                fields: {
+                  accountRegistration: {
+                    rrName: 'RR One',
+                    rrNo: '1001',
+                    customerNames: 'John Smith'
+                  },
+                  liquidNonQualifiedAssets: {
+                    cashMoneyMarketsCds: 0,
+                    brokerageNonManaged: 0,
+                    managedAccounts: 0,
+                    mutualFundsDirect: 0,
+                    annuitiesLessSurrenderCharges: 0,
+                    cashValueLifeInsurance: 0,
+                    otherBusinessAssetsCollectibles: 0
+                  },
+                  liabilities: {
+                    mortgagePrimaryResidence: 0,
+                    mortgagesSecondaryInvestment: 0,
+                    homeEquityLoans: 0,
+                    creditCards: 0,
+                    otherLiabilities: 0
+                  },
+                  illiquidNonQualifiedAssets: {
+                    primaryResidence: 0,
+                    investmentRealEstate: 0,
+                    privateBusiness: 0
+                  },
+                  liquidQualifiedAssets: {
+                    cashMoneyMarketsCds: 0,
+                    retirementPlans: 0,
+                    brokerageNonManaged: 0,
+                    managedAccounts: 0,
+                    mutualFundsDirect: 0,
+                    annuities: 0
+                  },
+                  incomeSummary: {
+                    salaryCommissions: 0,
+                    investmentIncome: 0,
+                    pension: 0,
+                    socialSecurity: 0,
+                    netRentalIncome: 0,
+                    other: 0
+                  },
+                  illiquidQualifiedAssets: {
+                    purchaseAmountValue: 0
+                  }
+                },
+                totals: {
+                  totalLiabilities: 0,
+                  totalLiquidAssets: 0,
+                  totalLiquidQualifiedAssets: 0,
+                  totalAnnualIncome: 0,
+                  totalIlliquidAssetsEquity: 0,
+                  totalAssetsLessPrimaryResidence: 0,
+                  totalNetWorthAssetsLessPrimaryResidenceLiabilities: 0,
+                  totalIlliquidSecurities: 0,
+                  totalNetWorth: 0,
+                  totalPotentialLiquidity: 0,
+                  totalIlliquidQualifiedAssets: 0
+                }
+              }
+            }
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      return new Response(JSON.stringify({ message: 'Not Found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/statement-of-financial-condition/step-1');
+
+    render(
+      <AuthProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </AuthProvider>
+    );
+
+    await screen.findByText('What are the liquid non-qualified assets?');
+
+    const cashInput = screen.getByRole('spinbutton', { name: 'Cash / Money Markets / CDs' }) as HTMLInputElement;
+    expect(cashInput.value).toBe('0');
+
+    await user.clear(cashInput);
+    expect(cashInput.value).toBe('');
+  });
+});

@@ -6,7 +6,7 @@ import { CreateClientDrawer } from '../components/create-client/CreateClientDraw
 import { useAuth } from '../context/AuthContext';
 import { usePdfUpdates } from '../context/PdfUpdatesContext';
 import { useToast } from '../context/ToastContext';
-import type { ClientRecord, FormCatalogItem } from '../types/api';
+import type { BrokerUserOption, ClientRecord, FormCatalogItem } from '../types/api';
 
 export function DashboardPage() {
   const { user, signOut } = useAuth();
@@ -16,6 +16,7 @@ export function DashboardPage() {
 
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [forms, setForms] = useState<FormCatalogItem[]>([]);
+  const [brokerUsers, setBrokerUsers] = useState<BrokerUserOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -42,13 +43,15 @@ export function DashboardPage() {
     setError(null);
 
     try {
-      const [clientsResponse, formsResponse] = await Promise.all([
+      const [clientsResponse, formsResponse, brokerUsersResponse] = await Promise.all([
         apiRequest<{ clients: ClientRecord[] }>('/api/clients'),
-        apiRequest<{ forms: FormCatalogItem[] }>('/api/forms')
+        apiRequest<{ forms: FormCatalogItem[] }>('/api/forms'),
+        apiRequest<{ users: BrokerUserOption[] }>('/api/clients/broker-users')
       ]);
 
       setClients(clientsResponse.clients);
       setForms(formsResponse.forms);
+      setBrokerUsers(brokerUsersResponse.users);
     } catch (requestError) {
       if (requestError instanceof ApiError && requestError.statusCode === 401) {
         await signOut();
@@ -93,6 +96,15 @@ export function DashboardPage() {
               <p className="mt-2 text-sm text-mute">Signed in as {user?.name}</p>
             </div>
             <div className="flex items-center gap-3">
+              {user?.isAdmin && (
+                <button
+                  className="rounded-full border border-line px-4 py-2 text-sm text-ink transition hover:border-accent"
+                  type="button"
+                  onClick={() => navigate('/admin/forms')}
+                >
+                  Form Library
+                </button>
+              )}
               <button
                 className="rounded-full border border-line px-4 py-2 text-sm text-ink transition hover:border-black"
                 type="button"
@@ -251,6 +263,7 @@ export function DashboardPage() {
 
       {user && (
         <CreateClientDrawer
+          brokerUsers={brokerUsers}
           forms={forms}
           open={drawerOpen}
           primaryBroker={user}

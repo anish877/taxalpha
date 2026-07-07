@@ -78,14 +78,14 @@ function getErrorForQuestion(
   return prefixed ? fieldErrors[prefixed] : null;
 }
 
-function parseAmountInput(raw: string): number {
+function parseAmountInput(raw: string): number | null {
   if (!raw.trim()) {
-    return 0;
+    return null;
   }
 
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed < 0) {
-    return 0;
+    return null;
   }
 
   return parsed;
@@ -365,7 +365,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep1Page() {
             min={0}
             step="any"
             type="number"
-            value={answer.proposedPrincipalAmount}
+            value={answer.proposedPrincipalAmount ?? ''}
             onChange={(event) => {
               const payload = structuredClone(answer);
               payload.proposedPrincipalAmount = parseAmountInput(event.target.value);

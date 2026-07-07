@@ -337,7 +337,8 @@ function createAuthCookie(): string {
 function createMockPrisma() {
   return {
     user: {
-      findUnique: vi.fn()
+      findUnique: vi.fn(),
+      findMany: vi.fn()
     },
     formCatalog: {
       findMany: vi.fn()
@@ -376,6 +377,37 @@ describe('client routes', () => {
 
     const response = await request(app).get('/api/clients');
     expect(response.status).toBe(401);
+  });
+
+  it('returns website users available for broker sharing', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.user.findMany.mockResolvedValue([
+      { id: 'user_2', name: 'Advisor Two', email: 'advisor.two@example.com' }
+    ]);
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get('/api/clients/broker-users')
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.body.users).toEqual([
+      { id: 'user_2', name: 'Advisor Two', email: 'advisor.two@example.com' }
+    ]);
+    expect(prisma.user.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          id: {
+            not: authUser.id
+          }
+        }
+      })
+    );
   });
 
   it('creates a client with investor profile onboarding and reuses broker by email', async () => {
@@ -483,6 +515,136 @@ describe('client routes', () => {
     expect(response.body.client.investorProfileOnboardingStatus).toBe('NOT_STARTED');
     expect(response.body.client.hasInvestorProfile).toBe(true);
     expect(tx.broker.upsert).toHaveBeenCalledTimes(1);
+  });
+
+  it('creates a shared client link for selected website broker users', async () => {
+    const prisma = createMockPrisma();
+    const sharedBrokerUser = {
+      id: 'user_2',
+      name: 'Advisor Two',
+      email: 'advisor.two@example.com'
+    };
+
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.user.findMany.mockResolvedValue([sharedBrokerUser]);
+    prisma.formCatalog.findMany.mockResolvedValue([{ id: 'form_investor', code: 'INVESTOR_PROFILE' }]);
+
+    const tx = {
+      client: {
+        findUnique: vi
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({
+            id: 'client_1',
+            name: 'John Smith',
+            email: 'john@example.com',
+            phone: null,
+            createdAt: new Date('2025-01-01T00:00:00.000Z'),
+            brokerLinks: [
+              {
+                role: 'PRIMARY',
+                broker: {
+                  id: 'broker_self',
+                  name: authUser.name,
+                  email: authUser.email,
+                  kind: 'SELF'
+                }
+              },
+              {
+                role: 'ADDITIONAL',
+                broker: {
+                  id: 'broker_shared',
+                  name: sharedBrokerUser.name,
+                  email: sharedBrokerUser.email,
+                  kind: 'SELF'
+                }
+              }
+            ],
+            formSelections: [
+              { form: { id: 'form_investor', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' } }
+            ],
+            investorProfileOnboarding: {
+              status: 'NOT_STARTED',
+              step1RrName: null
+            },
+            statementOfFinancialConditionOnboarding: null
+          }),
+        create: vi.fn().mockResolvedValue({ id: 'client_1' })
+      },
+      broker: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'broker_self',
+          ownerUserId: authUser.id,
+          name: authUser.name,
+          email: authUser.email,
+          kind: 'SELF'
+        }),
+        create: vi.fn(),
+        upsert: vi.fn().mockResolvedValue({
+          id: 'broker_shared',
+          ownerUserId: sharedBrokerUser.id,
+          name: sharedBrokerUser.name,
+          email: sharedBrokerUser.email,
+          kind: 'SELF'
+        })
+      },
+      clientBroker: {
+        createMany: vi.fn().mockResolvedValue({ count: 2 })
+      },
+      clientFormSelection: {
+        createMany: vi.fn().mockResolvedValue({ count: 1 })
+      },
+      investorProfileOnboarding: {
+        create: vi.fn().mockResolvedValue({ id: 'onboarding_1' })
+      },
+      statementOfFinancialConditionOnboarding: {
+        create: vi.fn()
+      }
+    };
+
+    prisma.$transaction.mockImplementation(async (callback: (trx: typeof tx) => Promise<unknown>) => callback(tx));
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        additionalBrokerUserIds: [sharedBrokerUser.id]
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.client.additionalBrokers).toEqual([
+      {
+        id: 'broker_shared',
+        name: sharedBrokerUser.name,
+        email: sharedBrokerUser.email
+      }
+    ]);
+    expect(tx.broker.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          ownerUserId_email: {
+            ownerUserId: sharedBrokerUser.id,
+            email: sharedBrokerUser.email
+          }
+        }
+      })
+    );
+    expect(tx.clientBroker.createMany).toHaveBeenCalledWith({
+      data: expect.arrayContaining([
+        {
+          clientId: 'client_1',
+          brokerId: 'broker_shared',
+          role: 'ADDITIONAL'
+        }
+      ])
+    });
   });
 
   it('creates a client with optional SFC onboarding when selected', async () => {

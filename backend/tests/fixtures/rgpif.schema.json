@@ -1,0 +1,1278 @@
+{
+  "code": "RGP_INCOME_FUND_II_SUB",
+  "title": "RGP Income Fund II, LP — Subscription Agreement",
+  "description": null,
+  "sections": [
+    {
+      "number": 1,
+      "title": "Section 1"
+    },
+    {
+      "number": 2,
+      "title": "Section 2"
+    },
+    {
+      "number": 3,
+      "title": "Section 3"
+    },
+    {
+      "number": 4,
+      "title": "Section 4"
+    },
+    {
+      "number": 5,
+      "title": "Section 5"
+    },
+    {
+      "number": 6,
+      "title": "Section 6"
+    },
+    {
+      "number": 7,
+      "title": "Section 7"
+    },
+    {
+      "number": 8,
+      "title": "Section 8"
+    },
+    {
+      "number": 9,
+      "title": "Section 9"
+    },
+    {
+      "number": 10,
+      "title": "Section 10"
+    },
+    {
+      "number": 11,
+      "title": "Section 11"
+    },
+    {
+      "number": 12,
+      "title": "Section 12"
+    }
+  ],
+  "items": [
+    {
+      "id": "investment.amount",
+      "section": 1,
+      "title": "Total Purchase Price (Subscription Payment)",
+      "helper": null,
+      "type": "currency",
+      "required": true,
+      "pdfField": "Investment",
+      "showIf": null,
+      "profileKey": "investment.amount"
+    },
+    {
+      "id": "investment.partnerType",
+      "section": 1,
+      "title": "Purchasing Units as",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Limited Partner",
+          "value": "limited",
+          "pdfField": "Check Box1"
+        },
+        {
+          "label": "Investor General Partner",
+          "value": "general",
+          "pdfField": "Check Box2"
+        }
+      ],
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "investmentType",
+      "section": 2,
+      "title": "Ownership Type",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Individual or Separate Property",
+          "value": "individual",
+          "pdfField": "Check Box3"
+        },
+        {
+          "label": "Husband and Wife as Community Property",
+          "value": "community",
+          "pdfField": "Check Box4"
+        },
+        {
+          "label": "Joint Tenants with Right of Survivorship",
+          "value": "joint_survivorship",
+          "pdfField": "Check Box5"
+        },
+        {
+          "label": "Tenants in Common",
+          "value": "tenants_common",
+          "pdfField": "Check Box6"
+        },
+        {
+          "label": "Trust",
+          "value": "trust",
+          "pdfField": "Check Box7"
+        },
+        {
+          "label": "Partnership",
+          "value": "partnership",
+          "pdfField": "Check Box8"
+        },
+        {
+          "label": "Limited Liability Company",
+          "value": "llc",
+          "pdfField": "Check Box9"
+        },
+        {
+          "label": "Corporation",
+          "value": "corporation",
+          "pdfField": "Check Box10"
+        }
+      ],
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "trust.details",
+      "section": 2,
+      "title": "Trust Details (name of trust, trustee, date formed)",
+      "helper": null,
+      "type": "textarea",
+      "required": false,
+      "pdfField": "Trust Include name of trust name of trustee and date trust was formed",
+      "showIf": "investmentType == 'trust'",
+      "profileKey": null
+    },
+    {
+      "id": "entity.otherType",
+      "section": 2,
+      "title": "Other Entity Type (if applicable)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Corporation Include evidence of corporate authority for person who executes required documents",
+      "showIf": "investmentType not in ['individual','community','joint_survivorship','tenants_common','trust','partnership','llc','corporation']",
+      "profileKey": null
+    },
+    {
+      "id": "entity.taxForm",
+      "section": 3,
+      "title": "Tax Form Used for Annual Filing",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Form 1065 (Partnership)",
+          "value": "1065",
+          "pdfField": "Check Box12"
+        },
+        {
+          "label": "Form 1120 (Corporation)",
+          "value": "1120",
+          "pdfField": "Check Box13"
+        },
+        {
+          "label": "Form 1120S (S Corporation)",
+          "value": "1120s",
+          "pdfField": "Check Box14"
+        },
+        {
+          "label": "Form 1040 (Disregarded)",
+          "value": "1040",
+          "pdfField": "Check Box15"
+        }
+      ],
+      "showIf": "investmentType in ['llc','corporation']",
+      "profileKey": null
+    },
+    {
+      "id": "primary.name",
+      "section": 4,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary Owner Information",
+      "showIf": null,
+      "profileKey": "person.fullName"
+    },
+    {
+      "id": "primary.address.line1",
+      "section": 4,
+      "title": "Address Line 1 (no P.O. Box)",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Address of Principal Place of Residence no PO Box",
+      "showIf": null,
+      "profileKey": "person.address.line1"
+    },
+    {
+      "id": "primary.address.line2",
+      "section": 4,
+      "title": "Address Line 2",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "1_2",
+      "showIf": null,
+      "profileKey": "person.address.line2"
+    },
+    {
+      "id": "primary.address.line3",
+      "section": 4,
+      "title": "City, State, Zip",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "2_2",
+      "showIf": null,
+      "profileKey": "person.address.cityStateZip"
+    },
+    {
+      "id": "primary.phone.business",
+      "section": 4,
+      "title": "Business Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business",
+      "showIf": null,
+      "profileKey": "person.phone.business"
+    },
+    {
+      "id": "primary.phone.home",
+      "section": 4,
+      "title": "Home Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home",
+      "showIf": null,
+      "profileKey": "person.phone.home"
+    },
+    {
+      "id": "primary.state",
+      "section": 4,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary State of Residence",
+      "showIf": null,
+      "profileKey": "person.state"
+    },
+    {
+      "id": "primary.dob",
+      "section": 4,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth",
+      "showIf": null,
+      "profileKey": "person.dob"
+    },
+    {
+      "id": "primary.tin",
+      "section": 4,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Social Security or Federal Tax ID Number TIN",
+      "showIf": null,
+      "profileKey": "person.tin"
+    },
+    {
+      "id": "primary.email",
+      "section": 4,
+      "title": "Email Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address",
+      "showIf": null,
+      "profileKey": "person.email"
+    },
+    {
+      "id": "primary.paperDelivery",
+      "section": 4,
+      "title": "Prefer Paper Delivery",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box47",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "joint.name",
+      "section": 5,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.fullName"
+    },
+    {
+      "id": "joint.address.line1",
+      "section": 5,
+      "title": "Address Line 1 (no P.O. Box)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 1",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.address.line1"
+    },
+    {
+      "id": "joint.address.line2",
+      "section": 5,
+      "title": "Address Line 2",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.address.line2"
+    },
+    {
+      "id": "joint.address.line3",
+      "section": 5,
+      "title": "City, State, Zip",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 3",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.address.cityStateZip"
+    },
+    {
+      "id": "joint.phone.business",
+      "section": 5,
+      "title": "Business Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.phone.business"
+    },
+    {
+      "id": "joint.phone.home",
+      "section": 5,
+      "title": "Home Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.phone.home"
+    },
+    {
+      "id": "joint.state",
+      "section": 5,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.state"
+    },
+    {
+      "id": "joint.dob",
+      "section": 5,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.dob"
+    },
+    {
+      "id": "joint.tin",
+      "section": 5,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.tin"
+    },
+    {
+      "id": "joint.email",
+      "section": 5,
+      "title": "Email Address",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_2",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": "joint.email"
+    },
+    {
+      "id": "joint.paperDelivery",
+      "section": 5,
+      "title": "Prefer Paper Delivery",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box48",
+      "showIf": "investmentType in ['community','joint_survivorship','tenants_common']",
+      "profileKey": null
+    },
+    {
+      "id": "controlPerson.name",
+      "section": 6,
+      "title": "Control Person Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_2",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.fullName"
+    },
+    {
+      "id": "controlPerson.address.line1",
+      "section": 6,
+      "title": "Address Line 1 (no P.O. Box)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box_2",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.address.line1"
+    },
+    {
+      "id": "controlPerson.address.line2",
+      "section": 6,
+      "title": "Address Line 2",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "undefined_5",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.address.line2"
+    },
+    {
+      "id": "controlPerson.address.line3",
+      "section": 6,
+      "title": "City, State, Zip",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "undefined_6",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.address.cityStateZip"
+    },
+    {
+      "id": "controlPerson.phone.business",
+      "section": 6,
+      "title": "Business Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.phone.business"
+    },
+    {
+      "id": "controlPerson.phone.home",
+      "section": 6,
+      "title": "Home Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.phone.home"
+    },
+    {
+      "id": "controlPerson.state",
+      "section": 6,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.state"
+    },
+    {
+      "id": "controlPerson.dob",
+      "section": 6,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.dob"
+    },
+    {
+      "id": "controlPerson.tin",
+      "section": 6,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.tin"
+    },
+    {
+      "id": "controlPerson.email",
+      "section": 6,
+      "title": "Email Address",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "controlPerson.email"
+    },
+    {
+      "id": "beneficialOwner1.name",
+      "section": 6,
+      "title": "Beneficial Owner 1 Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_3",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.fullName"
+    },
+    {
+      "id": "beneficialOwner1.address.line1",
+      "section": 6,
+      "title": "Address Line 1",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 1_2",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.address.line1"
+    },
+    {
+      "id": "beneficialOwner1.address.line2",
+      "section": 6,
+      "title": "Address Line 2",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 2_2",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.address.line2"
+    },
+    {
+      "id": "beneficialOwner1.address.line3",
+      "section": 6,
+      "title": "City, State, Zip",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address of Principal Place of Residence no PO Box 3_2",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.address.cityStateZip"
+    },
+    {
+      "id": "beneficialOwner1.phone.business",
+      "section": 6,
+      "title": "Business Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Phone Business_4",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.phone.business"
+    },
+    {
+      "id": "beneficialOwner1.phone.home",
+      "section": 6,
+      "title": "Home Phone",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Home_4",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.phone.home"
+    },
+    {
+      "id": "beneficialOwner1.state",
+      "section": 6,
+      "title": "Primary State of Residence",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Primary State of Residence_4",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.state"
+    },
+    {
+      "id": "beneficialOwner1.dob",
+      "section": 6,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Birth_4",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.dob"
+    },
+    {
+      "id": "beneficialOwner1.tin",
+      "section": 6,
+      "title": "Social Security or Federal Tax ID Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": false,
+      "pdfField": "Social Security or Federal Tax ID Number TIN_4",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.tin"
+    },
+    {
+      "id": "beneficialOwner1.email",
+      "section": 6,
+      "title": "Email Address",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_4",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": "beneficialOwner.email"
+    },
+    {
+      "id": "beneficialOwner1.ownershipPct",
+      "section": 6,
+      "title": "Ownership Percentage",
+      "helper": null,
+      "type": "number",
+      "required": false,
+      "pdfField": "Ownership Percentage",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": null
+    },
+    {
+      "id": "beneficialOwner1.ownershipType",
+      "section": 6,
+      "title": "Ownership Type",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Ownership",
+          "value": "direct",
+          "pdfField": "Check Box41"
+        },
+        {
+          "label": "Indirect Ownership",
+          "value": "indirect",
+          "pdfField": "Check Box40"
+        }
+      ],
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": null
+    },
+    {
+      "id": "beneficialOwner1.noOwner25Pct",
+      "section": 6,
+      "title": "No individual owns 25% or more",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box42",
+      "showIf": "investmentType in ['trust','partnership','llc','corporation']",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.method",
+      "section": 7,
+      "title": "Distribution Method",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Direct Deposit via ACH",
+          "value": "ach",
+          "pdfField": "Check Box55"
+        },
+        {
+          "label": "Mail Paper Check",
+          "value": "mail",
+          "pdfField": "Check Box29"
+        }
+      ],
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "distribution.accountType",
+      "section": 7,
+      "title": "Account Type",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Checking",
+          "value": "checking",
+          "pdfField": "Check Box31"
+        },
+        {
+          "label": "Savings",
+          "value": "savings",
+          "pdfField": "Check Box32"
+        },
+        {
+          "label": "Brokerage",
+          "value": "brokerage",
+          "pdfField": "Check Box30"
+        }
+      ],
+      "showIf": "distribution.method == 'ach'",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.bankName",
+      "section": 7,
+      "title": "Name of Financial Institution",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name of Financial Institution",
+      "showIf": "distribution.method == 'ach'",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.accountNumber",
+      "section": 7,
+      "title": "Account Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Account",
+      "showIf": "distribution.method == 'ach'",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.routingNumber",
+      "section": 7,
+      "title": "ABA Routing Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "ABA Routing",
+      "showIf": "distribution.method == 'ach'",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.mailName",
+      "section": 7,
+      "title": "Name (if different from Section 4)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_8",
+      "showIf": "distribution.method == 'mail'",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.mailAddress1",
+      "section": 7,
+      "title": "Address Line 1",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address 1",
+      "showIf": "distribution.method == 'mail'",
+      "profileKey": null
+    },
+    {
+      "id": "distribution.mailAddress2",
+      "section": 7,
+      "title": "Address Line 2",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address 2",
+      "showIf": "distribution.method == 'mail'",
+      "profileKey": null
+    },
+    {
+      "id": "suitability.netWorth",
+      "section": 8,
+      "title": "Individual net worth exceeds $1,000,000 (excluding primary residence)",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box28",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.income",
+      "section": 8,
+      "title": "Individual income exceeds $200,000 (or $300,000 joint) for past two years",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box27",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.license",
+      "section": 8,
+      "title": "Holds securities license or registration in good standing",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box26",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.preExistingRelationship",
+      "section": 8,
+      "title": "Pre-existing relationship with Fund or its directors",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box22",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.directorOfficer",
+      "section": 8,
+      "title": "Director, executive officer, or general partner of Fund or MGP",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box25",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.accreditedEntity",
+      "section": 8,
+      "title": "Accredited investor entity (other than natural person)",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box24",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.knowledgeExperience",
+      "section": 8,
+      "title": "Knowledge and experience in financial and business matters",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box21",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "suitability.experienceDescription",
+      "section": 8,
+      "title": "Description of experience in financial and business matters",
+      "helper": null,
+      "type": "textarea",
+      "required": false,
+      "pdfField": "financial and business matters",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "certifications.bankHoldingAct",
+      "section": 9,
+      "title": "Subject to U.S. Bank Holding Company Act of 1956",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box19",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "certifications.finraMember",
+      "section": 9,
+      "title": "Associated with FINRA member firm",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box20",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "signature.investor",
+      "section": 10,
+      "title": "Investor Signature",
+      "helper": null,
+      "type": "signature",
+      "required": true,
+      "pdfField": "Signature Investor or authorized signature_2",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "signature.investorName",
+      "section": 10,
+      "title": "Investor Name (if different from Section 4)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name_7",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "signature.date",
+      "section": 10,
+      "title": "Date",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "BEHALF OF THE PERSONS OR ENTITY REGISTERED IN SECTION 4 ABOVE",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "signature.electronicConsent",
+      "section": 10,
+      "title": "Consent to Electronic Signature",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box18",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.firmName",
+      "section": 11,
+      "title": "Broker-Dealer Firm Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "BrokerDealer Firm Name",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.repName",
+      "section": 11,
+      "title": "Registered Representative Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representative Name Print",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.firmCRD",
+      "section": 11,
+      "title": "Broker-Dealer CRD Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "BrokerDealer",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.repCRD",
+      "section": 11,
+      "title": "Representative CRD Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representative",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.branchAddress",
+      "section": 11,
+      "title": "Branch Address",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Registered Representatives Branch Address City State Zip",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.branchPhone",
+      "section": 11,
+      "title": "Branch Phone Number",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Branch Phone Number",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "brokerDealer.email",
+      "section": 11,
+      "title": "Email Address",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_8",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.firmName",
+      "section": 12,
+      "title": "RIA Firm Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name of RIA Firm",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.repName",
+      "section": 12,
+      "title": "Representative Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Representative",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.phone",
+      "section": 12,
+      "title": "Telephone Number",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Telephone Number",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.firmCRD",
+      "section": 12,
+      "title": "RIA CRD Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "No",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.repCRD",
+      "section": 12,
+      "title": "IA Representative CRD Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "CRD No_2",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.address",
+      "section": 12,
+      "title": "Address",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Address",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.email",
+      "section": 12,
+      "title": "Email",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.registeredWith",
+      "section": 12,
+      "title": "Registered With",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "SEC",
+          "value": "sec",
+          "pdfField": "Check Box16"
+        },
+        {
+          "label": "State",
+          "value": "state",
+          "pdfField": "Check Box17"
+        }
+      ],
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.finraMember",
+      "section": 12,
+      "title": "Advisor is a member of FINRA",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box56",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.affiliatedFINRA",
+      "section": 12,
+      "title": "Advisor is affiliated with FINRA member",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box57",
+      "showIf": null,
+      "profileKey": null
+    },
+    {
+      "id": "ria.affiliatedFINRACRD",
+      "section": 12,
+      "title": "Affiliated FINRA Member CRD Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Advisor is affiliated with the following FINRA member include CRD",
+      "showIf": null,
+      "profileKey": null
+    }
+  ],
+  "pdfFieldCount": 195,
+  "unmappedFields": [
+    "may require clarification",
+    "Check Box11",
+    "Text49",
+    "undefined",
+    "undefined_2",
+    "undefined_3",
+    "undefined_4",
+    "undefined_7",
+    "undefined_8",
+    "undefined_9",
+    "undefined_10",
+    "Ownership Percentage_2",
+    "Name_4",
+    "Address of Principal Place of Residence no PO Box 1_3",
+    "Address of Principal Place of Residence no PO Box 2_3",
+    "Address of Principal Place of Residence no PO Box 3_3",
+    "Phone Business_5",
+    "undefined_11",
+    "Home_5",
+    "undefined_12",
+    "Primary State of Residence_5",
+    "Date of Birth_5",
+    "Social Security or Federal Tax ID Number TIN_5",
+    "Email Address_5",
+    "Check Box43",
+    "Check Box44",
+    "Check Box45",
+    "Check Box46",
+    "Check Box53",
+    "Check Box54",
+    "Ownership Percentage_3",
+    "Name_5",
+    "Address of Principal Place of Residence no PO Box 1_4",
+    "Address of Principal Place of Residence no PO Box 2_4",
+    "Address of Principal Place of Residence no PO Box 3_4",
+    "Phone Business_6",
+    "undefined_13",
+    "Home_6",
+    "undefined_14",
+    "Primary State of Residence_6",
+    "Date of Birth_6",
+    "Social Security or Federal Tax ID Number TIN_6",
+    "Email Address_6",
+    "Ownership Percentage_4",
+    "Name_6",
+    "Address of Principal Place of Residence no PO Box 1_5",
+    "Address of Principal Place of Residence no PO Box 2_5",
+    "Address of Principal Place of Residence no PO Box 3_5",
+    "Phone Business_7",
+    "undefined_15",
+    "Home_7",
+    "undefined_16",
+    "Primary State of Residence_7",
+    "Date of Birth_7",
+    "Social Security or Federal Tax ID Number TIN_7",
+    "Email Address_7",
+    "Check Box33",
+    "Check Box34",
+    "Check Box35",
+    "Check Box36",
+    "Check Box37",
+    "Check Box38",
+    "Check Box39",
+    "Signature Investor or authorized signature",
+    "Name if applicable",
+    "Number",
+    "Check Box23",
+    "Check all applicable boxes Note that additional information may be requested",
+    "undefined_17",
+    "undefined_18",
+    "Signature Investor or authorized signature_3",
+    "Signature50",
+    "CRD No",
+    "undefined_19",
+    "undefined_20",
+    "Text51",
+    "Text52",
+    "2 Unless noted below a he or she is not a member of FINRA and based on the activities he or she performs",
+    "undefined_21",
+    "Signature of Representative",
+    "RIA Approval Signature REQUIRED",
+    "Date",
+    "Date_2",
+    "day of",
+    "undefined_22",
+    "Dated this",
+    "By",
+    "Name_9"
+  ]
+}

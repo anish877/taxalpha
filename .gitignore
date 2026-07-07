@@ -8,3 +8,6 @@ frontend/dist
 coverage
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
+backend/.local-storage
+backend/output
+tmp

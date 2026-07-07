@@ -80,6 +80,13 @@ describe('DashboardPage continue priority', () => {
         );
       }
 
+      if (url.includes('/api/clients/broker-users')) {
+        return new Response(JSON.stringify({ users: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
       if (url.includes('/api/clients')) {
         return new Response(
           JSON.stringify({
@@ -170,6 +177,13 @@ describe('DashboardPage continue priority', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
+      }
+
+      if (url.includes('/api/clients/broker-users')) {
+        return new Response(JSON.stringify({ users: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
 
       if (url.includes('/api/clients')) {
@@ -264,6 +278,13 @@ describe('DashboardPage continue priority', () => {
         );
       }
 
+      if (url.includes('/api/clients/broker-users')) {
+        return new Response(JSON.stringify({ users: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
       if (url.includes('/api/clients')) {
         return new Response(
           JSON.stringify({
@@ -356,6 +377,13 @@ describe('DashboardPage continue priority', () => {
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
+      }
+
+      if (url.includes('/api/clients/broker-users')) {
+        return new Response(JSON.stringify({ users: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
 
       if (url.includes('/api/clients')) {

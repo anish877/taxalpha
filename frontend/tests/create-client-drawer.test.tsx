@@ -29,12 +29,18 @@ describe('CreateClientDrawer', () => {
     }
   ];
 
+  const brokerUsers = [
+    { id: 'user_2', name: 'Advisor Two', email: 'advisor.two@example.com' },
+    { id: 'user_3', name: 'Advisor Three', email: 'advisor.three@example.com' }
+  ];
+
   it('shows required investor profile and both optional forms on step 3', async () => {
     const user = userEvent.setup();
 
     render(
       <ToastProvider>
         <CreateClientDrawer
+          brokerUsers={brokerUsers}
           forms={forms}
           open
           primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
@@ -114,6 +120,7 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
+          brokerUsers={brokerUsers}
           forms={forms}
           open
           primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
@@ -138,6 +145,87 @@ describe('CreateClientDrawer', () => {
     const [, requestInit] = postCall as [RequestInfo | URL, RequestInit | undefined];
     const body = JSON.parse(String(requestInit?.body ?? '{}'));
     expect(body.selectedFormCodes).toEqual(['INVESTOR_PROFILE', 'SFC']);
+    expect(onClientCreated).toHaveBeenCalledTimes(1);
+  });
+
+  it('submits selected website broker user ids', async () => {
+    const user = userEvent.setup();
+    const onClientCreated = vi.fn();
+
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => {
+      return new Response(
+        JSON.stringify({
+          client: {
+            id: 'client_1',
+            name: 'John Smith',
+            email: 'john@example.com',
+            phone: null,
+            createdAt: '2026-02-28T00:00:00.000Z',
+            primaryBroker: {
+              id: 'user_1',
+              name: 'Advisor One',
+              email: 'advisor@example.com'
+            },
+            additionalBrokers: [
+              {
+                id: 'broker_2',
+                name: 'Advisor Two',
+                email: 'advisor.two@example.com'
+              }
+            ],
+            selectedForms: [{ id: 'form_1', code: 'INVESTOR_PROFILE', title: 'Investor-Profile' }],
+            hasInvestorProfile: true,
+            investorProfileOnboardingStatus: 'NOT_STARTED',
+            investorProfileResumeStepRoute: '/clients/client_1/investor-profile/step-1',
+            hasStatementOfFinancialCondition: false,
+            statementOfFinancialConditionOnboardingStatus: 'NOT_STARTED',
+            statementOfFinancialConditionResumeStepRoute: null,
+            hasBaiodf: false,
+            baiodfOnboardingStatus: 'NOT_STARTED',
+            baiodfResumeStepRoute: null,
+            hasBaiv506c: false,
+            baiv506cOnboardingStatus: 'NOT_STARTED',
+            baiv506cResumeStepRoute: null
+          }
+        }),
+        {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <ToastProvider>
+        <CreateClientDrawer
+          brokerUsers={brokerUsers}
+          forms={forms}
+          open
+          primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
+          onClientCreated={onClientCreated}
+          onClose={vi.fn()}
+        />
+      </ToastProvider>
+    );
+
+    await user.type(screen.getByPlaceholderText('Enter full name'), 'John Smith');
+    await user.type(screen.getByPlaceholderText('name@example.com'), 'john@example.com');
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.selectOptions(screen.getByLabelText('Select Website User'), 'user_2');
+    expect(screen.getByText('Advisor Two')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.click(screen.getByRole('button', { name: 'Create Client' }));
+
+    const postCall = fetchMock.mock.calls.find(([input]) => String(input).includes('/api/clients'));
+    expect(postCall).toBeDefined();
+
+    const [, requestInit] = postCall as [RequestInfo | URL, RequestInit | undefined];
+    const body = JSON.parse(String(requestInit?.body ?? '{}'));
+    expect(body.additionalBrokerUserIds).toEqual(['user_2']);
     expect(onClientCreated).toHaveBeenCalledTimes(1);
   });
 
@@ -194,6 +282,7 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
+          brokerUsers={brokerUsers}
           forms={forms}
           open
           primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
@@ -274,6 +363,7 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
+          brokerUsers={brokerUsers}
           forms={forms}
           open
           primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}

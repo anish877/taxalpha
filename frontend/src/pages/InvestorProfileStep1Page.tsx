@@ -621,7 +621,6 @@ export function InvestorProfileStep1Page() {
           value={typeof value === 'number' ? value : value === '' ? '' : String(value)}
           onChange={(event) => {
             const next = event.target.value;
-            const parsed = Number(next);
 
             setFields((current) => {
               if (!current) {
@@ -629,7 +628,7 @@ export function InvestorProfileStep1Page() {
               }
 
               const clone = structuredClone(current);
-              clone.typeOfAccount.joint.numberOfTenants = Number.isFinite(parsed) ? parsed : null;
+              clone.typeOfAccount.joint.numberOfTenants = next === '' ? null : Number(next);
               return clone;
             });
           }}

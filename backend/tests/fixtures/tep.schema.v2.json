@@ -1,0 +1,3532 @@
+{
+  "version": 2,
+  "code": "TEP_FUND_2026_LP_SUB",
+  "title": "TEP Fund 2026 LP — Subscription Agreement",
+  "description": null,
+  "steps": [
+    {
+      "number": 1,
+      "key": "STEP_1_CHECKLIST",
+      "label": "STEP 1. SUBMISSION CHECKLIST",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 2,
+      "key": "STEP_2_INVESTMENT",
+      "label": "STEP 2. INVESTMENT DETAILS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 3,
+      "key": "STEP_3_ACCOUNT_TYPE",
+      "label": "STEP 3. ACCOUNT TYPE",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 4,
+      "key": "STEP_4_IRA_CUSTODIAN",
+      "label": "STEP 4. IRA/CUSTODIAL ACCOUNT INFORMATION",
+      "requiredIf": "accountType in ['traditionalIRA','rothIRA','sep','keogh','qualifiedPlan','other_custodial']",
+      "isTerminal": false
+    },
+    {
+      "number": 5,
+      "key": "STEP_5_PRIMARY_INVESTOR",
+      "label": "STEP 5. PRIMARY INVESTOR INFORMATION",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 6,
+      "key": "STEP_6_SECONDARY_INVESTOR",
+      "label": "STEP 6. SECONDARY INVESTOR INFORMATION",
+      "requiredIf": "accountType in ['joint','tenantsInCommon','communityProperty']",
+      "isTerminal": false
+    },
+    {
+      "number": 7,
+      "key": "STEP_7_DISTRIBUTIONS",
+      "label": "STEP 7. DISTRIBUTION OPTIONS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 8,
+      "key": "STEP_8_BROKER",
+      "label": "STEP 8. BROKER-DEALER/RIA INFORMATION",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 9,
+      "key": "STEP_9_ACCREDITED",
+      "label": "STEP 9. ACCREDITED INVESTOR STATUS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 10,
+      "key": "STEP_10_SOPHISTICATED",
+      "label": "STEP 10. SOPHISTICATED INVESTOR STATUS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 11,
+      "key": "STEP_11_QUALIFIED_PURCHASER",
+      "label": "STEP 11. QUALIFIED PURCHASER STATUS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 12,
+      "key": "STEP_12_QUALIFIED_CLIENT",
+      "label": "STEP 12. QUALIFIED CLIENT STATUS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 13,
+      "key": "STEP_13_LOOKTHROUGH",
+      "label": "STEP 13. LOOK-THROUGH ENTITY DETAILS",
+      "requiredIf": "qualifiedClientEntity == true",
+      "isTerminal": false
+    },
+    {
+      "number": 14,
+      "key": "STEP_14_ERISA",
+      "label": "STEP 14. ERISA/BENEFIT PLAN STATUS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 15,
+      "key": "STEP_15_INVESTMENT_COMPANY",
+      "label": "STEP 15. INVESTMENT COMPANY ACT STATUS",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 16,
+      "key": "STEP_16_ENTITY_DETAILS",
+      "label": "STEP 16. ENTITY/TRUST DETAILS",
+      "requiredIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "isTerminal": false
+    },
+    {
+      "number": 17,
+      "key": "STEP_17_TRUSTEES",
+      "label": "STEP 17. TRUSTEES/MANAGERS",
+      "requiredIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "isTerminal": false
+    },
+    {
+      "number": 18,
+      "key": "STEP_18_BENEFICIAL_OWNERS",
+      "label": "STEP 18. BENEFICIAL OWNERS",
+      "requiredIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "isTerminal": false
+    },
+    {
+      "number": 19,
+      "key": "STEP_19_BENEFICIAL_OWNER_AUTH",
+      "label": "STEP 19. BENEFICIAL OWNER AUTHORIZATION",
+      "requiredIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "isTerminal": false
+    },
+    {
+      "number": 20,
+      "key": "STEP_20_SIGNATURES",
+      "label": "STEP 20. SIGNATURES",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 21,
+      "key": "STEP_21_ACCREDITED_VERIFICATION",
+      "label": "STEP 21. ACCREDITED INVESTOR VERIFICATION (BD/RIA USE ONLY)",
+      "requiredIf": null,
+      "isTerminal": false
+    },
+    {
+      "number": 22,
+      "key": "STEP_22_W9",
+      "label": "STEP 22. W-9 TAX INFORMATION",
+      "requiredIf": null,
+      "isTerminal": false
+    }
+  ],
+  "items": [
+    {
+      "id": "checklist.allPartiesSigned",
+      "step": 1,
+      "order": 0,
+      "title": "All parties (account holders) have signed and dated where required, including the W-9 form",
+      "helper": null,
+      "type": "checkbox",
+      "required": true,
+      "pdfField": "undefined",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.driversLicense",
+      "step": 1,
+      "order": 1,
+      "title": "DRIVERS LICENSE IS REQUIRED",
+      "helper": null,
+      "type": "checkbox",
+      "required": true,
+      "pdfField": "1",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.signaturePage",
+      "step": 1,
+      "order": 2,
+      "title": "Signature page section has been completed",
+      "helper": null,
+      "type": "checkbox",
+      "required": true,
+      "pdfField": "2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.brokerInfo",
+      "step": 1,
+      "order": 3,
+      "title": "Broker Information section has been completed and signed",
+      "helper": null,
+      "type": "checkbox",
+      "required": true,
+      "pdfField": "undefined_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.distributionOption",
+      "step": 1,
+      "order": 4,
+      "title": "Distribution Option has been selected",
+      "helper": null,
+      "type": "checkbox",
+      "required": true,
+      "pdfField": "undefined_3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.ira.infoCompleted",
+      "step": 1,
+      "order": 5,
+      "title": "IRA Information Section has been completed",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box63",
+      "showIf": "accountType in ['traditionalIRA','rothIRA','sep','keogh','qualifiedPlan','other_custodial']",
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.ira.sentToCustodian",
+      "step": 1,
+      "order": 6,
+      "title": "This agreement has been sent to Custodian for signature",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box64",
+      "showIf": "accountType in ['traditionalIRA','rothIRA','sep','keogh','qualifiedPlan','other_custodial']",
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.ira.corporateCharter",
+      "step": 1,
+      "order": 7,
+      "title": "Custodian has provided a Corporate Charter",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box65",
+      "showIf": "accountType in ['traditionalIRA','rothIRA','sep','keogh','qualifiedPlan','other_custodial']",
+      "canonicalField": null
+    },
+    {
+      "id": "checklist.ira.w9",
+      "step": 1,
+      "order": 8,
+      "title": "Custodian has provided a W-9 (Form W-9 is attached)",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box66",
+      "showIf": "accountType in ['traditionalIRA','rothIRA','sep','keogh','qualifiedPlan','other_custodial']",
+      "canonicalField": null
+    },
+    {
+      "id": "investment.commitmentAmount",
+      "step": 2,
+      "order": 0,
+      "title": "Amount of Commitment ($50,000/Unit)",
+      "helper": null,
+      "type": "currency",
+      "required": true,
+      "pdfField": "Units",
+      "showIf": null,
+      "validation": {
+        "rule": "positiveNumber"
+      },
+      "canonicalField": "investment.amount"
+    },
+    {
+      "id": "investment.units",
+      "step": 2,
+      "order": 1,
+      "title": "Units",
+      "helper": null,
+      "type": "number",
+      "required": true,
+      "pdfField": "Units",
+      "showIf": null,
+      "validation": {
+        "rule": "positiveNumber"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "investment.interestType",
+      "step": 2,
+      "order": 2,
+      "title": "Type of Interests in the Partnership Being Subscribed For",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Limited Partner Interests",
+          "value": "limited",
+          "description": null,
+          "pdfField": "Limited Partner Interests",
+          "required": false
+        },
+        {
+          "label": "General Partner Interests",
+          "value": "general",
+          "description": null,
+          "pdfField": "General Partner Interests",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "investment.classType",
+      "step": 2,
+      "order": 3,
+      "title": "Class of Units to be Purchased",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Class A-1 (Initial Investment $250,000 made on or before 6/30/26 - 10% Bonus)",
+          "value": "classA1",
+          "description": null,
+          "pdfField": "Initial Investment",
+          "required": false
+        },
+        {
+          "label": "Class A-2 (Additional Investment greater than $250,000 made on or before 6/30/26 - 13% Bonus)",
+          "value": "classA2",
+          "description": null,
+          "pdfField": "Additional Investment",
+          "required": false
+        },
+        {
+          "label": "Broker-Dealer Class",
+          "value": "brokerDealer",
+          "description": null,
+          "pdfField": "BrokerDealer Class",
+          "required": false
+        },
+        {
+          "label": "RIA/Direct Investor",
+          "value": "riaDirect",
+          "description": null,
+          "pdfField": "Registered Investment Adviser Class",
+          "required": false
+        },
+        {
+          "label": "NAV",
+          "value": "nav",
+          "description": null,
+          "pdfField": "Directly Offered Class",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "accountType",
+      "step": 3,
+      "order": 0,
+      "title": "Type of Account",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Individual",
+          "value": "individual",
+          "description": null,
+          "pdfField": "Check Box67",
+          "required": false
+        },
+        {
+          "label": "Joint tenants with Rights of Survivorship",
+          "value": "joint",
+          "description": null,
+          "pdfField": "Check Box68",
+          "required": false
+        },
+        {
+          "label": "Community Property",
+          "value": "communityProperty",
+          "description": null,
+          "pdfField": "Check Box69",
+          "required": false
+        },
+        {
+          "label": "Tenants in Common",
+          "value": "tenantsInCommon",
+          "description": null,
+          "pdfField": "Check Box70",
+          "required": false
+        },
+        {
+          "label": "Uniform Gift to Minors Act",
+          "value": "ugma",
+          "description": null,
+          "pdfField": "Check Box71",
+          "required": false
+        },
+        {
+          "label": "Qualified Pension or Profit-Sharing Plan",
+          "value": "qualifiedPlan",
+          "description": null,
+          "pdfField": "Check Box72",
+          "required": false
+        },
+        {
+          "label": "Trust",
+          "value": "trust",
+          "description": null,
+          "pdfField": "Check Box73",
+          "required": false
+        },
+        {
+          "label": "Corporation",
+          "value": "corporation",
+          "description": null,
+          "pdfField": "Check Box74",
+          "required": false
+        },
+        {
+          "label": "Partnership",
+          "value": "partnership",
+          "description": null,
+          "pdfField": "Check Box75",
+          "required": false
+        },
+        {
+          "label": "Other",
+          "value": "other_entity",
+          "description": null,
+          "pdfField": "Check Box76",
+          "required": false
+        },
+        {
+          "label": "Traditional IRA",
+          "value": "traditionalIRA",
+          "description": null,
+          "pdfField": "Check Box77",
+          "required": false
+        },
+        {
+          "label": "Roth IRA",
+          "value": "rothIRA",
+          "description": null,
+          "pdfField": "Check Box78",
+          "required": false
+        },
+        {
+          "label": "Simplified Employee Pension/Trust (SEP)",
+          "value": "sep",
+          "description": null,
+          "pdfField": "Check Box79",
+          "required": false
+        },
+        {
+          "label": "KEOGH",
+          "value": "keogh",
+          "description": null,
+          "pdfField": "Check Box80",
+          "required": false
+        },
+        {
+          "label": "Other (Custodial)",
+          "value": "other_custodial",
+          "description": null,
+          "pdfField": "Check Box81",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": "account.registrationType"
+    },
+    {
+      "id": "accountType.ugmaState",
+      "step": 3,
+      "order": 1,
+      "title": "State (for UGMA)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Uniform Gift to Minors Act  State of",
+      "showIf": "accountType == 'ugma'",
+      "canonicalField": null
+    },
+    {
+      "id": "accountType.otherSpecify",
+      "step": 3,
+      "order": 2,
+      "title": "Other (Specify)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Other Specify",
+      "showIf": "accountType == 'other_entity'",
+      "canonicalField": null
+    },
+    {
+      "id": "custodian.name",
+      "step": 4,
+      "order": 0,
+      "title": "Custodian Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Custodian Name",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "custodian.accountNumber",
+      "step": 4,
+      "order": 1,
+      "title": "Custodian Account Number",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Custodian Account Number",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "custodian.address",
+      "step": 4,
+      "order": 2,
+      "title": "Custodian Address",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Custodian Address",
+          "canonicalField": null
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": true,
+          "pdfField": "City",
+          "canonicalField": null
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "type": "text",
+          "required": true,
+          "pdfField": "State",
+          "canonicalField": null
+        },
+        {
+          "key": "zip",
+          "label": "Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "Zip",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "custodian.taxId",
+      "step": 4,
+      "order": 3,
+      "title": "Custodian Tax I.D. Number",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Custodian Tax ID Number",
+      "showIf": null,
+      "validation": {
+        "rule": "ein"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "custodian.phone",
+      "step": 4,
+      "order": 4,
+      "title": "Telephone Number",
+      "helper": null,
+      "type": "phone",
+      "required": true,
+      "pdfField": "Text139",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "custodian.email",
+      "step": 4,
+      "order": 5,
+      "title": "Custodian Email",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Custodian Email",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "primary.accountRegistration",
+      "step": 5,
+      "order": 0,
+      "title": "Account registration and/or entity name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Account registration andor entity name",
+      "showIf": null,
+      "canonicalField": "account.name"
+    },
+    {
+      "id": "primary.name",
+      "step": 5,
+      "order": 1,
+      "title": "Primary Investor Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Primary Investor Name",
+      "showIf": null,
+      "canonicalField": "primary.fullName"
+    },
+    {
+      "id": "primary.ssn",
+      "step": 5,
+      "order": 2,
+      "title": "Primary Investor Social Security Number",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Primary Investor Social Security Number",
+      "showIf": null,
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": "primary.ssn"
+    },
+    {
+      "id": "primary.taxId",
+      "step": 5,
+      "order": 3,
+      "title": "Tax ID (for entity accounts)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Tax ID for entity accounts",
+      "showIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "validation": {
+        "rule": "ein"
+      },
+      "canonicalField": "entity.ein"
+    },
+    {
+      "id": "primary.dateOfFormation",
+      "step": 5,
+      "order": 4,
+      "title": "Date of Formation",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "Date of Formation",
+      "showIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "primary.dob",
+      "step": 5,
+      "order": 5,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth",
+      "showIf": null,
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": "primary.dateOfBirth"
+    },
+    {
+      "id": "primary.phone",
+      "step": 5,
+      "order": 6,
+      "title": "Telephone Number",
+      "helper": null,
+      "type": "phone",
+      "required": true,
+      "pdfField": "Telephone Number",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": "primary.phone"
+    },
+    {
+      "id": "primary.email",
+      "step": 5,
+      "order": 7,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": "primary.email"
+    },
+    {
+      "id": "primary.address",
+      "step": 5,
+      "order": 8,
+      "title": "Street Address (Cannot be a P.O. Box)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": "address.legal",
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Street Address Cannot be a PO Box",
+          "canonicalField": "address.legal.line1",
+          "validation": {
+            "rule": "noPoBox"
+          }
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": true,
+          "pdfField": "City_2",
+          "canonicalField": "address.legal.city"
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "type": "text",
+          "required": true,
+          "pdfField": "State_2",
+          "canonicalField": "address.legal.state"
+        },
+        {
+          "key": "zip",
+          "label": "Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "Zip_2",
+          "canonicalField": "address.legal.zip"
+        }
+      ]
+    },
+    {
+      "id": "primary.permanentAddress",
+      "step": 5,
+      "order": 9,
+      "title": "Permanent Residence or Principal Place of Business (if different from Address above)",
+      "helper": null,
+      "type": "textarea",
+      "required": false,
+      "pdfField": "Permanent Residence or Principal Place of Business if different from Address above",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "secondary.name",
+      "step": 6,
+      "order": 0,
+      "title": "Secondary Investor Name",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Secondary Investor Name",
+      "showIf": null,
+      "canonicalField": "secondary.fullName"
+    },
+    {
+      "id": "secondary.ssn",
+      "step": 6,
+      "order": 1,
+      "title": "Secondary Investor Social Security Number",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Secondary Investor Social Security Number",
+      "showIf": null,
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": "secondary.ssn"
+    },
+    {
+      "id": "secondary.dob",
+      "step": 6,
+      "order": 2,
+      "title": "Date of Birth",
+      "helper": null,
+      "type": "date",
+      "required": true,
+      "pdfField": "Date of Birth_2",
+      "showIf": null,
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": "secondary.dateOfBirth"
+    },
+    {
+      "id": "secondary.phone",
+      "step": 6,
+      "order": 3,
+      "title": "Telephone Number",
+      "helper": null,
+      "type": "phone",
+      "required": true,
+      "pdfField": "Telephone Number_2",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": "secondary.phone"
+    },
+    {
+      "id": "secondary.email",
+      "step": 6,
+      "order": 4,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": true,
+      "pdfField": "Email Address_2",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": "secondary.email"
+    },
+    {
+      "id": "secondary.address",
+      "step": 6,
+      "order": 5,
+      "title": "Street Address (Cannot be a P.O. Box)",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Street Address Cannot be a PO Box_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "noPoBox"
+          }
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": true,
+          "pdfField": "City_3",
+          "canonicalField": null
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "type": "text",
+          "required": true,
+          "pdfField": "State_3",
+          "canonicalField": null
+        },
+        {
+          "key": "zip",
+          "label": "Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "Zip_3",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "distribution.method",
+      "step": 7,
+      "order": 0,
+      "title": "Distribution Method",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Deposit distributions directly into the Investor's account",
+          "value": "directDeposit",
+          "description": null,
+          "pdfField": "Please check one",
+          "required": false
+        },
+        {
+          "label": "Send distributions via check to the Investor's home address",
+          "value": "checkHome",
+          "description": null,
+          "pdfField": "1_2",
+          "required": false
+        },
+        {
+          "label": "Send distributions via check to alternate payee listed here",
+          "value": "checkAlternate",
+          "description": null,
+          "pdfField": "2_2",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.bank.name",
+      "step": 7,
+      "order": 1,
+      "title": "Financial Institution Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Financial Institution Name",
+      "showIf": "distribution.method == 'directDeposit'",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.bank.routing",
+      "step": 7,
+      "order": 2,
+      "title": "ABA/ Routing Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "ABA Routing Number",
+      "showIf": "distribution.method == 'directDeposit'",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.bank.accountNumber",
+      "step": 7,
+      "order": 3,
+      "title": "Account Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Account Number_2",
+      "showIf": "distribution.method == 'directDeposit'",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.bank.accountName",
+      "step": 7,
+      "order": 4,
+      "title": "Account Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Account Name",
+      "showIf": "distribution.method == 'directDeposit'",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.alternate.name",
+      "step": 7,
+      "order": 5,
+      "title": "Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name",
+      "showIf": "distribution.method == 'checkAlternate'",
+      "canonicalField": null
+    },
+    {
+      "id": "distribution.alternate.address",
+      "step": 7,
+      "order": 6,
+      "title": "Alternate Payee Address",
+      "helper": null,
+      "type": "address-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": "distribution.method == 'checkAlternate'",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Street Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Street Address",
+          "canonicalField": null
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": true,
+          "pdfField": "City_4",
+          "canonicalField": null
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "type": "text",
+          "required": true,
+          "pdfField": "State_4",
+          "canonicalField": null
+        },
+        {
+          "key": "zip",
+          "label": "Zip",
+          "type": "text",
+          "required": true,
+          "pdfField": "Zip_4",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "broker.advisorName",
+      "step": 8,
+      "order": 0,
+      "title": "Financial Advisor/Broker Name",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Financial AdvisorBroker Name",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "broker.phone",
+      "step": 8,
+      "order": 1,
+      "title": "Telephone Number",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Telephone Number_3",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "broker.email",
+      "step": 8,
+      "order": 2,
+      "title": "E-mail Address",
+      "helper": null,
+      "type": "email",
+      "required": false,
+      "pdfField": "Email Address_3",
+      "showIf": null,
+      "validation": {
+        "rule": "email"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "broker.dealerName",
+      "step": 8,
+      "order": 3,
+      "title": "Name of Broker Dealer",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Name of Broker Dealer",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "broker.dealerAddress",
+      "step": 8,
+      "order": 4,
+      "title": "Broker Dealer Address",
+      "helper": null,
+      "type": "address-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Address",
+          "type": "text",
+          "required": false,
+          "pdfField": "Zip_5",
+          "canonicalField": null
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text",
+          "required": false,
+          "pdfField": "Telephone of new Broker Dealer",
+          "canonicalField": null
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "type": "text",
+          "required": false,
+          "pdfField": "State_5",
+          "canonicalField": null
+        },
+        {
+          "key": "zip",
+          "label": "Zip",
+          "type": "text",
+          "required": false,
+          "pdfField": "Rep CRD Number",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "broker.dealerPhone",
+      "step": 8,
+      "order": 5,
+      "title": "Telephone of new Broker Dealer",
+      "helper": null,
+      "type": "phone",
+      "required": false,
+      "pdfField": "Telephone of new Broker Dealer",
+      "showIf": null,
+      "validation": {
+        "rule": "phone"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "broker.repCRD",
+      "step": 8,
+      "order": 6,
+      "title": "Rep CRD Number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "undefined_6",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "broker.acknowledgment",
+      "step": 8,
+      "order": 7,
+      "title": "Acknowledgments",
+      "helper": null,
+      "type": "multi-select",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "The Investor is a Registered Investment Adviser affiliated with the broker/dealer indicated above and will not be paid a commission for this purchase",
+          "value": "riaAffiliated",
+          "description": null,
+          "pdfField": "Check Box83",
+          "required": false
+        },
+        {
+          "label": "The Investor is an unaffiliated Registered Investment Adviser and will not be paid a commission for this purchase",
+          "value": "riaUnaffiliated",
+          "description": null,
+          "pdfField": "Check Box84",
+          "required": false
+        },
+        {
+          "label": "The Investor has a preexisting personal or business relationship with the Partnership, Management Company or any of their officers or directors",
+          "value": "preexistingRelationship",
+          "description": null,
+          "pdfField": "Check Box85",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "accredited.status",
+      "step": 9,
+      "order": 0,
+      "title": "Accredited Investor Status (check all that apply)",
+      "helper": null,
+      "type": "multi-select",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Individual net worth, or combined net worth with spouse, in excess of $1,000,000",
+          "value": "netWorth1M",
+          "description": null,
+          "pdfField": "Check Box86",
+          "required": false
+        },
+        {
+          "label": "Individual income of more than $200,000 in each of the two most recent years",
+          "value": "income200k",
+          "description": null,
+          "pdfField": "Check Box87",
+          "required": false
+        },
+        {
+          "label": "IRA or Keogh plan, the individual for whose benefit the investment is made is an accredited investor",
+          "value": "iraKeogh",
+          "description": null,
+          "pdfField": "Check Box88",
+          "required": false
+        },
+        {
+          "label": "Bank as defined in Section 3(a)(2) of the Securities Act",
+          "value": "bank",
+          "description": null,
+          "pdfField": "Check Box89",
+          "required": false
+        },
+        {
+          "label": "Broker-dealer registered pursuant to Section 15 of the Exchange Act",
+          "value": "brokerDealer",
+          "description": null,
+          "pdfField": "Check Box90",
+          "required": false
+        },
+        {
+          "label": "Insurance company as defined in Section 2(a)(13) of the Securities Act",
+          "value": "insurance",
+          "description": null,
+          "pdfField": "Check Box91",
+          "required": false
+        },
+        {
+          "label": "Investment adviser registered pursuant to Section 203 of the Investment Advisers Act of 1940",
+          "value": "investmentAdviser",
+          "description": null,
+          "pdfField": "Check Box92",
+          "required": false
+        },
+        {
+          "label": "Investment company registered under the Investment Company Act of 1940",
+          "value": "investmentCompany",
+          "description": null,
+          "pdfField": "Check Box93",
+          "required": false
+        },
+        {
+          "label": "Director or executive officer of the Partnership",
+          "value": "directorOfficer",
+          "description": null,
+          "pdfField": "Check Box94",
+          "required": false
+        },
+        {
+          "label": "Natural person who holds professional certifications (Series 7, 65, 82)",
+          "value": "professionalCert",
+          "description": null,
+          "pdfField": "Check Box95",
+          "required": false
+        },
+        {
+          "label": "Natural person who is a knowledgeable employee",
+          "value": "knowledgeableEmployee",
+          "description": null,
+          "pdfField": "Check Box96",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "validation": {
+        "rule": "multiSelectAtLeastOne"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "sophisticated.status",
+      "step": 10,
+      "order": 0,
+      "title": "Sophisticated Investor Status",
+      "helper": null,
+      "type": "multi-select",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "By reason of the Investor's business or financial experience, the Investor has the capacity to protect the Investor's own interests in connection with the purchase of the Units",
+          "value": "businessExperience",
+          "description": null,
+          "pdfField": "a By reason of the Investors business or financial experience the Investor has the capacity to protect the",
+          "required": false
+        },
+        {
+          "label": "The Investor has a preexisting personal or business relationship with the Fund, the General Partner, the Management Company or any of their officers or directors",
+          "value": "preexistingRelationship",
+          "description": null,
+          "pdfField": "b The Investor has a preexisting personal or business relationship with the Fund the General Partner the",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "validation": {
+        "rule": "multiSelectAtLeastOne"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "qualifiedPurchaser.naturalPerson",
+      "step": 11,
+      "order": 0,
+      "title": "For Natural Persons",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box109",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "qualifiedPurchaser.entity",
+      "step": 11,
+      "order": 1,
+      "title": "The Investor is not a Natural Person and",
+      "helper": null,
+      "type": "multi-select",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Entity owns and invests on a discretionary basis, not less than $25,000,000 in Investments",
+          "value": "entity25M",
+          "description": null,
+          "pdfField": "Check Box110",
+          "required": false
+        },
+        {
+          "label": "Is a family company",
+          "value": "familyCompany",
+          "description": null,
+          "pdfField": "Check Box111",
+          "required": false
+        },
+        {
+          "label": "Entity (other than a trust), each of the beneficial owners of which is a qualified purchaser",
+          "value": "entityBeneficialOwners",
+          "description": null,
+          "pdfField": "Check Box112",
+          "required": false
+        },
+        {
+          "label": "Trust that is not Family Company owning at least $5,000,000 in Investments",
+          "value": "trust5M",
+          "description": null,
+          "pdfField": "Check Box113",
+          "required": false
+        },
+        {
+          "label": "Qualified institutional buyer (as defined in paragraph (a) of Rule 144A under the Securities Act)",
+          "value": "qib",
+          "description": null,
+          "pdfField": "Check Box114",
+          "required": false
+        },
+        {
+          "label": "Qualified institutional buyer acting for the account of another qualified institutional buyer",
+          "value": "qibForQib",
+          "description": null,
+          "pdfField": "Check Box115",
+          "required": false
+        },
+        {
+          "label": "None of the above is applicable to the Investor",
+          "value": "noneApplicable",
+          "description": null,
+          "pdfField": "Check Box116",
+          "required": false
+        }
+      ],
+      "showIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "canonicalField": null
+    },
+    {
+      "id": "qualifiedClient.naturalPerson",
+      "step": 12,
+      "order": 0,
+      "title": "For Natural Persons",
+      "helper": null,
+      "type": "multi-select",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Has a net worth in excess of $2,200,000 (including assets held jointly with spouse)",
+          "value": "netWorth2_2M",
+          "description": null,
+          "pdfField": "Check Box117",
+          "required": false
+        },
+        {
+          "label": "Has at least $1,100,000 under the management of the investment adviser",
+          "value": "aum1_1M",
+          "description": null,
+          "pdfField": "Check Box118",
+          "required": false
+        },
+        {
+          "label": "Is a qualified purchaser as defined in Section 2(a)(51) of the Investment Company Act",
+          "value": "qualifiedPurchaser",
+          "description": null,
+          "pdfField": "Check Box119",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "qualifiedClient.entity",
+      "step": 12,
+      "order": 1,
+      "title": "The Investor is not a Natural Person and",
+      "helper": null,
+      "type": "multi-select",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Is an entity which would be defined as an investment company under Section 3(a) of the Investment Company Act",
+          "value": "investmentCompanyEntity",
+          "description": null,
+          "pdfField": "Check Box120",
+          "required": false
+        },
+        {
+          "label": "Is an investment company registered, or required to be registered, under the Investment Company Act",
+          "value": "registeredInvestmentCompany",
+          "description": null,
+          "pdfField": "Check Box121",
+          "required": false
+        },
+        {
+          "label": "Is a business development company as defined in Section 202(a)(22) of the Investment Advisers Act of 1940",
+          "value": "bdc",
+          "description": null,
+          "pdfField": "Check Box122",
+          "required": false
+        },
+        {
+          "label": "Is not an entity described in the above and either has a net worth in excess of $2,200,000",
+          "value": "entityNetWorth2_2M",
+          "description": null,
+          "pdfField": "Check Box123",
+          "required": false
+        },
+        {
+          "label": "None of the above is applicable to the Investor",
+          "value": "noneApplicable",
+          "description": null,
+          "pdfField": "Check Box124",
+          "required": false
+        }
+      ],
+      "showIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "canonicalField": null
+    },
+    {
+      "id": "qualifiedClientEntity.setTrue",
+      "step": 12,
+      "order": 2,
+      "title": "Is the Investor an entity that requires look-through analysis?",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "Check Box148",
+      "showIf": "accountType in ['trust','corporation','partnership','llc','other_entity']",
+      "canonicalField": null
+    },
+    {
+      "id": "lookthrough.equityOwnerNetWorth",
+      "step": 13,
+      "order": 0,
+      "title": "Each equity owner of the Investor has a net worth (for natural persons, assets held jointly with spouse) in excess of $2,200,000",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box125",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box132",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "lookthrough.equityOwnerOfEquityOwnerNetWorth",
+      "step": 13,
+      "order": 1,
+      "title": "Each equity owner of each Investor Equity Owner that is also a look-through entity has a net worth in excess of $2,200,000",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box126",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box133",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "lookthrough.equityOwnerAUM",
+      "step": 13,
+      "order": 2,
+      "title": "Each Investor Equity Owner has at least $1,100,000 under the management of the Management Company",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box127",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box134",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "lookthrough.equityOwnerOfEquityOwnerAUM",
+      "step": 13,
+      "order": 3,
+      "title": "Each equity owner of each Investor Equity Owner that is also a look-through entity has at least $1,100,000 under management",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box128",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box135",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "lookthrough.equityOwnerQualifiedPurchaser",
+      "step": 13,
+      "order": 4,
+      "title": "Each Investor Equity Owner is a qualified purchaser as defined in Section 2(a)(51) of the Investment Company Act",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box129",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box136",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "lookthrough.equityOwnerOfEquityOwnerQualifiedPurchaser",
+      "step": 13,
+      "order": 5,
+      "title": "Each equity owner of each Investor Equity Owner that is also a look-through entity is a qualified purchaser",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box130",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box137",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "erisa.employeeBenefitPlan",
+      "step": 14,
+      "order": 0,
+      "title": "The Investor is an employee benefit plan (within the meaning of Section 3(3) of ERISA) subject to Title I of ERISA",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box140",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box144",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "erisa.plan4975",
+      "step": 14,
+      "order": 1,
+      "title": "The Investor is a plan (as defined in Section 4975(e)(1) of the Code, including an individual retirement account), subject to Section 4975 of the Code",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box141",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box145",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "erisa.entityWithPlanAssets",
+      "step": 14,
+      "order": 2,
+      "title": "The Investor certifies that it is an entity whose underlying assets include plan assets by reason of a plan's investment in the entity",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box142",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box146",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "erisa.entityWithPlanAssets.percentage",
+      "step": 14,
+      "order": 3,
+      "title": "Partnership will not exceed the following percentage",
+      "helper": null,
+      "type": "number",
+      "required": false,
+      "pdfField": "Partnership will not exceed the following percentage",
+      "showIf": "erisa.entityWithPlanAssets == 'true'",
+      "canonicalField": null
+    },
+    {
+      "id": "erisa.benefitPlanInvestor",
+      "step": 14,
+      "order": 4,
+      "title": "The Investor is an entity that otherwise constitutes a benefit plan investor within the meaning of ERISA",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box143",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box147",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "erisa.benefitPlanInvestor.percentage",
+      "step": 14,
+      "order": 5,
+      "title": "Partnership will not exceed the following percentage",
+      "helper": null,
+      "type": "number",
+      "required": false,
+      "pdfField": "Partnership will not exceed the following percentage_2",
+      "showIf": "erisa.benefitPlanInvestor == 'true'",
+      "canonicalField": null
+    },
+    {
+      "id": "investmentCompanyAct.formedForPurpose",
+      "step": 15,
+      "order": 0,
+      "title": "The Investor was formed, capitalized or recapitalized for the specific purpose of acquiring the Interest",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box148",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box153",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "investmentCompanyAct.investmentConstitutes40Percent",
+      "step": 15,
+      "order": 1,
+      "title": "The Investor's investment in the Partnership constitutes, and after the closing date applicable to the Investor will constitute, more than 40% of the combined amount of the Investor's total assets and committed capital",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box149",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box154",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "investmentCompanyAct.registeredInvestmentCompany",
+      "step": 15,
+      "order": 2,
+      "title": "The Investor is an investment company registered under the Investment Company Act or an investment company that would be required to so register but for Section 3(c)(1) or Section 3(c)(7) thereof",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box150",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box155",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "investmentCompanyAct.investmentMoreThan10Percent",
+      "step": 15,
+      "order": 3,
+      "title": "To the Investor's knowledge, the Investor's investment in the Partnership constitutes more than 10% of the outstanding voting securities of the Partnership",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box151",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box156",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "investmentCompanyAct.formedBeforeApril1996",
+      "step": 15,
+      "order": 4,
+      "title": "The Investor was formed on or before April 30, 1996",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "TRUE",
+          "value": "true",
+          "description": null,
+          "pdfField": "Check Box152",
+          "required": false
+        },
+        {
+          "label": "FALSE",
+          "value": "false",
+          "description": null,
+          "pdfField": "Check Box157",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "investmentCompanyAct.beneficialOwnerCount",
+      "step": 15,
+      "order": 5,
+      "title": "Number of beneficial owners of the Investor",
+      "helper": null,
+      "type": "number",
+      "required": false,
+      "pdfField": "Number of beneficial owners of the Investor",
+      "showIf": null,
+      "validation": {
+        "rule": "integer"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "entity.ownershipType",
+      "step": 16,
+      "order": 0,
+      "title": "Type of Ownership",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Revocable Trust",
+          "value": "revocableTrust",
+          "description": null,
+          "pdfField": "Check Box158",
+          "required": false
+        },
+        {
+          "label": "Irrevocable Trust",
+          "value": "irrevocableTrust",
+          "description": null,
+          "pdfField": "Check Box161",
+          "required": false
+        },
+        {
+          "label": "Limited Liability Company (LLC)",
+          "value": "llc",
+          "description": null,
+          "pdfField": "Check Box159",
+          "required": false
+        },
+        {
+          "label": "Limited Partnership (LP)",
+          "value": "limitedPartnership",
+          "description": null,
+          "pdfField": "Check Box162",
+          "required": false
+        },
+        {
+          "label": "Corporation",
+          "value": "corporation",
+          "description": null,
+          "pdfField": "Check Box163",
+          "required": false
+        },
+        {
+          "label": "Other",
+          "value": "other",
+          "description": null,
+          "pdfField": "Check Box160",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "entity.ownershipType.otherDescribe",
+      "step": 16,
+      "order": 1,
+      "title": "Other (describe)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Text164",
+      "showIf": "entity.ownershipType == 'other'",
+      "canonicalField": null
+    },
+    {
+      "id": "entity.authorizedPerson",
+      "step": 16,
+      "order": 2,
+      "title": "Provide the name of the person that is authorized to make this investment and sign on behalf of this trust or legal entity. If this investment decision is being made by a third-party Administrator (such as a Trust attorney or financial institution), provide the name and contact information of the Administrator",
+      "helper": null,
+      "type": "textarea",
+      "required": true,
+      "pdfField": "Provide the name of the person that is authorized to make this investment and sign on behalf of this trust or legal entity If this investment decision is being made by a third party Administrator such as a Trust attorney or financial institution provide the name and contact information of the Administrator",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "entity.taxId",
+      "step": 16,
+      "order": 3,
+      "title": "Provide Tax ID Number of this Trust or Legal Entity (Trust, Corp, LLC, LP or Corp)",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "Provide Tax ID Number of this Trust or Legal Entity Trust Corp LLC LP or Corp",
+      "showIf": null,
+      "validation": {
+        "rule": "ein"
+      },
+      "canonicalField": "entity.ein"
+    },
+    {
+      "id": "entity.name",
+      "step": 16,
+      "order": 4,
+      "title": "If Trust, provide the title of the Trust; or if Legal Entity, provide the name of the Legal Entity",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "If Trust provide the title of the Trust or if Legal Entity provide the name of the Legal Entity",
+      "showIf": null,
+      "canonicalField": "entity.name"
+    },
+    {
+      "id": "entity.trustAgreementDate",
+      "step": 16,
+      "order": 5,
+      "title": "If Trust, provide date of Trust Agreement",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "If Trust provide date of Trust Agreement",
+      "showIf": "entity.ownershipType in ['revocableTrust','irrevocableTrust']",
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "entity.trustAmendmentDate",
+      "step": 16,
+      "order": 6,
+      "title": "If Trust, provide date of last amendment (if any)",
+      "helper": null,
+      "type": "date",
+      "required": false,
+      "pdfField": "If Trust provide date of last amendment if any",
+      "showIf": "entity.ownershipType in ['revocableTrust','irrevocableTrust']",
+      "validation": {
+        "rule": "pastDate"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "trustees",
+      "step": 17,
+      "order": 0,
+      "title": "Trustees or Managers",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "legalName",
+          "label": "Legal Name of Trustees or Manager",
+          "type": "text",
+          "required": true,
+          "pdfField": "Legal Name of Trustees or ManagerRow1",
+          "canonicalField": null
+        },
+        {
+          "key": "dob",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date of BirthRow1",
+          "canonicalField": null,
+          "validation": {
+            "rule": "pastDate"
+          }
+        },
+        {
+          "key": "ssn",
+          "label": "Social Security No",
+          "type": "ssn-ein",
+          "required": true,
+          "pdfField": "Social Security NoRow1",
+          "canonicalField": null,
+          "validation": {
+            "rule": "ssn"
+          }
+        },
+        {
+          "key": "address",
+          "label": "Residential Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Residential AddressRow1",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "beneficialOwners.noOwnerOver25Percent",
+      "step": 18,
+      "order": 0,
+      "title": "Check here if there is no owner that owns more than 25% of equity interest in the entity",
+      "helper": null,
+      "type": "checkbox",
+      "required": false,
+      "pdfField": "If any beneficial owner is an entity provide the entity name AND the names of each beneficial owner of that",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "beneficialOwners",
+      "step": 18,
+      "order": 1,
+      "title": "Beneficial Owners",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": null,
+      "showIf": "!beneficialOwners.noOwnerOver25Percent",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "legalName",
+          "label": "Legal Name of Beneficial Owners",
+          "type": "text",
+          "required": true,
+          "pdfField": "Legal Name of Beneficial OwnersRow1",
+          "canonicalField": null
+        },
+        {
+          "key": "dob",
+          "label": "Date of Birth",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date of BirthRow1_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "pastDate"
+          }
+        },
+        {
+          "key": "ssn",
+          "label": "Social Security No",
+          "type": "ssn-ein",
+          "required": true,
+          "pdfField": "Social Security NoRow1_2",
+          "canonicalField": null,
+          "validation": {
+            "rule": "ssn"
+          }
+        },
+        {
+          "key": "address",
+          "label": "Residential Address",
+          "type": "text",
+          "required": true,
+          "pdfField": "Residential AddressRow1_2",
+          "canonicalField": null
+        },
+        {
+          "key": "percentOwned",
+          "label": "% Owned",
+          "type": "number",
+          "required": true,
+          "pdfField": "OwnedRow1",
+          "canonicalField": null,
+          "validation": {
+            "rule": "nonNegativeNumber"
+          }
+        }
+      ]
+    },
+    {
+      "id": "beneficialOwner.authorization",
+      "step": 19,
+      "order": 0,
+      "title": "Beneficial Owner Authorization",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "As Beneficial Owner, I may act independently as provided in the Trust or Company/Partnership Agreement",
+          "value": "actIndependently",
+          "description": null,
+          "pdfField": "As Beneficial Owner I may act independently as provided in the Trust or CompanyPartnership",
+          "required": false
+        },
+        {
+          "label": "The Beneficial Owner(s) listed above may act as a majority as provided in the Trust or Company/Partnership Agreement",
+          "value": "actMajority",
+          "description": null,
+          "pdfField": "The Beneficial Owners listed above may act as a majority as provided in the Trust or Company",
+          "required": false
+        },
+        {
+          "label": "The Beneficial Owner(s) listed above must act unanimously as provided in the Trust or Company/Partnership Agreement",
+          "value": "actUnanimously",
+          "description": null,
+          "pdfField": "The Beneficial Owners listed above must act unanimously as provided in the Trust or Company",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "beneficialOwner.signature",
+      "step": 19,
+      "order": 1,
+      "title": "Signature of Beneficial Owner/Authorized Signor",
+      "helper": null,
+      "type": "signature-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Text166",
+          "canonicalField": null
+        },
+        {
+          "key": "printedName",
+          "label": "Print Beneficial Owner Legal Name",
+          "type": "text",
+          "required": true,
+          "pdfField": "Text165",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "beneficialOwner.coSignature",
+      "step": 19,
+      "order": 2,
+      "title": "Signature of Co-Beneficial Owner (if applicable)",
+      "helper": null,
+      "type": "signature-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": false,
+          "pdfField": "Text167",
+          "canonicalField": null
+        },
+        {
+          "key": "printedName",
+          "label": "Print Co-Beneficial Owner Legal Name",
+          "type": "text",
+          "required": false,
+          "pdfField": "Print CoBeneficial Owner Legal Name if applies",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "signatures.accountHolder",
+      "step": 20,
+      "order": 0,
+      "title": "Account Holder Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Date_4",
+          "canonicalField": null
+        },
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date_4",
+          "canonicalField": null,
+          "validation": {
+            "rule": "notFutureDate"
+          }
+        }
+      ]
+    },
+    {
+      "id": "signatures.secondAccountHolder",
+      "step": 20,
+      "order": 1,
+      "title": "Second Account Holder Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": "accountType in ['joint','tenantsInCommon','communityProperty']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Date_5",
+          "canonicalField": null
+        },
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date_5",
+          "canonicalField": null,
+          "validation": {
+            "rule": "notFutureDate"
+          }
+        }
+      ]
+    },
+    {
+      "id": "signatures.custodian",
+      "step": 20,
+      "order": 2,
+      "title": "Custodian Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": "accountType in ['traditionalIRA','rothIRA','sep','keogh','qualifiedPlan','other_custodial']",
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Date_5",
+          "canonicalField": null
+        },
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date",
+          "required": true,
+          "pdfField": "Date_5",
+          "canonicalField": null,
+          "validation": {
+            "rule": "notFutureDate"
+          }
+        }
+      ]
+    },
+    {
+      "id": "verification.verifierType",
+      "step": 21,
+      "order": 0,
+      "title": "The verifier is",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "A registered broker-dealer, as defined in the Securities Exchange Act of 1934",
+          "value": "brokerDealer",
+          "description": null,
+          "pdfField": "Check Box169",
+          "required": false
+        },
+        {
+          "label": "An investment adviser registered with the Securities and Exchange Commission",
+          "value": "investmentAdviser",
+          "description": null,
+          "pdfField": "Check Box170",
+          "required": false
+        },
+        {
+          "label": "A licensed attorney in good standing under the laws of the jurisdictions in which I am admitted to practice law",
+          "value": "attorney",
+          "description": null,
+          "pdfField": "Check Box171",
+          "required": false
+        },
+        {
+          "label": "A certified public accountant in good standing under the laws of the place of my residence or principal office",
+          "value": "cpa",
+          "description": null,
+          "pdfField": "Check Box172",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "verification.clientStatus",
+      "step": 21,
+      "order": 1,
+      "title": "Client satisfies one or more of the following criteria",
+      "helper": null,
+      "type": "multi-select",
+      "required": false,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "A natural person whose individual net worth, or joint net worth with spouse, exceeds $1,000,000",
+          "value": "netWorth1M",
+          "description": null,
+          "pdfField": "Check Box173",
+          "required": false
+        },
+        {
+          "label": "A natural person who had an individual income in excess of $200,000 in each of the two most recent years or joint income with spouse in excess of $300,000",
+          "value": "income200k",
+          "description": null,
+          "pdfField": "Check Box174",
+          "required": false
+        },
+        {
+          "label": "An individual retirement account owned by a natural person, or a revocable trust where the grantor is a natural person, and the natural person meets at least one of the two criteria listed above",
+          "value": "iraOrTrust",
+          "description": null,
+          "pdfField": "Check Box175",
+          "required": false
+        },
+        {
+          "label": "Corporation, Massachusetts or similar business trust, partnership, limited liability company or organization with total assets over $5,000,000",
+          "value": "entity5M",
+          "description": null,
+          "pdfField": "Check Box176",
+          "required": false
+        },
+        {
+          "label": "Holder in good standing of certain professional certifications or designations",
+          "value": "professionalCert",
+          "description": null,
+          "pdfField": "Check Box177",
+          "required": false
+        },
+        {
+          "label": "Entity with investments exceeding $5,000,000, not formed for the specific purpose of acquiring the securities offered",
+          "value": "entityInvestments5M",
+          "description": null,
+          "pdfField": "Check Box178",
+          "required": false
+        },
+        {
+          "label": "Investment adviser registered under the Investment Advisers Act of 1940, or an exempt investment adviser",
+          "value": "investmentAdviser",
+          "description": null,
+          "pdfField": "Check Box179",
+          "required": false
+        },
+        {
+          "label": "Trust, with total assets over $5,000,000, not formed for the specific purpose of acquiring securities offered",
+          "value": "trust5M",
+          "description": null,
+          "pdfField": "Check Box180",
+          "required": false
+        },
+        {
+          "label": "Family client of family office, with total assets of at least $5,000,000",
+          "value": "familyClient",
+          "description": null,
+          "pdfField": "Check Box181",
+          "required": false
+        },
+        {
+          "label": "Broker-dealer registered under Section 15 of the Securities Exchange Act of 1934, as amended",
+          "value": "brokerDealer",
+          "description": null,
+          "pdfField": "Check Box182",
+          "required": false
+        },
+        {
+          "label": "Investment company registered under the Investment Company Act of 1940 or a business development company",
+          "value": "investmentCompany",
+          "description": null,
+          "pdfField": "Check Box183",
+          "required": false
+        },
+        {
+          "label": "Small business investment company licensed by the Small Business Administration",
+          "value": "sbic",
+          "description": null,
+          "pdfField": "Check Box184",
+          "required": false
+        },
+        {
+          "label": "Rural business investment company",
+          "value": "rbic",
+          "description": null,
+          "pdfField": "Check Box185",
+          "required": false
+        },
+        {
+          "label": "An employee benefit plan within the meaning of ERISA",
+          "value": "employeeBenefitPlan",
+          "description": null,
+          "pdfField": "Check Box186",
+          "required": false
+        },
+        {
+          "label": "Private business development company",
+          "value": "privateBDC",
+          "description": null,
+          "pdfField": "Check Box187",
+          "required": false
+        },
+        {
+          "label": "Bank as defined in Section 3(a)(2) of the Securities Act",
+          "value": "bank",
+          "description": null,
+          "pdfField": "Check Box188",
+          "required": false
+        },
+        {
+          "label": "Plan established and maintained by a state, its political subdivisions, or any agency or instrumentality of a state or its political subdivisions, for the benefit of its employees, if such plan has total assets in excess of $5,000,000; any insurance company as defined in Section 2(13) of the Securities Act",
+          "value": "statePlan",
+          "description": null,
+          "pdfField": "Check Box189",
+          "required": false
+        },
+        {
+          "label": "One of our officers, directors, advisory board members or trustees or persons serving in a similar capacity",
+          "value": "officerDirector",
+          "description": null,
+          "pdfField": "Check Box190",
+          "required": false
+        },
+        {
+          "label": "An entity in which all of the equity owners are Accredited Investors",
+          "value": "entityAllAccredited",
+          "description": null,
+          "pdfField": "Check Box191",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "verification.signature",
+      "step": 21,
+      "order": 2,
+      "title": "Verifier Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": false,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature",
+          "type": "signature",
+          "required": false,
+          "pdfField": "Text204",
+          "canonicalField": null
+        },
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date",
+          "required": false,
+          "pdfField": "Text204",
+          "canonicalField": null,
+          "validation": {
+            "rule": "notFutureDate"
+          }
+        },
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "text",
+          "required": false,
+          "pdfField": "Name_2",
+          "canonicalField": null
+        },
+        {
+          "key": "by",
+          "label": "By",
+          "type": "text",
+          "required": false,
+          "pdfField": "By",
+          "canonicalField": null
+        },
+        {
+          "key": "title",
+          "label": "Title",
+          "type": "text",
+          "required": false,
+          "pdfField": "Title",
+          "canonicalField": null
+        },
+        {
+          "key": "stateBarNumber",
+          "label": "State Bar Number and Issuing State",
+          "type": "text",
+          "required": false,
+          "pdfField": "State Bar Number and Issuing State",
+          "canonicalField": null
+        },
+        {
+          "key": "cpaCertNumber",
+          "label": "Or CPA Certificate Number and Issuing State",
+          "type": "text",
+          "required": false,
+          "pdfField": "Or CPA Certificate Number and Issuing State",
+          "canonicalField": null
+        },
+        {
+          "key": "crdOrSecNumber",
+          "label": "Or CRD Number or SEC Registration Number",
+          "type": "text",
+          "required": false,
+          "pdfField": "Or CRD Number or SEC Registration Number",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "w9.name",
+      "step": 22,
+      "order": 0,
+      "title": "Name of entity/Individual",
+      "helper": null,
+      "type": "text",
+      "required": true,
+      "pdfField": "1 Name of entityIndividual An entry Is required For a sole proprietor or disregarded entity enter the owners name on line 1 and enter the businessdisregarded entitys name on line 2",
+      "showIf": null,
+      "canonicalField": "w9.name"
+    },
+    {
+      "id": "w9.businessName",
+      "step": 22,
+      "order": 1,
+      "title": "Business name/disregarded entity name, if different from above",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Text192",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.taxClassification",
+      "step": 22,
+      "order": 2,
+      "title": "Federal tax classification",
+      "helper": null,
+      "type": "single-choice-cards",
+      "required": true,
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Individual/sole proprietor",
+          "value": "individual",
+          "description": null,
+          "pdfField": "Check Box193",
+          "required": false
+        },
+        {
+          "label": "C corporation",
+          "value": "cCorp",
+          "description": null,
+          "pdfField": "Check Box195",
+          "required": false
+        },
+        {
+          "label": "S corporation",
+          "value": "sCorp",
+          "description": null,
+          "pdfField": "Check Box196",
+          "required": false
+        },
+        {
+          "label": "Partnership",
+          "value": "partnership",
+          "description": null,
+          "pdfField": "Check Box197",
+          "required": false
+        },
+        {
+          "label": "Trust/estate",
+          "value": "trustEstate",
+          "description": null,
+          "pdfField": "Check Box198",
+          "required": false
+        },
+        {
+          "label": "LLC",
+          "value": "llc",
+          "description": null,
+          "pdfField": "Check Box194",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.llcClassification",
+      "step": 22,
+      "order": 3,
+      "title": "LLC tax classification (C = C corporation, S = S corporation, P = Partnership)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "classlficatlon of the LLC unless It Is a disregarded entity A disregarded entity should Instead check the appropriate",
+      "showIf": "w9.taxClassification == 'llc'",
+      "canonicalField": null
+    },
+    {
+      "id": "w9.otherClassification",
+      "step": 22,
+      "order": 4,
+      "title": "Other (see Instructions)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Text199",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.exemptPayeeCode",
+      "step": 22,
+      "order": 5,
+      "title": "Exempt payee code (if any)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Text200",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.fatcaExemptionCode",
+      "step": 22,
+      "order": 6,
+      "title": "Exemption from Foreign Account Tax Compliance Act (FATCA) reporting code (if any)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Applies to accounts maintained",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.address",
+      "step": 22,
+      "order": 7,
+      "title": "Address",
+      "helper": null,
+      "type": "address-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "line1",
+          "label": "Address (number, street, and apt. or suite no.)",
+          "type": "text",
+          "required": true,
+          "pdfField": "Text201",
+          "canonicalField": null
+        },
+        {
+          "key": "city",
+          "label": "City, state, and ZIP code",
+          "type": "text",
+          "required": true,
+          "pdfField": "6 City state and ZIP code",
+          "canonicalField": null
+        }
+      ]
+    },
+    {
+      "id": "w9.requesterNameAddress",
+      "step": 22,
+      "order": 8,
+      "title": "Requester's name and address (optional)",
+      "helper": null,
+      "type": "textarea",
+      "required": false,
+      "pdfField": "Requesters name and address optional_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.accountNumbers",
+      "step": 22,
+      "order": 9,
+      "title": "List account number(s) here (optional)",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Text205",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "w9.tin",
+      "step": 22,
+      "order": 10,
+      "title": "Taxpayer Identification Number (TIN)",
+      "helper": null,
+      "type": "ssn-ein",
+      "required": true,
+      "pdfField": "Text202",
+      "showIf": null,
+      "validation": {
+        "rule": "ssnOrEin"
+      },
+      "canonicalField": "w9.tin"
+    },
+    {
+      "id": "w9.ein",
+      "step": 22,
+      "order": 11,
+      "title": "Employer identification number",
+      "helper": null,
+      "type": "text",
+      "required": false,
+      "pdfField": "Text203",
+      "showIf": null,
+      "validation": {
+        "rule": "ein"
+      },
+      "canonicalField": null
+    },
+    {
+      "id": "w9.signature",
+      "step": 22,
+      "order": 12,
+      "title": "W-9 Signature",
+      "helper": null,
+      "type": "signature-block",
+      "required": true,
+      "pdfField": null,
+      "showIf": null,
+      "canonicalField": null,
+      "subFields": [
+        {
+          "key": "signature",
+          "label": "Signature of U.S. person",
+          "type": "signature",
+          "required": true,
+          "pdfField": "Text204",
+          "canonicalField": null
+        },
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date",
+          "required": true,
+          "pdfField": "Text204",
+          "canonicalField": null,
+          "validation": {
+            "rule": "notFutureDate"
+          }
+        }
+      ]
+    },
+    {
+      "id": "signatures.accountHolder.signature__i1",
+      "step": 20,
+      "order": 3,
+      "title": "Account Holder Signature — Signature (1)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "signature",
+      "required": false,
+      "pdfField": "Date",
+      "canonicalField": null
+    },
+    {
+      "id": "signatures.accountHolder.signature__i2",
+      "step": 20,
+      "order": 4,
+      "title": "Account Holder Signature — Signature (2)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "signature",
+      "required": false,
+      "pdfField": "Date_2",
+      "canonicalField": null
+    },
+    {
+      "id": "signatures.accountHolder.signature__i3",
+      "step": 20,
+      "order": 5,
+      "title": "Account Holder Signature — Signature (3)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "signature",
+      "required": false,
+      "pdfField": "Date_3",
+      "canonicalField": null
+    },
+    {
+      "id": "w9.requesterNameAddress__i1",
+      "step": 22,
+      "order": 13,
+      "title": "Requester's name and address (optional) (1)",
+      "helper": "Auto-recovered repeated field — confirm which owner/party this belongs to.",
+      "type": "textarea",
+      "required": false,
+      "pdfField": "Requesters name and address optional",
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.submission_checklist_confirmation",
+      "step": 1,
+      "order": 9,
+      "title": "Submission Checklist Confirmation",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Please check to confirm the Investor has completed the following items",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.items_checklist_instructions",
+      "step": 1,
+      "order": 10,
+      "title": "Items Checklist Instructions",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Please check the box or indicate NA not applicable for the items below",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.amount_of_commitment_and_units",
+      "step": 2,
+      "order": 4,
+      "title": "Amount of Commitment and Units",
+      "type": "text",
+      "required": true,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Type of Interests in the Partnership Being Subscribed For please check one",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.permanent_residence_or_principal_place_of_business",
+      "step": 6,
+      "order": 6,
+      "title": "Permanent Residence or Principal Place of Business",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Text82",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.broker_office_address",
+      "step": 8,
+      "order": 8,
+      "title": "Broker Office Address",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "We must have the broker email address to set up online access to our broker web portal",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.accredited_investor_criteria",
+      "step": 9,
+      "order": 1,
+      "title": "Accredited Investor Criteria",
+      "type": "multi-select",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Criterion 1",
+          "value": "criterion_1",
+          "pdfField": "Check Box97",
+          "required": false
+        },
+        {
+          "label": "Criterion 2",
+          "value": "criterion_2",
+          "pdfField": "Check Box98",
+          "required": false
+        },
+        {
+          "label": "Criterion 3",
+          "value": "criterion_3",
+          "pdfField": "Check Box99",
+          "required": false
+        },
+        {
+          "label": "Criterion 4",
+          "value": "criterion_4",
+          "pdfField": "Check Box100",
+          "required": false
+        },
+        {
+          "label": "Criterion 5",
+          "value": "criterion_5",
+          "pdfField": "Check Box101",
+          "required": false
+        },
+        {
+          "label": "Criterion 6",
+          "value": "criterion_6",
+          "pdfField": "Check Box102",
+          "required": false
+        },
+        {
+          "label": "Criterion 7",
+          "value": "criterion_7",
+          "pdfField": "Check Box103",
+          "required": false
+        },
+        {
+          "label": "Criterion 8",
+          "value": "criterion_8",
+          "pdfField": "Check Box104",
+          "required": false
+        },
+        {
+          "label": "Criterion 9",
+          "value": "criterion_9",
+          "pdfField": "Check Box105",
+          "required": false
+        },
+        {
+          "label": "Criterion 10",
+          "value": "criterion_10",
+          "pdfField": "Check Box106",
+          "required": false
+        },
+        {
+          "label": "Criterion 11",
+          "value": "criterion_11",
+          "pdfField": "Check Box107",
+          "required": false
+        },
+        {
+          "label": "Criterion 12",
+          "value": "criterion_12",
+          "pdfField": "Check Box108",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.look_through_entity_selection",
+      "step": 13,
+      "order": 6,
+      "title": "Look-Through Entity Selection",
+      "type": "single-choice-cards",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": null,
+      "options": [
+        {
+          "label": "Option A",
+          "value": "option_a",
+          "pdfField": "Check Box131",
+          "required": false
+        },
+        {
+          "label": "Option B",
+          "value": "option_b",
+          "pdfField": "Check Box138",
+          "required": false
+        }
+      ],
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.additional_trustee_manager_row_2",
+      "step": 17,
+      "order": 1,
+      "title": "Additional Trustee/Manager - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Legal Name of Trustees or ManagerRow2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.trustee_manager_date_of_birth_row_2",
+      "step": 17,
+      "order": 2,
+      "title": "Trustee/Manager Date of Birth - Row 2",
+      "type": "date",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Date of BirthRow2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.trustee_manager_ssn_row_2",
+      "step": 17,
+      "order": 3,
+      "title": "Trustee/Manager SSN - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Social Security NoRow2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.trustee_manager_address_row_2",
+      "step": 17,
+      "order": 4,
+      "title": "Trustee/Manager Address - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Residential AddressRow2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_name_row_2",
+      "step": 18,
+      "order": 2,
+      "title": "Beneficial Owner Name - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Legal Name of Beneficial OwnersRow2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_dob_row_2",
+      "step": 18,
+      "order": 3,
+      "title": "Beneficial Owner DOB - Row 2",
+      "type": "date",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Date of BirthRow2_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_ssn_row_2",
+      "step": 18,
+      "order": 4,
+      "title": "Beneficial Owner SSN - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Social Security NoRow2_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_address_row_2",
+      "step": 18,
+      "order": 5,
+      "title": "Beneficial Owner Address - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Residential AddressRow2_2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.percentage_owned_row_2",
+      "step": 18,
+      "order": 6,
+      "title": "Percentage Owned - Row 2",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": " OwnedRow2",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_name_row_3",
+      "step": 18,
+      "order": 7,
+      "title": "Beneficial Owner Name - Row 3",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Legal Name of Beneficial OwnersRow3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_dob_row_3",
+      "step": 18,
+      "order": 8,
+      "title": "Beneficial Owner DOB - Row 3",
+      "type": "date",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Date of BirthRow3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_ssn_row_3",
+      "step": 18,
+      "order": 9,
+      "title": "Beneficial Owner SSN - Row 3",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Social Security NoRow3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_address_row_3",
+      "step": 18,
+      "order": 10,
+      "title": "Beneficial Owner Address - Row 3",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Residential AddressRow3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.percentage_owned_row_3",
+      "step": 18,
+      "order": 11,
+      "title": "Percentage Owned - Row 3",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": " OwnedRow3",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_name_row_4",
+      "step": 18,
+      "order": 12,
+      "title": "Beneficial Owner Name - Row 4",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Legal Name of Beneficial OwnersRow4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_dob_row_4",
+      "step": 18,
+      "order": 13,
+      "title": "Beneficial Owner DOB - Row 4",
+      "type": "date",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Date of BirthRow4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_ssn_row_4",
+      "step": 18,
+      "order": 14,
+      "title": "Beneficial Owner SSN - Row 4",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Social Security NoRow4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_address_row_4",
+      "step": 18,
+      "order": 15,
+      "title": "Beneficial Owner Address - Row 4",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Residential AddressRow4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.percentage_owned_row_4",
+      "step": 18,
+      "order": 16,
+      "title": "Percentage Owned - Row 4",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": " OwnedRow4",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_name_row_5",
+      "step": 18,
+      "order": 17,
+      "title": "Beneficial Owner Name - Row 5",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Legal Name of Beneficial OwnersRow5",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_dob_row_5",
+      "step": 18,
+      "order": 18,
+      "title": "Beneficial Owner DOB - Row 5",
+      "type": "date",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Date of BirthRow5",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_ssn_row_5",
+      "step": 18,
+      "order": 19,
+      "title": "Beneficial Owner SSN - Row 5",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Social Security NoRow5",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.beneficial_owner_address_row_5",
+      "step": 18,
+      "order": 20,
+      "title": "Beneficial Owner Address - Row 5",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Residential AddressRow5",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.percentage_owned_row_5",
+      "step": 18,
+      "order": 21,
+      "title": "Percentage Owned - Row 5",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": " OwnedRow5",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.percentage_owned_row_1",
+      "step": 18,
+      "order": 22,
+      "title": "Percentage Owned - Row 1",
+      "type": "text",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": " OwnedRow1",
+      "showIf": null,
+      "canonicalField": null
+    },
+    {
+      "id": "recovered.bd_ria_verification_date",
+      "step": 21,
+      "order": 3,
+      "title": "BD/RIA Verification Date",
+      "type": "date",
+      "required": false,
+      "helper": "Recovered field — confirm it belongs here.",
+      "pdfField": "Dated",
+      "showIf": null,
+      "canonicalField": null
+    }
+  ],
+  "pdfFieldCount": 283,
+  "unmappedFields": [
+    "undefined_4",
+    "Other",
+    "undefined_5",
+    "Text168",
+    "3b If on line 3a you checked Partnership or Trustestate or checked LLC and entered P as Its tax classlflcatlon"
+  ],
+  "unmappedDetails": [
+    {
+      "name": "undefined_4",
+      "page": 3,
+      "hint": "If the subscription is for an IRA or other Qualified or Custodial Account, all of the foll",
+      "category": "other"
+    },
+    {
+      "name": "Other",
+      "page": 5,
+      "hint": "A signature box",
+      "category": "signature"
+    },
+    {
+      "name": "undefined_5",
+      "page": 8,
+      "hint": "Broker Dealer Address:",
+      "category": "address"
+    },
+    {
+      "name": "Text168",
+      "page": 24,
+      "hint": "has requested that the undersigned provide",
+      "category": "other"
+    },
+    {
+      "name": "3b If on line 3a you checked Partnership or Trustestate or checked LLC and entered P as Its tax classlflcatlon",
+      "page": 33,
+      "hint": "Checkbox: classlficatlon of the LLC, unless It Is a disregarded entity. A disreg",
+      "category": "checkbox"
+    }
+  ]
+}

@@ -2,9 +2,395 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  isAdmin?: boolean;
+}
+
+// --- AI form ingestion (admin) ---------------------------------------------
+
+export type IngestedQuestionType =
+  | 'text'
+  | 'textarea'
+  | 'date'
+  | 'number'
+  | 'currency'
+  | 'email'
+  | 'phone'
+  | 'ssn-ein'
+  | 'single-choice-cards'
+  | 'multi-select'
+  | 'checkbox'
+  | 'signature';
+
+export interface IngestedChoiceOption {
+  label: string;
+  value: string;
+  pdfField: string | null;
+}
+
+export interface IngestedQuestion {
+  id: string;
+  section: number;
+  title: string;
+  helper?: string | null;
+  type: IngestedQuestionType;
+  required: boolean;
+  pdfField?: string | null;
+  options?: IngestedChoiceOption[];
+  showIf?: string | null;
+  profileKey?: string | null;
+}
+
+export interface IngestedFormSchema {
+  code: string;
+  title: string;
+  description?: string | null;
+  sections: { number: number; title: string }[];
+  items: IngestedQuestion[];
+  pdfFieldCount: number;
+  unmappedFields: string[];
+  unmappedDetails?: { name: string; page: number; hint: string }[];
+}
+
+export type FormSourceKind = 'SEED' | 'UPLOAD';
+export type FormStatusKind = 'DRAFT' | 'PUBLISHED';
+
+export interface AdminFormSummary {
+  id: string;
+  code: string;
+  title: string;
+  status: FormStatusKind;
+  source: FormSourceKind;
+  unmappedCount: number | null;
+  updatedAt: string;
+}
+
+export interface AdminFormDetail {
+  id: string;
+  code: string;
+  title: string;
+  status: FormStatusKind;
+  source: FormSourceKind;
+  templateUrl: string | null;
+  unmappedCount: number | null;
+  schema: V2Schema | null;
+}
+
+// --- v2 step-wise schema (the wizard runtime) ---
+export interface V2ChoiceOption {
+  label: string;
+  value: string;
+  description?: string | null;
+  pdfField: string | null;
+  required?: boolean;
+  mapping?: MappingExplanation;
+}
+export interface V2SubField {
+  key: string;
+  label: string;
+  type: string;
+  required?: boolean;
+  pdfField?: string | null;
+  canonicalField?: string | null;
+  mapping?: MappingExplanation;
+  autofill?: AutofillExplanation | null;
+}
+export interface MappingExplanation {
+  reason?: string;
+  evidence?: string;
+  source?: string;
+  confidence?: number | null;
+}
+export interface AutofillExplanation {
+  canonicalField: string;
+  reason: string;
+  source?: string;
+}
+export interface V2Question {
+  id: string;
+  step: number;
+  order: number;
+  title: string;
+  helper?: string | null;
+  type: string;
+  required?: boolean;
+  pdfField?: string | null;
+  canonicalField?: string | null;
+  options?: V2ChoiceOption[];
+  showIf?: string | null;
+  subFields?: V2SubField[];
+  kind?: string; // 'repeat-block'
+  fields?: V2Question[];
+  minItems?: number;
+  maxItems?: number;
+  mapping?: MappingExplanation;
+  autofill?: AutofillExplanation | null;
+}
+export interface V2Step {
+  number: number;
+  key: string;
+  label: string;
+  requiredIf?: string | null;
+  emits?: string[];
+  isTerminal?: boolean;
+}
+export interface V2Schema {
+  version: 2;
+  code: string;
+  title: string;
+  description?: string | null;
+  steps: V2Step[];
+  items: V2Question[];
+  pdfFieldCount: number;
+  unmappedFields: string[];
+  unmappedDetails?: {
+    name: string;
+    page: number;
+    hint: string;
+    category?: string;
+    reason?: string;
+    recommendedAction?: string;
+    source?: string;
+    confidence?: number | null;
+  }[];
+  mappingSummary?: {
+    totalFields: number;
+    mappedFields: number;
+    unmappedFields: number;
+    mappedPercent: number;
+    questions: number;
+    autofillReadyFields: number;
+    recoveredByExpansion?: number;
+    recoveredBySecondPass?: number;
+  };
+  analysisReport?: IngestionAnalysisReport;
+  mappingLayout?: PdfMappingLayout;
+}
+
+export type PdfTargetKind = 'acrofield' | 'overlay';
+export type PdfWidgetType = 'text' | 'checkbox' | 'choice';
+export type PdfValueFormat = 'text' | 'date' | 'currency' | 'phone' | 'tin' | 'ssn';
+
+export interface PdfMappingRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface PdfMappingTarget {
+  id: string;
+  kind: PdfTargetKind;
+  page: number;
+  rect: PdfMappingRect;
+  pdfField?: string | null;
+  widgetType: PdfWidgetType;
+  variableKey?: string | null;
+  optionValue?: string | null;
+  format?: PdfValueFormat;
+  required?: boolean;
+  source: 'ai' | 'admin';
+  confidence?: number | null;
+  ignoredReason?: 'signature_skipped' | 'admin_ignored';
+}
+
+export interface PdfMappingLayout {
+  version: 1;
+  targets: PdfMappingTarget[];
+}
+
+export interface PdfMapPage {
+  page: number;
+  width: number;
+  height: number;
+}
+
+export interface PdfMapField {
+  id: string;
+  page: number;
+  fieldName: string | null;
+  type: string;
+  rect: PdfMappingRect;
+  label: string;
+  nearbyText: string[];
+  exportValue?: string | null;
+  required?: boolean;
+}
+
+export interface PdfMapVariable {
+  key: string;
+  label: string;
+  group: string;
+  source: 'schema' | 'canonical' | 'fact';
+  format?: PdfValueFormat;
+  description?: string;
+  ruleSummary?: string;
+  sourceForms?: string[];
+  reviewSensitive?: boolean;
+}
+
+export interface SkippedSignatureField {
+  id: string;
+  page: number;
+  fieldName: string | null;
+  rect: PdfMappingRect;
+  label: string;
+  ignoredReason: 'signature_skipped';
+}
+
+export interface PdfMapResponse {
+  templateUrl: string;
+  pages: PdfMapPage[];
+  fields: PdfMapField[];
+  skippedSignatureFields: SkippedSignatureField[];
+  mappingLayout: PdfMappingLayout;
+  variables: PdfMapVariable[];
+}
+
+export interface PdfMappingWarning {
+  targetId: string;
+  variableKey: string;
+  pdfField?: string | null;
+  reason: string;
+  missingInputs?: string[];
+  needsReview?: boolean;
+  sourceFields?: string[];
+}
+
+// --- Client direct PDF fill sessions --------------------------------------
+
+export type PdfFillConfidence = 'high' | 'medium' | 'low';
+export type PdfFillTargetStatus = 'filled' | 'needs_review' | 'empty' | 'skipped';
+
+export interface PdfFillWarning {
+  targetId: string;
+  label: string;
+  reason: string;
+  missingInputs?: string[];
+}
+
+export interface PdfFillTarget {
+  id: string;
+  page: number;
+  rect: PdfMappingRect;
+  widgetType: PdfWidgetType;
+  label: string;
+  value: string | boolean | null;
+  displayValue: string;
+  status: PdfFillTargetStatus;
+  sourceLabel?: string;
+  explanation?: string;
+  confidence: PdfFillConfidence;
+  editable: boolean;
+  warning?: string;
+  pdfField?: string | null;
+}
+
+export interface PdfFillLayout {
+  pages: PdfMapPage[];
+  targets: PdfFillTarget[];
+}
+
+export interface PdfFillRecord {
+  id: string;
+  fileName: string | null;
+  status: string;
+  originalPdfUrl: string;
+  generatedPdfUrl: string | null;
+  generatedAt: string | null;
+  resolvedLayout: PdfFillLayout;
+  warnings: PdfFillWarning[];
+}
+
+export interface PdfFillSummary {
+  id: string;
+  fileName: string | null;
+  status: string;
+  generatedPdfUrl: string | null;
+  generatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  warningCount: number;
+}
+
+export interface PdfFillOverride {
+  value?: string | boolean | null;
+  ignored?: boolean;
+}
+
+export interface IngestionAnalysisReport {
+  headline: string;
+  plainSummary: string;
+  mappedSummary: string;
+  unmappedSummary: string;
+  autofillSummary: string;
+  reviewPriority: string;
+  nextSteps: string[];
+}
+
+export interface DynamicStepEnvelope {
+  key: string;
+  label: string;
+  currentQuestionId: string | null;
+  currentQuestionIndex: number;
+  visibleQuestionIds: string[];
+  fields: Record<string, unknown>;
+  autoFilled: string[];
+  requiresStep4?: boolean;
+  requiresJointOwnerSignature?: boolean;
+  nextRouteAfterCompletion?: string | null;
+}
+export interface DynamicStepResponse {
+  onboarding: {
+    clientId: string;
+    status: string;
+    totalSteps: number;
+    step: DynamicStepEnvelope;
+  };
+}
+
+export interface UploadFormResult {
+  form: { id: string; code: string; title: string; status: FormStatusKind; source: FormSourceKind };
+  stats: {
+    totalFields: number;
+    steps: number;
+    questions: number;
+    mapped: number;
+    unmapped: number;
+    choiceGroups: number;
+    recoveredByExpansion: number;
+    recoveredBySecondPass?: number;
+    mappedPercent: number;
+  };
+  report?: IngestionAnalysisReport | null;
+  unmappedFields: string[];
+}
+
+export interface AdminIngestionJob {
+  id: string;
+  kind: 'UPLOAD' | 'REANALYZE';
+  status: 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  percent: number;
+  label: string;
+  stage: string;
+  createdAt: string;
+  updatedAt: string;
+  formId?: string;
+  result?: UploadFormResult | {
+    form: { id: string; code: string; title: string; status: FormStatusKind; source: FormSourceKind; unmappedCount?: number | null };
+    stats: UploadFormResult['stats'];
+    report?: IngestionAnalysisReport | null;
+    unmappedFields: string[];
+  };
+  error?: string;
 }
 
 export interface BrokerSummary {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface BrokerUserOption {
   id: string;
   name: string;
   email: string;
@@ -940,44 +1326,44 @@ export interface StatementOfFinancialConditionStepOneFields {
     customerNames: string;
   };
   liquidNonQualifiedAssets: {
-    cashMoneyMarketsCds: number;
-    brokerageNonManaged: number;
-    managedAccounts: number;
-    mutualFundsDirect: number;
-    annuitiesLessSurrenderCharges: number;
-    cashValueLifeInsurance: number;
-    otherBusinessAssetsCollectibles: number;
+    cashMoneyMarketsCds: number | null;
+    brokerageNonManaged: number | null;
+    managedAccounts: number | null;
+    mutualFundsDirect: number | null;
+    annuitiesLessSurrenderCharges: number | null;
+    cashValueLifeInsurance: number | null;
+    otherBusinessAssetsCollectibles: number | null;
   };
   liabilities: {
-    mortgagePrimaryResidence: number;
-    mortgagesSecondaryInvestment: number;
-    homeEquityLoans: number;
-    creditCards: number;
-    otherLiabilities: number;
+    mortgagePrimaryResidence: number | null;
+    mortgagesSecondaryInvestment: number | null;
+    homeEquityLoans: number | null;
+    creditCards: number | null;
+    otherLiabilities: number | null;
   };
   illiquidNonQualifiedAssets: {
-    primaryResidence: number;
-    investmentRealEstate: number;
-    privateBusiness: number;
+    primaryResidence: number | null;
+    investmentRealEstate: number | null;
+    privateBusiness: number | null;
   };
   liquidQualifiedAssets: {
-    cashMoneyMarketsCds: number;
-    retirementPlans: number;
-    brokerageNonManaged: number;
-    managedAccounts: number;
-    mutualFundsDirect: number;
-    annuities: number;
+    cashMoneyMarketsCds: number | null;
+    retirementPlans: number | null;
+    brokerageNonManaged: number | null;
+    managedAccounts: number | null;
+    mutualFundsDirect: number | null;
+    annuities: number | null;
   };
   incomeSummary: {
-    salaryCommissions: number;
-    investmentIncome: number;
-    pension: number;
-    socialSecurity: number;
-    netRentalIncome: number;
-    other: number;
+    salaryCommissions: number | null;
+    investmentIncome: number | null;
+    pension: number | null;
+    socialSecurity: number | null;
+    netRentalIncome: number | null;
+    other: number | null;
   };
   illiquidQualifiedAssets: {
-    purchaseAmountValue: number;
+    purchaseAmountValue: number | null;
   };
 }
 
@@ -1111,7 +1497,7 @@ export interface BaiodfStepOneFields {
     customerNames: string;
   };
   orderBasics: {
-    proposedPrincipalAmount: number;
+    proposedPrincipalAmount: number | null;
     qualifiedAccount: {
       yes: boolean;
       no: boolean;
@@ -1181,13 +1567,13 @@ export interface BaiodfStepTwoFields {
     datePpmSent: string | null;
   };
   existingAltPositions: {
-    existingIlliquidAltPositions: number;
-    existingSemiLiquidAltPositions: number;
-    existingTaxAdvantageAltPositions: number;
+    existingIlliquidAltPositions: number | null;
+    existingSemiLiquidAltPositions: number | null;
+    existingTaxAdvantageAltPositions: number | null;
   };
   netWorthAndConcentration: {
-    totalNetWorth: number;
-    liquidNetWorth: number;
+    totalNetWorth: number | null;
+    liquidNetWorth: number | null;
   };
 }
 
@@ -1421,12 +1807,27 @@ export interface FormWorkspaceItem {
   totalSteps: number | null;
   pdfCount: number;
   latestPdfReceivedAt: string | null;
+  dynamic?: boolean;
+  mappingTemplate?: boolean;
+  fillRoute?: string | null;
+  generateRoute?: string | null;
 }
 
 export interface FormWorkspaceRecord {
   clientId: string;
   clientName: string;
   forms: FormWorkspaceItem[];
+}
+
+export interface ClientDocumentRecord {
+  id: string;
+  clientId: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedByName: string;
+  createdAt: string;
+  viewUrl: string;
 }
 
 export interface ClientFormPdfRecord {

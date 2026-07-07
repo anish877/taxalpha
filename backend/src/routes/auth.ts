@@ -69,7 +69,8 @@ export function createAuthRouter(deps: RouteDeps): ExpressRouter {
         select: {
           id: true,
           name: true,
-          email: true
+          email: true,
+          isAdmin: true
         }
       });
 
@@ -110,6 +111,7 @@ export function createAuthRouter(deps: RouteDeps): ExpressRouter {
           id: true,
           name: true,
           email: true,
+          isAdmin: true,
           passwordHash: true
         }
       });
@@ -139,7 +141,8 @@ export function createAuthRouter(deps: RouteDeps): ExpressRouter {
         user: {
           id: user.id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          isAdmin: user.isAdmin
         }
       });
     } catch (error) {
