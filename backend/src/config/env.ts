@@ -35,6 +35,7 @@ const envSchema = z.object({
   S3_BUCKET: z.string().min(1).optional(),
   S3_UPLOAD_PREFIX: z.string().default('investor-profile/government-id'),
   S3_CLIENT_DOCUMENT_PREFIX: z.string().default('client-documents'),
+  S3_FILLED_PDF_PREFIX: z.string().default('filled-pdfs'),
   // AI form-ingestion (OpenRouter, OpenAI-compatible). Ingestion stays disabled
   // unless OPENROUTER_API_KEY is set.
   OPENROUTER_API_KEY: z.string().min(1).optional(),
@@ -126,7 +127,8 @@ export function getRuntimeConfig(env: Environment = getEnv()): RuntimeConfig {
       region: env.AWS_REGION,
       bucket: env.S3_BUCKET ?? null,
       uploadPrefix: env.S3_UPLOAD_PREFIX.replace(/^\/+|\/+$/g, ''),
-      clientDocumentPrefix: env.S3_CLIENT_DOCUMENT_PREFIX.replace(/^\/+|\/+$/g, '')
+      clientDocumentPrefix: env.S3_CLIENT_DOCUMENT_PREFIX.replace(/^\/+|\/+$/g, ''),
+      filledPdfPrefix: env.S3_FILLED_PDF_PREFIX.replace(/^\/+|\/+$/g, '')
     },
     openrouter: {
       apiKey: env.OPENROUTER_API_KEY ?? null,

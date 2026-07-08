@@ -89,7 +89,7 @@ export function createDynamicFormsRouter(deps: RouteDeps): ExpressRouter {
       await ownedClient(clientId, request.authUser!.id);
       const form = await loadForm(code);
 
-      const template = await loadTemplate(form.templateUrl);
+      const template = await loadTemplate(form.templateUrl, deps.config);
       if (!template) {
         throw new HttpError(400, 'The original PDF for this form is not stored. Re-upload it in the Form Library.');
       }
@@ -104,7 +104,7 @@ export function createDynamicFormsRouter(deps: RouteDeps): ExpressRouter {
       const schema = FormSchema.parse(form.schema);
       const values = resolveFieldValues(schema, answers);
       const filled = await fillPdf(new Uint8Array(template), values, { flatten: true });
-      await storeFilled(filledKey(clientId, code), filled);
+      await storeFilled(filledKey(clientId, code), filled, deps.config);
 
       // Persist answers + mark completed.
       await deps.prisma.dynamicFormResponse.upsert({
@@ -129,7 +129,7 @@ export function createDynamicFormsRouter(deps: RouteDeps): ExpressRouter {
       const clientId = String(request.params.clientId);
       const code = String(request.params.code);
       await ownedClient(clientId, request.authUser!.id);
-      const bytes = await loadFilled(filledKey(clientId, code));
+      const bytes = await loadFilled(filledKey(clientId, code), deps.config);
       if (!bytes) throw new HttpError(404, 'No generated PDF yet.');
       response.setHeader('Content-Type', 'application/pdf');
       response.send(bytes);

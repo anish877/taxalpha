@@ -161,7 +161,7 @@ export function createAdminFormsRouter(
     });
 
   const store: StoreFn = options.storeTemplate ?? ((id, bytes) => storeTemplate(id, bytes, deps.config));
-  const loadTpl = options.loadTemplate ?? loadTemplate;
+  const loadTpl = options.loadTemplate ?? ((templateUrl: string | null) => loadTemplate(templateUrl, deps.config));
 
   const loadFormSchema = async (id: string): Promise<{ form: Awaited<ReturnType<typeof deps.prisma.formCatalog.findUnique>>; schema: FormSchemaV2Type }> => {
     const form = await deps.prisma.formCatalog.findUnique({ where: { id } });
@@ -438,7 +438,7 @@ export function createAdminFormsRouter(
         select: { templateUrl: true }
       });
       if (!form?.templateUrl) throw new HttpError(404, 'No stored template for this form.');
-      const bytes = await loadTemplate(form.templateUrl);
+      const bytes = await loadTemplate(form.templateUrl, deps.config);
       if (!bytes) throw new HttpError(404, 'Template not available (stored remotely).');
       response.setHeader('Content-Type', 'application/pdf');
       response.send(bytes);

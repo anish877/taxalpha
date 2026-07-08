@@ -306,7 +306,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
         overrides,
         previous
       );
-      await storeFilled(generatedStorageKey(fill.id), generated.bytes);
+      await storeFilled(generatedStorageKey(fill.id), generated.bytes, deps.config);
       const generatedPdfUrl = publicPdfFillUrl(deps.config.backendPublicUrl, clientId, fill.id, 'filled');
       const now = new Date();
 
@@ -378,7 +378,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
     try {
       const clientId = String(request.params.clientId);
       const fill = await ownedFill(deps, clientId, String(request.params.fillId), request.authUser!.id);
-      const bytes = await loadFilled(generatedStorageKey(fill.id));
+      const bytes = await loadFilled(generatedStorageKey(fill.id), deps.config);
       if (!bytes) throw new HttpError(404, 'Generated PDF is not available.');
       response.setHeader('Content-Type', 'application/pdf');
       response.send(bytes);

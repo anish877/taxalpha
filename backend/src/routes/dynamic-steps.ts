@@ -262,7 +262,7 @@ export function createDynamicStepsRouter(
       if (form.source === 'UPLOAD' && !schema.mappingLayout) {
         throw new HttpError(400, 'This PDF template has not been mapped yet. Ask an admin to publish its mapping.');
       }
-      const template = await loadTemplate(form?.templateUrl ?? null);
+      const template = await loadTemplate(form?.templateUrl ?? null, deps.config);
       if (!template) throw new HttpError(400, 'The original PDF for this form is not stored. Re-upload it in the Form Library.');
 
       const resp = await loadResponse(clientId, code);
@@ -275,7 +275,7 @@ export function createDynamicStepsRouter(
         : { fieldValues: resolveFieldValuesV2(schema, merged, ctx), overlays: [], warnings: [] };
       const acroFilled = await fillPdf(new Uint8Array(template), mapped.fieldValues, { flatten: true });
       const filled = await drawPdfTextOverlays(acroFilled, mapped.overlays);
-      await storeFilled(`${clientId}__${code}`, filled);
+      await storeFilled(`${clientId}__${code}`, filled, deps.config);
       const pdfUrl = `${deps.config.backendPublicUrl ?? ''}/api/clients/${clientId}/forms/${code}/filled.pdf`;
       await deps.prisma.clientFormPdf.upsert({
         where: {
@@ -322,7 +322,7 @@ export function createDynamicStepsRouter(
       const clientId = String(req.params.clientId);
       const code = String(req.params.code);
       await ownedClient(clientId, req.authUser!.id);
-      const bytes = await loadFilled(`${clientId}__${code}`);
+      const bytes = await loadFilled(`${clientId}__${code}`, deps.config);
       if (!bytes) throw new HttpError(404, 'No generated PDF yet.');
       res.setHeader('Content-Type', 'application/pdf');
       res.send(bytes);

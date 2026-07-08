@@ -20,6 +20,8 @@ export interface S3UploadConfig {
   uploadPrefix: string;
   /** Key prefix (folder) for client workspace documents. */
   clientDocumentPrefix: string;
+  /** Key prefix (folder) for generated filled PDFs. */
+  filledPdfPrefix: string;
 }
 
 export interface OpenRouterConfig {

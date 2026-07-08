@@ -6,6 +6,7 @@ import {
   isKeyWithinPrefix,
   isUploadsConfigured
 } from '../src/lib/s3-uploads.js';
+import { buildFilledPdfS3Key } from '../src/lib/ingestion/template-store.js';
 import { buildClientDocumentS3Key } from '../src/lib/s3-client-documents.js';
 import type { S3UploadConfig } from '../src/types/deps.js';
 
@@ -13,7 +14,8 @@ const baseConfig: S3UploadConfig = {
   region: 'us-east-1',
   bucket: 'gpt-alpha-905418209881',
   uploadPrefix: 'investor-profile/government-id',
-  clientDocumentPrefix: 'client-documents'
+  clientDocumentPrefix: 'client-documents',
+  filledPdfPrefix: 'filled-pdfs'
 };
 
 describe('s3-uploads helpers', () => {
@@ -76,5 +78,12 @@ describe('s3-uploads helpers', () => {
     });
 
     expect(key).toBe('client-documents/client-123/uuid-Tax-Letter.docx');
+  });
+
+  it('builds generated filled PDF keys under the filled PDF prefix', () => {
+    expect(buildFilledPdfS3Key(baseConfig, 'pdf-fill-fill_123')).toBe('filled-pdfs/pdf-fill-fill_123.pdf');
+    expect(buildFilledPdfS3Key({ ...baseConfig, filledPdfPrefix: '../generated pdfs' }, 'client/one__BAIODF')).toBe(
+      'generated-pdfs/client-one__BAIODF.pdf'
+    );
   });
 });
