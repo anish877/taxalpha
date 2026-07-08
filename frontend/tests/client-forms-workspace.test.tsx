@@ -276,7 +276,9 @@ describe('Client forms workspace', () => {
       expect(window.location.pathname).toBe('/clients/client_1/forms');
       expect(screen.getByText('Client Workspace')).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Client One' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Upload PDF to Fill' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Files & PDF Fill' })).toBeInTheDocument();
+      expect(screen.queryByText('Documents for this client')).not.toBeInTheDocument();
+      expect(screen.queryByText('Direct PDF Fill')).not.toBeInTheDocument();
     });
 
     await user.click(screen.getByRole('checkbox', { name: 'Select Investor Profile' }));
@@ -405,8 +407,22 @@ describe('Client forms workspace', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Files & PDF Fill' })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Files & PDF Fill' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Documents & PDF fill' })).toBeInTheDocument();
       expect(screen.getByText('Tax Return.pdf')).toBeInTheDocument();
     });
+
+    await user.click(screen.getByRole('button', { name: 'PDF Fill (0)' }));
+    expect(screen.getByRole('button', { name: 'Upload PDF' })).toBeInTheDocument();
+    expect(screen.getByText('No direct PDF fills yet.')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Documents (1)' }));
+    expect(screen.getByRole('button', { name: 'Upload Document' })).toBeInTheDocument();
 
     const file = new File(['agreement'], 'Operating Agreement.docx', {
       type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'

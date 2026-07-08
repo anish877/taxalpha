@@ -119,6 +119,8 @@ function formatFileSize(bytes: number): string {
   return `${megabytes.toFixed(megabytes >= 10 ? 0 : 1)} MB`;
 }
 
+type WorkspaceToolsDrawerMode = 'documents' | 'pdf-fill';
+
 export function ClientFormsWorkspacePage() {
   const { clientId } = useParams<{ clientId: string }>();
   const navigate = useNavigate();
@@ -145,6 +147,7 @@ export function ClientFormsWorkspacePage() {
   const [clientDocumentsLoading, setClientDocumentsLoading] = useState(false);
   const [clientDocumentsError, setClientDocumentsError] = useState<string | null>(null);
   const [uploadingClientDocument, setUploadingClientDocument] = useState(false);
+  const [workspaceToolsDrawerMode, setWorkspaceToolsDrawerMode] = useState<WorkspaceToolsDrawerMode | null>(null);
 
   const stagedCount = stagedCodes.size;
   const selectedCount = workspace?.forms.filter((form) => form.selected).length ?? 0;
@@ -517,6 +520,10 @@ export function ClientFormsWorkspacePage() {
     setPdfLoading(false);
   };
 
+  const handleCloseWorkspaceToolsDrawer = () => {
+    setWorkspaceToolsDrawerMode(null);
+  };
+
   return (
     <>
       <main className="min-h-screen bg-fog px-4 py-6 sm:px-8 sm:py-8">
@@ -533,8 +540,8 @@ export function ClientFormsWorkspacePage() {
                 </p>
               </div>
 
-              <div className="flex gap-4 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-6 border-r border-line pr-4 text-[10px] sm:text-xs">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-6 border-b border-line pb-4 text-[10px] sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4 sm:text-xs">
                   <div>
                     <p className="uppercase tracking-[0.2em] text-mute">Selected</p>
                     <p className="mt-1 text-lg font-light text-ink">{selectedCount}</p>
@@ -567,20 +574,11 @@ export function ClientFormsWorkspacePage() {
                   }}
                 />
                 <button
-                  className="whitespace-nowrap rounded-full border border-line bg-white px-4 py-2 text-sm text-ink transition hover:border-black disabled:cursor-not-allowed disabled:opacity-45"
+                  className="whitespace-nowrap rounded-full bg-accent px-4 py-2 text-sm text-white transition hover:bg-accent/90"
                   type="button"
-                  disabled={uploadingClientDocument}
-                  onClick={() => clientDocumentInputRef.current?.click()}
+                  onClick={() => setWorkspaceToolsDrawerMode('documents')}
                 >
-                  {uploadingClientDocument ? 'Uploading...' : 'Upload Document'}
-                </button>
-                <button
-                  className="whitespace-nowrap rounded-full bg-accent px-4 py-2 text-sm text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/45"
-                  type="button"
-                  disabled={uploadingPdfFill}
-                  onClick={() => uploadInputRef.current?.click()}
-                >
-                  {uploadingPdfFill ? 'Analyzing PDF...' : 'Upload PDF to Fill'}
+                  Files & PDF Fill
                 </button>
                 <button
                   className="whitespace-nowrap rounded-full border border-line px-4 py-2 text-sm text-mute transition hover:border-black hover:text-ink"
@@ -639,146 +637,6 @@ export function ClientFormsWorkspacePage() {
               </div>
             </section>
           )}
-
-          <section className="mt-8 border border-black/10 bg-paper p-5 shadow-hairline sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-mute">Client Documents</p>
-                <h2 className="mt-2 text-2xl font-light text-ink">Documents for this client</h2>
-                <p className="mt-2 text-sm text-mute">
-                  Upload and open supporting files stored with this client workspace.
-                </p>
-              </div>
-              <button
-                className="shrink-0 rounded-full bg-ink px-5 py-3 text-xs uppercase tracking-[0.16em] text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-45"
-                disabled={uploadingClientDocument}
-                type="button"
-                onClick={() => clientDocumentInputRef.current?.click()}
-              >
-                {uploadingClientDocument ? 'Uploading...' : 'Upload Document'}
-              </button>
-            </div>
-
-            <div className="mt-5">
-              {clientDocumentsLoading && <div className="h-20 animate-pulse rounded-2xl bg-white/60" />}
-
-              {!clientDocumentsLoading && clientDocumentsError && (
-                <div className="border border-red-200 bg-white px-5 py-5 text-sm text-red-600">
-                  {clientDocumentsError}
-                </div>
-              )}
-
-              {!clientDocumentsLoading && !clientDocumentsError && clientDocuments.length === 0 && (
-                <div className="border border-dashed border-line bg-white px-5 py-5 text-sm text-mute">
-                  No client documents uploaded yet.
-                </div>
-              )}
-
-              {!clientDocumentsLoading && !clientDocumentsError && clientDocuments.length > 0 && (
-                <div className="overflow-hidden border border-line bg-white">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full border-collapse text-left text-sm">
-                      <thead className="bg-fog text-xs uppercase tracking-[0.16em] text-mute">
-                        <tr>
-                          <th className="px-4 py-3 font-medium">Document</th>
-                          <th className="px-4 py-3 font-medium">Uploaded</th>
-                          <th className="px-4 py-3 font-medium">Size</th>
-                          <th className="px-4 py-3 font-medium">Open</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {clientDocuments.map((document) => (
-                          <tr key={document.id} className="border-t border-line/70">
-                            <td className="max-w-[22rem] px-4 py-3 align-top">
-                              <p className="truncate font-light text-ink" title={document.fileName}>
-                                {document.fileName}
-                              </p>
-                              <p className="mt-1 truncate text-xs text-mute">{document.contentType}</p>
-                            </td>
-                            <td className="px-4 py-3 align-top text-xs text-mute">
-                              <p>{formatTimestamp(document.createdAt)}</p>
-                              <p className="mt-1">by {document.uploadedByName}</p>
-                            </td>
-                            <td className="px-4 py-3 align-top text-xs text-mute">
-                              {formatFileSize(document.sizeBytes)}
-                            </td>
-                            <td className="px-4 py-3 align-top">
-                              <a
-                                className="inline-flex rounded-full border border-line px-3 py-1 text-xs uppercase tracking-[0.14em] text-ink transition hover:border-black"
-                                href={clientDocumentViewUrl(document)}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
-                                Open
-                              </a>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className="mt-8 border border-black/10 bg-paper p-5 shadow-hairline sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-mute">Direct PDF Fill</p>
-                <h2 className="mt-2 text-2xl font-light text-ink">Upload any PDF for this client</h2>
-                <p className="mt-2 text-sm text-mute">
-                  The PDF opens with actual client data filled from the completed website forms.
-                </p>
-              </div>
-              <button
-                className="shrink-0 rounded-full bg-ink px-5 py-3 text-xs uppercase tracking-[0.16em] text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-45"
-                disabled={uploadingPdfFill}
-                type="button"
-                onClick={() => uploadInputRef.current?.click()}
-              >
-                {uploadingPdfFill ? 'Analyzing...' : 'Upload PDF'}
-              </button>
-            </div>
-
-            <div className="mt-5">
-              {pdfFillsLoading && <div className="h-20 animate-pulse rounded-2xl bg-white/60" />}
-              {!pdfFillsLoading && pdfFills.length === 0 && (
-                <div className="border border-dashed border-line bg-white px-5 py-5 text-sm text-mute">
-                  No direct PDF fills yet.
-                </div>
-              )}
-              {!pdfFillsLoading && pdfFills.length > 0 && (
-                <div className="grid gap-3 lg:grid-cols-2">
-                  {pdfFills.slice(0, 4).map((fill) => (
-                    <button
-                      key={fill.id}
-                      className="border border-line bg-white px-4 py-3 text-left transition hover:border-black"
-                      type="button"
-                      onClick={() => navigate(`/clients/${clientId}/pdf-fills/${fill.id}`)}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-ink">{fill.fileName ?? 'Uploaded PDF'}</p>
-                          <p className="mt-1 text-xs text-mute">
-                            {fill.generatedAt ? `Generated ${formatTimestamp(fill.generatedAt)}` : `Draft updated ${formatTimestamp(fill.updatedAt)}`}
-                          </p>
-                        </div>
-                        <span className="shrink-0 border border-line bg-fog px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-mute">
-                          {fill.status}
-                        </span>
-                      </div>
-                      {fill.warningCount > 0 && (
-                        <p className="mt-2 text-xs text-amber-700">
-                          {fill.warningCount} field{fill.warningCount === 1 ? '' : 's'} need review
-                        </p>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
 
           <section className="mt-10 flex-1">
             {loading && (
@@ -1082,6 +940,223 @@ export function ClientFormsWorkspacePage() {
                     </table>
                   </div>
                 </div>
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {workspaceToolsDrawerMode && (
+        <div className="fixed inset-0 z-[70] flex justify-end bg-black/35 backdrop-blur-[2px]">
+          <button
+            aria-label="Close workspace files drawer overlay"
+            className="flex-1"
+            type="button"
+            onClick={handleCloseWorkspaceToolsDrawer}
+          />
+          <aside
+            aria-labelledby="workspace-tools-drawer-title"
+            aria-modal="true"
+            className="relative flex h-full w-full max-w-4xl flex-col border-l border-black/10 bg-paper shadow-2xl"
+            role="dialog"
+          >
+            <div className="border-b border-line px-5 py-5 sm:px-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-mute">Workspace Files</p>
+                  <h2 className="mt-2 text-2xl font-light text-ink" id="workspace-tools-drawer-title">
+                    Documents & PDF fill
+                  </h2>
+                  <p className="mt-2 text-sm text-mute">
+                    Upload client files, review supporting documents, and run one-off PDF fills.
+                  </p>
+                </div>
+                <button
+                  className="rounded-full border border-line px-4 py-2 text-sm text-mute transition hover:border-black hover:text-ink"
+                  type="button"
+                  onClick={handleCloseWorkspaceToolsDrawer}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-5 grid grid-cols-2 overflow-hidden rounded-full border border-line bg-white p-1">
+                <button
+                  aria-pressed={workspaceToolsDrawerMode === 'documents'}
+                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.16em] transition ${
+                    workspaceToolsDrawerMode === 'documents'
+                      ? 'bg-ink text-white'
+                      : 'text-mute hover:bg-fog hover:text-ink'
+                  }`}
+                  type="button"
+                  onClick={() => setWorkspaceToolsDrawerMode('documents')}
+                >
+                  Documents ({clientDocuments.length})
+                </button>
+                <button
+                  aria-pressed={workspaceToolsDrawerMode === 'pdf-fill'}
+                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.16em] transition ${
+                    workspaceToolsDrawerMode === 'pdf-fill'
+                      ? 'bg-ink text-white'
+                      : 'text-mute hover:bg-fog hover:text-ink'
+                  }`}
+                  type="button"
+                  onClick={() => setWorkspaceToolsDrawerMode('pdf-fill')}
+                >
+                  PDF Fill ({pdfFills.length})
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-6">
+              {workspaceToolsDrawerMode === 'documents' && (
+                <section>
+                  <div className="flex flex-col gap-4 border-b border-line pb-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-mute">Client Documents</p>
+                      <h3 className="mt-2 text-xl font-light text-ink">Documents for this client</h3>
+                      <p className="mt-2 text-sm text-mute">
+                        Supporting files stay attached to this shared client workspace.
+                      </p>
+                    </div>
+                    <button
+                      className="shrink-0 rounded-full bg-ink px-5 py-3 text-xs uppercase tracking-[0.16em] text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-45"
+                      disabled={uploadingClientDocument}
+                      type="button"
+                      onClick={() => clientDocumentInputRef.current?.click()}
+                    >
+                      {uploadingClientDocument ? 'Uploading...' : 'Upload Document'}
+                    </button>
+                  </div>
+
+                  <div className="mt-5">
+                    {clientDocumentsLoading && <div className="h-24 animate-pulse rounded-2xl bg-white/60" />}
+
+                    {!clientDocumentsLoading && clientDocumentsError && (
+                      <div className="border border-red-200 bg-white px-5 py-5 text-sm text-red-600">
+                        {clientDocumentsError}
+                      </div>
+                    )}
+
+                    {!clientDocumentsLoading && !clientDocumentsError && clientDocuments.length === 0 && (
+                      <div className="border border-dashed border-line bg-white px-5 py-8 text-sm text-mute">
+                        No client documents uploaded yet.
+                      </div>
+                    )}
+
+                    {!clientDocumentsLoading && !clientDocumentsError && clientDocuments.length > 0 && (
+                      <div className="overflow-hidden border border-line bg-white">
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full border-collapse text-left text-sm">
+                            <thead className="bg-fog text-xs uppercase tracking-[0.16em] text-mute">
+                              <tr>
+                                <th className="px-4 py-3 font-medium">Document</th>
+                                <th className="px-4 py-3 font-medium">Uploaded</th>
+                                <th className="px-4 py-3 font-medium">Size</th>
+                                <th className="px-4 py-3 font-medium">Open</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {clientDocuments.map((document) => (
+                                <tr key={document.id} className="border-t border-line/70">
+                                  <td className="max-w-[22rem] px-4 py-3 align-top">
+                                    <p className="truncate font-light text-ink" title={document.fileName}>
+                                      {document.fileName}
+                                    </p>
+                                    <p className="mt-1 truncate text-xs text-mute">{document.contentType}</p>
+                                  </td>
+                                  <td className="px-4 py-3 align-top text-xs text-mute">
+                                    <p>{formatTimestamp(document.createdAt)}</p>
+                                    <p className="mt-1">by {document.uploadedByName}</p>
+                                  </td>
+                                  <td className="px-4 py-3 align-top text-xs text-mute">
+                                    {formatFileSize(document.sizeBytes)}
+                                  </td>
+                                  <td className="px-4 py-3 align-top">
+                                    <a
+                                      className="inline-flex rounded-full border border-line px-3 py-1 text-xs uppercase tracking-[0.14em] text-ink transition hover:border-black"
+                                      href={clientDocumentViewUrl(document)}
+                                      rel="noreferrer"
+                                      target="_blank"
+                                    >
+                                      Open
+                                    </a>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {workspaceToolsDrawerMode === 'pdf-fill' && (
+                <section>
+                  <div className="flex flex-col gap-4 border-b border-line pb-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-mute">Direct PDF Fill</p>
+                      <h3 className="mt-2 text-xl font-light text-ink">Upload any PDF for this client</h3>
+                      <p className="mt-2 text-sm text-mute">
+                        The PDF opens with client data filled from completed website forms.
+                      </p>
+                    </div>
+                    <button
+                      className="shrink-0 rounded-full bg-ink px-5 py-3 text-xs uppercase tracking-[0.16em] text-white transition hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-45"
+                      disabled={uploadingPdfFill}
+                      type="button"
+                      onClick={() => uploadInputRef.current?.click()}
+                    >
+                      {uploadingPdfFill ? 'Analyzing...' : 'Upload PDF'}
+                    </button>
+                  </div>
+
+                  <div className="mt-5">
+                    {pdfFillsLoading && <div className="h-24 animate-pulse rounded-2xl bg-white/60" />}
+
+                    {!pdfFillsLoading && pdfFills.length === 0 && (
+                      <div className="border border-dashed border-line bg-white px-5 py-8 text-sm text-mute">
+                        No direct PDF fills yet.
+                      </div>
+                    )}
+
+                    {!pdfFillsLoading && pdfFills.length > 0 && (
+                      <div className="grid gap-3">
+                        {pdfFills.map((fill) => (
+                          <button
+                            key={fill.id}
+                            className="border border-line bg-white px-4 py-3 text-left transition hover:border-black"
+                            type="button"
+                            onClick={() => navigate(`/clients/${clientId}/pdf-fills/${fill.id}`)}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-ink">
+                                  {fill.fileName ?? 'Uploaded PDF'}
+                                </p>
+                                <p className="mt-1 text-xs text-mute">
+                                  {fill.generatedAt
+                                    ? `Generated ${formatTimestamp(fill.generatedAt)}`
+                                    : `Draft updated ${formatTimestamp(fill.updatedAt)}`}
+                                </p>
+                              </div>
+                              <span className="shrink-0 border border-line bg-fog px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-mute">
+                                {fill.status}
+                              </span>
+                            </div>
+                            {fill.warningCount > 0 && (
+                              <p className="mt-2 text-xs text-amber-700">
+                                {fill.warningCount} field{fill.warningCount === 1 ? '' : 's'} need review
+                              </p>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </section>
               )}
             </div>
           </aside>
