@@ -155,6 +155,40 @@ select {
   -webkit-backdrop-filter: saturate(160%) blur(28px);
 }
 
+/* The drawer is rendered beside, not inside, `.workspace-premium`. Keep its
+   shared controls fully styled instead of inheriting white text on no fill. */
+.premium-workspace-drawer .premium-dark {
+  min-height: 40px;
+  border-radius: 999px;
+  color: #fff;
+  background: #1d1d1f;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.premium-workspace-drawer .premium-dark:hover {
+  background: #000;
+  transform: translateY(-1px);
+}
+
+.premium-workspace-drawer .premium-secondary {
+  min-height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  color: #1d1d1f;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.premium-workspace-drawer .premium-dark:focus-visible,
+.premium-workspace-drawer .premium-secondary:focus-visible {
+  outline: 3px solid rgba(0, 113, 227, 0.22);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .workspace-premium .premium-primary,
   .workspace-premium .premium-dark,

@@ -214,6 +214,8 @@ export function ClientFormsWorkspacePage() {
   const [ticketOrderItems, setTicketOrderItems] = useState<TicketOrderReviewItem[]>([]);
   const [ticketOrderDialogOpen, setTicketOrderDialogOpen] = useState(false);
   const [draggedTicketOrderKey, setDraggedTicketOrderKey] = useState<string | null>(null);
+  const draggedTicketOrderKeyRef = useRef<string | null>(null);
+  const [pdfFillDropActive, setPdfFillDropActive] = useState(false);
   const [creatingTicket, setCreatingTicket] = useState(false);
   const [investmentActionId, setInvestmentActionId] = useState<string | null>(null);
   const [newInvestmentName, setNewInvestmentName] = useState('');
@@ -702,6 +704,13 @@ export function ClientFormsWorkspacePage() {
     }
   };
 
+  const handlePdfFillDrop = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    setPdfFillDropActive(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) void handleUploadPdfFill(file);
+  };
+
   const handleUploadClientDocument = async (file: File | null | undefined) => {
     if (!clientId || !file || uploadingClientDocument) return;
 
@@ -872,11 +881,28 @@ export function ClientFormsWorkspacePage() {
 
   const handleTicketOrderDrop = (event: DragEvent<HTMLElement>, targetKey: string) => {
     event.preventDefault();
-    const sourceKey = draggedTicketOrderKey || event.dataTransfer.getData('text/plain');
+    const sourceKey = draggedTicketOrderKeyRef.current || event.dataTransfer.getData('text/plain');
     if (sourceKey) {
       setTicketOrderItems((current) => moveTicketOrderItem(current, sourceKey, targetKey));
     }
+    draggedTicketOrderKeyRef.current = null;
     setDraggedTicketOrderKey(null);
+  };
+
+  const handleTicketOrderDragEnter = (event: DragEvent<HTMLElement>, targetKey: string) => {
+    event.preventDefault();
+    const sourceKey = draggedTicketOrderKeyRef.current;
+    if (sourceKey && sourceKey !== targetKey) {
+      setTicketOrderItems((current) => moveTicketOrderItem(current, sourceKey, targetKey));
+    }
+  };
+
+  const handleTicketOrderMove = (itemKey: string, offset: -1 | 1) => {
+    setTicketOrderItems((current) => {
+      const sourceIndex = current.findIndex((item) => item.key === itemKey);
+      const target = current[sourceIndex + offset];
+      return target ? moveTicketOrderItem(current, itemKey, target.key) : current;
+    });
   };
 
   const handleTicketOrderKeyboardMove = (
@@ -886,11 +912,7 @@ export function ClientFormsWorkspacePage() {
   ) => {
     if ((offset === -1 && event.key !== 'ArrowUp') || (offset === 1 && event.key !== 'ArrowDown')) return;
     event.preventDefault();
-    setTicketOrderItems((current) => {
-      const sourceIndex = current.findIndex((item) => item.key === itemKey);
-      const target = current[sourceIndex + offset];
-      return target ? moveTicketOrderItem(current, itemKey, target.key) : current;
-    });
+    handleTicketOrderMove(itemKey, offset);
   };
 
   const handleCreateTicket = async () => {
@@ -2346,16 +2368,42 @@ export function ClientFormsWorkspacePage() {
                           : 'The PDF opens with client data filled from completed website forms.'}
                       </p>
                     </div>
-                    <button
-                      className={`${GUIDED_CLIENT_WORKSPACE ? 'premium-dark px-5 py-2.5 text-sm' : 'rounded-full bg-ink px-5 py-3 text-xs uppercase tracking-[0.16em] hover:bg-black/80'} shrink-0 text-white transition disabled:cursor-not-allowed disabled:opacity-45`}
-                      disabled={uploadingPdfFill}
-                      type="button"
-                      onClick={() => uploadInputRef.current?.click()}
+                    <div
+                      className={`flex min-w-[15rem] shrink-0 items-center justify-between gap-3 rounded-2xl border border-dashed px-3 py-2.5 transition ${
+                        pdfFillDropActive
+                          ? 'border-accent bg-blue-50'
+                          : 'border-black/15 bg-white/55'
+                      }`}
+                      data-testid="pdf-fill-dropzone"
+                      onDragEnter={(event) => {
+                        event.preventDefault();
+                        setPdfFillDropActive(true);
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = 'copy';
+                        setPdfFillDropActive(true);
+                      }}
+                      onDragLeave={() => setPdfFillDropActive(false)}
+                      onDrop={handlePdfFillDrop}
                     >
-                      {uploadingPdfFill
-                        ? GUIDED_CLIENT_WORKSPACE ? 'Analyzing…' : 'Analyzing...'
-                        : GUIDED_CLIENT_WORKSPACE ? 'Choose PDF' : 'Upload PDF'}
-                    </button>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-ink">
+                          {pdfFillDropActive ? 'Release to upload' : 'Drag and drop PDF'}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-mute">PDF only · 15 MB maximum</p>
+                      </div>
+                      <button
+                        className={`${GUIDED_CLIENT_WORKSPACE ? 'premium-dark px-4 py-2 text-sm' : 'rounded-full bg-ink px-4 py-2 text-xs uppercase tracking-[0.16em] hover:bg-black/80'} shrink-0 text-white transition disabled:cursor-not-allowed disabled:opacity-45`}
+                        disabled={uploadingPdfFill}
+                        type="button"
+                        onClick={() => uploadInputRef.current?.click()}
+                      >
+                        {uploadingPdfFill
+                          ? GUIDED_CLIENT_WORKSPACE ? 'Analyzing…' : 'Analyzing...'
+                          : GUIDED_CLIENT_WORKSPACE ? 'Choose PDF' : 'Upload PDF'}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="mt-5">
@@ -2376,8 +2424,8 @@ export function ClientFormsWorkspacePage() {
                             fill.status === 'ANALYSIS_FAILED'
                               ? 'Retry analysis'
                               : fill.status === 'GENERATED'
-                                ? 'Open fill'
-                                : 'Resume fill';
+                                ? 'Edit PDF'
+                                : 'Open editor';
                           return (
                             <div key={fill.id} className="rounded-2xl border border-black/[0.065] bg-white/70 px-4 py-4 sm:px-5">
                               <div className="flex items-start justify-between gap-4">
@@ -2451,6 +2499,7 @@ export function ClientFormsWorkspacePage() {
                                   <span className="text-xs text-mute">We’ll refresh this automatically.</span>
                                 ) : (
                                   <button
+                                    aria-label={`${actionLabel}: ${fill.fileName ?? 'Uploaded PDF'}`}
                                     className="premium-dark px-4 py-2 text-sm text-white disabled:opacity-45"
                                     disabled={pdfFillActionId === fill.id}
                                     type="button"
@@ -2665,23 +2714,36 @@ export function ClientFormsWorkspacePage() {
                 {ticketOrderItems.map((item, index) => (
                   <div
                     key={item.key}
-                    className={`flex items-center gap-3 rounded-xl border border-line bg-white px-3 py-3 transition ${
-                      draggedTicketOrderKey === item.key ? 'opacity-45' : ''
+                    aria-grabbed={draggedTicketOrderKey === item.key}
+                    className={`flex cursor-grab items-center gap-3 rounded-xl border bg-white px-3 py-3 transition active:cursor-grabbing ${
+                      draggedTicketOrderKey === item.key
+                        ? 'border-accent/40 bg-blue-50 opacity-70 shadow-sm'
+                        : 'border-line hover:border-black/20'
                     }`}
-                    onDragOver={(event) => event.preventDefault()}
+                    data-testid={`ticket-order-item-${item.key}`}
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.effectAllowed = 'move';
+                      event.dataTransfer.setData('text/plain', item.key);
+                      draggedTicketOrderKeyRef.current = item.key;
+                      setDraggedTicketOrderKey(item.key);
+                    }}
+                    onDragEnter={(event) => handleTicketOrderDragEnter(event, item.key)}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = 'move';
+                    }}
                     onDrop={(event) => handleTicketOrderDrop(event, item.key)}
+                    onDragEnd={() => {
+                      draggedTicketOrderKeyRef.current = null;
+                      setDraggedTicketOrderKey(null);
+                    }}
                   >
                     <button
                       aria-label={`Reorder ${item.title}. Use arrow keys or drag.`}
-                      className="cursor-grab select-none px-1 py-2 text-base leading-none text-mute active:cursor-grabbing hover:text-ink"
-                      draggable
+                      className="select-none px-1 py-2 text-base leading-none text-mute hover:text-ink"
+                      draggable={false}
                       type="button"
-                      onDragStart={(event) => {
-                        event.dataTransfer.effectAllowed = 'move';
-                        event.dataTransfer.setData('text/plain', item.key);
-                        setDraggedTicketOrderKey(item.key);
-                      }}
-                      onDragEnd={() => setDraggedTicketOrderKey(null)}
                       onKeyDown={(event) => {
                         handleTicketOrderKeyboardMove(event, item.key, -1);
                         handleTicketOrderKeyboardMove(event, item.key, 1);
@@ -2697,6 +2759,28 @@ export function ClientFormsWorkspacePage() {
                     <span className="shrink-0 text-xs text-mute">
                       {item.pdfCount} PDF{item.pdfCount === 1 ? '' : 's'}
                     </span>
+                    <div className="flex shrink-0 items-center gap-1" aria-label={`Move ${item.title}`}>
+                      <button
+                        aria-label={`Move ${item.title} up`}
+                        className="rounded-lg border border-line bg-white px-2 py-1 text-xs text-mute transition hover:border-black/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
+                        disabled={index === 0}
+                        draggable={false}
+                        type="button"
+                        onClick={() => handleTicketOrderMove(item.key, -1)}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        aria-label={`Move ${item.title} down`}
+                        className="rounded-lg border border-line bg-white px-2 py-1 text-xs text-mute transition hover:border-black/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
+                        disabled={index === ticketOrderItems.length - 1}
+                        draggable={false}
+                        type="button"
+                        onClick={() => handleTicketOrderMove(item.key, 1)}
+                      >
+                        ↓
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

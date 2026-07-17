@@ -27,7 +27,20 @@ describe('Guided client workspace', () => {
         });
       }
       if (url.includes('/api/clients/client_1/pdf-fills')) {
-        return new Response(JSON.stringify({ fills: [] }), {
+        return new Response(JSON.stringify({
+          fills: [
+            {
+              id: 'fill_direct_1',
+              fileName: 'Subscription agreement.pdf',
+              status: 'DRAFT',
+              generatedPdfUrl: null,
+              generatedAt: null,
+              createdAt: '2026-07-17T18:00:00.000Z',
+              updatedAt: '2026-07-17T18:05:00.000Z',
+              warningCount: 3
+            }
+          ]
+        }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
         });
@@ -160,5 +173,14 @@ describe('Guided client workspace', () => {
     await user.click(screen.getByRole('button', { name: 'PDF history (0)' }));
     expect(screen.getByRole('dialog', { name: 'Investor Profile' })).toBeInTheDocument();
     expect(await screen.findByText('No PDFs received yet.')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(screen.getByRole('button', { name: 'Client files' }));
+    await user.click(screen.getByRole('button', { name: 'Fill a PDF (1)' }));
+    expect(screen.getByTestId('pdf-fill-dropzone')).toHaveTextContent('Drag and drop PDF');
+    expect(screen.getByRole('button', { name: 'Choose PDF' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Open editor: Subscription agreement.pdf' })
+    ).toBeInTheDocument();
   });
 });
