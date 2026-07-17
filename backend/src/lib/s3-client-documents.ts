@@ -91,6 +91,17 @@ export async function deleteClientDocumentFromS3(
   );
 }
 
+export async function downloadClientDocumentFromS3(
+  config: ConfiguredS3,
+  input: { key: string }
+): Promise<Buffer | null> {
+  const result = await getClient(config.region).send(
+    new GetObjectCommand({ Bucket: config.bucket, Key: input.key })
+  );
+  if (!result.Body) return null;
+  return Buffer.from(await result.Body.transformToByteArray());
+}
+
 export async function createClientDocumentViewUrl(
   config: ConfiguredS3,
   input: {

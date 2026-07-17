@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import express, { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import { clientAccessWhere } from '../lib/client-access.js';
+import { resolveClientDocumentStoragePath } from '../lib/client-document-storage.js';
 import {
   buildClientDocumentS3Key,
   createClientDocumentViewUrl,
@@ -18,10 +18,6 @@ import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
 const MAX_CLIENT_DOCUMENT_BYTES = 50 * 1024 * 1024;
-const STORAGE_ROOT = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../.local-storage/client-documents'
-);
 
 const clientDocumentParamsSchema = z.object({
   clientId: z.string().trim().min(1)
@@ -50,17 +46,6 @@ function sanitizeFileName(value: string | undefined): string {
     .slice(0, 180);
 
   return sanitized || 'document';
-}
-
-function resolveStoragePath(storageKey: string): string {
-  const resolved = path.resolve(STORAGE_ROOT, storageKey);
-  const rootWithSeparator = `${STORAGE_ROOT}${path.sep}`;
-
-  if (resolved !== STORAGE_ROOT && !resolved.startsWith(rootWithSeparator)) {
-    throw new Error('Invalid document storage key.');
-  }
-
-  return resolved;
 }
 
 function contentDisposition(fileName: string): string {
@@ -225,7 +210,7 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const storageKey = `${clientId}/${uniqueFileName}`;
-      const storagePath = resolveStoragePath(storageKey);
+      const storagePath = resolveClientDocumentStoragePath(storageKey);
 
       await fs.promises.mkdir(path.dirname(storagePath), { recursive: true });
       await fs.promises.writeFile(storagePath, body);
@@ -306,7 +291,7 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const storagePath = resolveStoragePath(document.storageKey);
+      const storagePath = resolveClientDocumentStoragePath(document.storageKey);
       try {
         await fs.promises.access(storagePath, fs.constants.R_OK);
       } catch {
@@ -319,6 +304,37 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
       response.setHeader('Content-Disposition', contentDisposition(document.fileName));
 
       fs.createReadStream(storagePath).on('error', next).pipe(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete('/:clientId/documents/:documentId', requireAuth(deps), async (request, response, next) => {
+    const parsedParams = clientDocumentViewParamsSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      response.status(400).json({ message: 'Invalid document identifier.' });
+      return;
+    }
+
+    const { clientId, documentId } = parsedParams.data;
+    try {
+      const document = await deps.prisma.clientDocument.findFirst({
+        where: { id: documentId, clientId, client: clientAccessWhere(request.authUser!.id) }
+      });
+      if (!document) {
+        response.status(404).json({ message: 'Document not found.' });
+        return;
+      }
+
+      await deps.prisma.clientDocument.delete({ where: { id: document.id } });
+      if (document.storageProvider === 'S3') {
+        if (isClientDocumentsS3Configured(deps.config.s3)) {
+          await deleteClientDocumentFromS3(deps.config.s3, { key: document.storageKey }).catch(() => undefined);
+        }
+      } else {
+        await fs.promises.rm(resolveClientDocumentStoragePath(document.storageKey), { force: true }).catch(() => undefined);
+      }
+      response.status(204).send();
     } catch (error) {
       next(error);
     }

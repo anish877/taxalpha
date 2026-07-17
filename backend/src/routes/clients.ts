@@ -9,6 +9,9 @@ import {
 import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
+import { publicPdfFillUrl } from '../lib/pdf-fill/engine.js';
+import { requestBaseUrl } from '../lib/request-base-url.js';
+
 import {
   STEP_1_LABEL,
   applyStep1Answer,
@@ -216,7 +219,15 @@ const createClientSchema = z.object({
   additionalBrokerUserIds: z.array(z.string().trim().min(1)).default([]),
   selectedFormCodes: z
     .array(z.string().trim().min(1))
-    .default([INVESTOR_PROFILE_FORM_CODE])
+    .default([INVESTOR_PROFILE_FORM_CODE]),
+  investments: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1, 'Investment name is required.').max(120)
+      })
+    )
+    .max(10, 'A client can have at most 10 investments.')
+    .default([])
 });
 
 const clientIdParamsSchema = z.object({
@@ -373,6 +384,50 @@ const clientInclude = {
       step2Data: true,
       step3Data: true
     }
+  },
+  investments: {
+    include: {
+      baiodfOnboarding: {
+        select: {
+          status: true,
+          step1Data: true,
+          step2Data: true,
+          step3Data: true,
+          step1CurrentQuestionIndex: true,
+          step2CurrentQuestionIndex: true,
+          step3CurrentQuestionIndex: true
+        }
+      },
+      agreementPdfFill: {
+        select: {
+          id: true,
+          fileName: true,
+          status: true,
+          analysisStartedAt: true,
+          analysisStage: true,
+          analysisError: true,
+          analysisAttempts: true,
+          generatedPdfUrl: true,
+          generatedAt: true,
+          warnings: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      },
+      formPdfs: {
+        orderBy: [{ generatedAt: 'desc' }, { receivedAt: 'desc' }],
+        select: {
+          id: true,
+          formCode: true,
+          pdfUrl: true,
+          documentTitle: true,
+          fileName: true,
+          generatedAt: true,
+          receivedAt: true
+        }
+      }
+    },
+    orderBy: { position: 'asc' }
   },
   baiv506cOnboarding: {
     select: {
@@ -602,7 +657,26 @@ interface FormWorkspaceItem {
 interface FormWorkspaceRecord {
   clientId: string;
   clientName: string;
+  setupStatus: 'INCOMPLETE' | 'ACTIVE';
   forms: FormWorkspaceItem[];
+  investments: Array<{
+    id: string;
+    name: string;
+    position: number;
+    baiodfStatus: WorkspaceOnboardingStatus;
+    baiodfResumeRoute: string;
+    baiodfPdf: { id: string; pdfUrl: string; generatedAt: string | null } | null;
+    baiodfPdfCount: number;
+    agreement: {
+      fillId: string;
+      fileName: string | null;
+      status: string;
+      warningCount: number;
+      generatedPdfUrl: string | null;
+      generatedAt: string | null;
+    } | null;
+    pairReady: boolean;
+  }>;
 }
 
 interface ClientFormPdfRecord {
@@ -858,6 +932,26 @@ function getBaiodfResumeStepRoute(client: HydratedClient): string | null {
     return null;
   }
 
+  const firstIncompleteInvestment = (client.investments ?? []).find(
+    (investment) =>
+      investment.baiodfOnboarding?.status !==
+      BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
+  );
+  if (firstIncompleteInvestment) {
+    const onboarding = firstIncompleteInvestment.baiodfOnboarding;
+    const base = `/clients/${client.id}/investments/${firstIncompleteInvestment.id}/baiodf`;
+    if (!onboarding) return `${base}/step-1`;
+    if (
+      Object.keys(validateBaiodfStep1Completion(normalizeBaiodfStep1Fields(onboarding.step1Data))).length > 0
+    ) return `${base}/step-1`;
+    if (
+      Object.keys(validateBaiodfStep2Completion(normalizeBaiodfStep2Fields(onboarding.step2Data))).length > 0
+    ) return `${base}/step-2`;
+    return `${base}/step-3`;
+  }
+
+  if ((client.investments ?? []).length > 0) return null;
+
   const onboarding = client.baiodfOnboarding;
   const base = `/clients/${client.id}/brokerage-alternative-investment-order-disclosure`;
 
@@ -935,6 +1029,15 @@ function getNextRouteAfterInvestorProfileCompletion(params: {
     | null
     | undefined;
   hasBaiodf: boolean;
+  investments?: Array<{
+    id: string;
+    baiodfOnboarding: {
+      status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus;
+      step1Data: Prisma.JsonValue | null;
+      step2Data: Prisma.JsonValue | null;
+      step3Data: Prisma.JsonValue | null;
+    } | null;
+  }>;
   baiodfOnboarding:
     | {
         step1Data: Prisma.JsonValue | null;
@@ -977,6 +1080,26 @@ function getNextRouteAfterInvestorProfileCompletion(params: {
   }
 
   if (params.hasBaiodf) {
+    const firstIncompleteInvestment = params.investments?.find(
+      (investment) =>
+        investment.baiodfOnboarding?.status !==
+        BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
+    );
+    if (firstIncompleteInvestment) {
+      const base = `/clients/${params.clientId}/investments/${firstIncompleteInvestment.id}/baiodf`;
+      const onboarding = firstIncompleteInvestment.baiodfOnboarding;
+      if (!onboarding) return `${base}/step-1`;
+      if (Object.keys(validateBaiodfStep1Completion(normalizeBaiodfStep1Fields(onboarding.step1Data))).length > 0) {
+        return `${base}/step-1`;
+      }
+      if (Object.keys(validateBaiodfStep2Completion(normalizeBaiodfStep2Fields(onboarding.step2Data))).length > 0) {
+        return `${base}/step-2`;
+      }
+      return `${base}/step-3`;
+    }
+    if ((params.investments?.length ?? 0) > 0) {
+      // All investment-scoped forms are complete; continue to BAIV below.
+    } else {
     const baiodfBase = `/clients/${params.clientId}/brokerage-alternative-investment-order-disclosure`;
     const baiodfOnboarding = params.baiodfOnboarding;
 
@@ -1003,6 +1126,7 @@ function getNextRouteAfterInvestorProfileCompletion(params: {
       ).length > 0
     ) {
       return `${baiodfBase}/step-3`;
+    }
     }
   }
 
@@ -1187,10 +1311,13 @@ function getNextOnboardingRouteForClient(client: HydratedClient, filterCodes?: S
 function toFormWorkspaceRecord(
   client: HydratedClient,
   activeForms: Array<{ code: string; title: string; source?: string }>,
-  pdfSummaries: Map<string, { pdfCount: number; latestPdfReceivedAt: string | null }> = new Map()
+  pdfSummaries: Map<string, { pdfCount: number; latestPdfReceivedAt: string | null }> = new Map(),
+  pdfFillBaseUrl = ''
 ): FormWorkspaceRecord {
   const selectedCodes = getSelectedFormCodes(client);
-  const sortedForms = [...activeForms].sort((left, right) => {
+  const sortedForms = activeForms
+    .filter((form) => SUPPORTED_CLIENT_FORM_CODES.has(form.code))
+    .sort((left, right) => {
     const leftIndex = FORM_SEQUENCE.indexOf(left.code as (typeof FORM_SEQUENCE)[number]);
     const rightIndex = FORM_SEQUENCE.indexOf(right.code as (typeof FORM_SEQUENCE)[number]);
 
@@ -1202,11 +1329,59 @@ function toFormWorkspaceRecord(
     }
 
     return left.title.localeCompare(right.title);
-  });
+    });
 
   return {
     clientId: client.id,
     clientName: client.name,
+    setupStatus: client.setupStatus,
+    investments: (client.investments ?? []).map((investment) => {
+      const baiodfPdfs = investment.formPdfs.filter((pdf) => pdf.formCode === BAIODF_FORM_CODE);
+      const latestBaiodfPdf = baiodfPdfs[0] ?? null;
+      const agreement = investment.agreementPdfFill;
+      const agreementAnalysisIsStale = Boolean(
+        agreement?.status === 'ANALYZING' &&
+        Date.now() - (agreement.analysisStartedAt ?? agreement.updatedAt).getTime() >= 5 * 60 * 1000
+      );
+      return {
+        id: investment.id,
+        name: investment.name,
+        position: investment.position,
+        baiodfStatus:
+          investment.baiodfOnboarding?.status ??
+          BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
+        baiodfResumeRoute: `/clients/${client.id}/investments/${investment.id}/baiodf/step-1`,
+        baiodfSyncRequestedAt: investment.baiodfSyncRequestedAt?.toISOString() ?? null,
+        baiodfPdf: latestBaiodfPdf
+          ? {
+              id: latestBaiodfPdf.id,
+              pdfUrl: latestBaiodfPdf.pdfUrl,
+              generatedAt: latestBaiodfPdf.generatedAt?.toISOString() ?? null
+            }
+          : null,
+        baiodfPdfCount: baiodfPdfs.length,
+        agreement: agreement
+          ? {
+              fillId: agreement.id,
+              fileName: agreement.fileName,
+              status: agreementAnalysisIsStale ? 'ANALYSIS_FAILED' : agreement.status,
+              warningCount: Array.isArray(agreement.warnings) ? agreement.warnings.length : 0,
+              generatedPdfUrl: agreement.generatedPdfUrl
+                ? publicPdfFillUrl(pdfFillBaseUrl, client.id, agreement.id, 'filled')
+                : null,
+              generatedAt: agreement.generatedAt?.toISOString() ?? null,
+              uploadedAt: agreement.createdAt.toISOString(),
+              analysisStartedAt: agreement.analysisStartedAt?.toISOString() ?? null,
+              analysisStage: agreement.analysisStage,
+              analysisError: agreementAnalysisIsStale
+                ? 'Analysis was interrupted or timed out. Retry analysis.'
+                : agreement.analysisError,
+              analysisAttempts: agreement.analysisAttempts
+            }
+          : null,
+        pairReady: Boolean(latestBaiodfPdf && agreement?.status === 'GENERATED' && agreement.generatedPdfUrl)
+      };
+    }),
     forms: sortedForms.map((form) => {
       const selected = selectedCodes.has(form.code);
       const mappingTemplate = form.source === 'UPLOAD';
@@ -1247,6 +1422,30 @@ function toClientDto(client: HydratedClient) {
   );
   const hasBaiodf = client.formSelections.some((selection) => selection.form.code === BAIODF_FORM_CODE);
   const hasBaiv506c = client.formSelections.some((selection) => selection.form.code === BAIV_506C_FORM_CODE);
+  const investments = client.investments ?? [];
+  const investmentStatuses = investments.map(
+    (investment) =>
+      investment.baiodfOnboarding?.status ??
+      BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED
+  );
+  const aggregateBaiodfStatus =
+    investmentStatuses.length === 0
+      ? client.baiodfOnboarding?.status ??
+        BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED
+      : investmentStatuses.every(
+            (status) => status === BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
+          )
+        ? BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
+        : investmentStatuses.some(
+              (status) => status !== BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED
+            )
+          ? BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS
+          : BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED;
+  const firstIncompleteInvestment = investments.find(
+    (investment) =>
+      investment.baiodfOnboarding?.status !==
+      BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
+  );
 
   return {
     id: client.id,
@@ -1254,6 +1453,7 @@ function toClientDto(client: HydratedClient) {
     email: client.email,
     phone: client.phone,
     createdAt: client.createdAt,
+    setupStatus: client.setupStatus,
     primaryBroker: primaryLink
       ? {
           id: primaryLink.broker.id,
@@ -1281,10 +1481,22 @@ function toClientDto(client: HydratedClient) {
       ? getStatementOfFinancialConditionResumeStepRoute(client)
       : null,
     hasBaiodf,
-    baiodfOnboardingStatus:
-      client.baiodfOnboarding?.status ??
-      BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
-    baiodfResumeStepRoute: hasBaiodf ? getBaiodfResumeStepRoute(client) : null,
+    baiodfOnboardingStatus: aggregateBaiodfStatus,
+    baiodfResumeStepRoute: firstIncompleteInvestment
+      ? `/clients/${client.id}/investments/${firstIncompleteInvestment.id}/baiodf/step-1`
+      : hasBaiodf
+        ? getBaiodfResumeStepRoute(client)
+        : null,
+    investments: (client.investments ?? []).map((investment) => ({
+      id: investment.id,
+      name: investment.name,
+      position: investment.position,
+      baiodfStatus:
+        investment.baiodfOnboarding?.status ??
+        BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
+      agreementStatus: investment.agreementPdfFill?.status ?? null,
+      agreementFileName: investment.agreementPdfFill?.fileName ?? null
+    })),
     hasBaiv506c,
     baiv506cOnboardingStatus:
       client.baiv506cOnboarding?.status ??
@@ -1337,10 +1549,13 @@ function createDefaultStatementOfFinancialConditionOnboardingPayload() {
   } as const;
 }
 
-function createDefaultBaiodfOnboardingPayload() {
+function createDefaultBaiodfOnboardingPayload(investmentName?: string) {
   const step1Defaults = defaultBaiodfStep1Fields();
   const step2Defaults = defaultBaiodfStep2Fields();
   const step3Defaults = defaultBaiodfStep3Fields();
+  if (investmentName) {
+    step2Defaults.custodianAndProduct.nameOfProduct = investmentName;
+  }
 
   return {
     step1CurrentQuestionIndex: 0,
@@ -1748,10 +1963,40 @@ function toInvestorReviewResponse(
 export function createClientsRouter(deps: RouteDeps): ExpressRouter {
   const router = Router();
 
+  router.use('/:clientId/investor-profile', requireAuth(deps), async (request, response, next) => {
+    try {
+      const client = await deps.prisma.client.findFirst({
+        where: {
+          id: String(request.params.clientId),
+          setupStatus: 'ACTIVE',
+          ...clientAccessWhere(request.authUser!.id)
+        },
+        select: { id: true }
+      });
+      if (!client) {
+        response.status(404).json({ message: 'Active client not found.' });
+        return;
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.get('/', requireAuth(deps), async (request, response, next) => {
     try {
       const clients = await deps.prisma.client.findMany({
-        where: clientAccessWhere(request.authUser!.id),
+        where: {
+          AND: [
+            clientAccessWhere(request.authUser!.id),
+            {
+              OR: [
+                { setupStatus: 'ACTIVE' },
+                { ownerUserId: request.authUser!.id }
+              ]
+            }
+          ]
+        },
         include: clientInclude,
         orderBy: {
           createdAt: 'desc'
@@ -1847,6 +2092,35 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         fieldErrors: {
           selectedFormCodes: `Unsupported form code(s): ${unsupportedFormCodes.join(', ')}.`
         }
+      });
+      return;
+    }
+
+    const investmentNames = parsed.data.investments.map((investment) => investment.name.trim());
+    const normalizedInvestmentNames = investmentNames.map((name) => name.toLocaleLowerCase());
+    const hasDuplicateInvestmentNames = new Set(normalizedInvestmentNames).size !== normalizedInvestmentNames.length;
+    const hasBaiodfSelection = selectedFormCodes.includes(BAIODF_FORM_CODE);
+
+    if (hasBaiodfSelection && investmentNames.length === 0) {
+      response.status(400).json({
+        message: 'Add at least one investment for Brokerage Alternative.',
+        fieldErrors: { investments: 'Add between 1 and 10 investments.' }
+      });
+      return;
+    }
+
+    if (!hasBaiodfSelection && investmentNames.length > 0) {
+      response.status(400).json({
+        message: 'Brokerage Alternative must be selected for investments.',
+        fieldErrors: { investments: 'Remove investments or select Brokerage Alternative.' }
+      });
+      return;
+    }
+
+    if (hasDuplicateInvestmentNames) {
+      response.status(400).json({
+        message: 'Investment names must be unique.',
+        fieldErrors: { investments: 'Use a unique name for every investment.' }
       });
       return;
     }
@@ -1998,7 +2272,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             ownerUserId: authUser.id,
             name: clientName,
             email: clientEmail,
-            phone: clientPhone
+            phone: clientPhone,
+            setupStatus: hasBaiodfSelection ? 'INCOMPLETE' : 'ACTIVE'
           }
         });
 
@@ -2050,15 +2325,24 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
 
         if (selectedForms.some((form) => form.code === BAIODF_FORM_CODE)) {
-          const baiodfOnboardingDefaults = createDefaultBaiodfOnboardingPayload();
-
-          await transactionClient.brokerageAlternativeInvestmentOrderDisclosureOnboarding.create({
-            data: {
-              clientId: createdClient.id,
-              status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
-              ...baiodfOnboardingDefaults
-            }
-          });
+          for (const [index, name] of investmentNames.entries()) {
+            const baiodfOnboardingDefaults = createDefaultBaiodfOnboardingPayload(name);
+            const investment = await transactionClient.clientInvestment.create({
+              data: {
+                clientId: createdClient.id,
+                name,
+                position: index + 1
+              }
+            });
+            await transactionClient.investmentBaiodfOnboarding.create({
+              data: {
+                clientId: createdClient.id,
+                investmentId: investment.id,
+                status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
+                ...baiodfOnboardingDefaults
+              }
+            });
+          }
         }
 
         if (selectedForms.some((form) => form.code === BAIV_506C_FORM_CODE)) {
@@ -2085,7 +2369,11 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         return hydratedClient;
       });
 
-      response.status(201).json({ client: toClientDto(client) });
+      response.status(201).json({
+        client: toClientDto(client),
+        nextOnboardingRoute:
+          client.setupStatus === 'ACTIVE' ? `/clients/${client.id}/investor-profile/step-1` : null
+      });
     } catch (error) {
       if (error instanceof HttpError) {
         response.status(error.statusCode).json({
@@ -2245,7 +2533,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }),
         deps.prisma.formCatalog.findMany({
           where: {
-            active: true
+            active: true,
+            code: { in: [...FORM_SEQUENCE] }
           },
           select: {
             code: true,
@@ -2270,7 +2559,12 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const payload: FormWorkspaceResponse = {
-        workspace: toFormWorkspaceRecord(client, activeForms, summarizeClientFormPdfs(pdfs))
+        workspace: toFormWorkspaceRecord(
+          client,
+          activeForms,
+          summarizeClientFormPdfs(pdfs),
+          requestBaseUrl(request)
+        )
       };
 
       response.json(payload);
@@ -2299,8 +2593,14 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     const requestedCodes = [
       ...new Set(parsedBody.data.formCodes.map((code) => code.trim().toUpperCase()).filter(Boolean))
     ];
-    // Any active catalog form is selectable (including AI-uploaded forms). The
-    // catalog-existence check below rejects unknown/inactive codes.
+    const unsupportedCodes = requestedCodes.filter((code) => !SUPPORTED_CLIENT_FORM_CODES.has(code));
+    if (unsupportedCodes.length > 0) {
+      response.status(400).json({
+        message: 'Only fixed onboarding forms can be selected here.',
+        fieldErrors: { formCodes: `Unsupported onboarding form code(s): ${unsupportedCodes.join(', ')}.` }
+      });
+      return;
+    }
 
     const authUser = request.authUser!;
     const clientId = parsedParams.data.clientId;
@@ -2422,7 +2722,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           include: clientInclude
         }),
         deps.prisma.formCatalog.findMany({
-          where: { active: true },
+          where: { active: true, code: { in: [...FORM_SEQUENCE] } },
           select: {
             code: true,
             title: true,
@@ -2454,7 +2754,12 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                 new Set(formsToAdd.map((form) => form.code))
               )
             : null,
-        workspace: toFormWorkspaceRecord(hydratedClient, activeForms, summarizeClientFormPdfs(pdfs))
+        workspace: toFormWorkspaceRecord(
+          hydratedClient,
+          activeForms,
+          summarizeClientFormPdfs(pdfs),
+          requestBaseUrl(request)
+        )
       };
 
       const formCodesToSync = requestedCodes.filter(
@@ -2867,6 +3172,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               step3Data: true
             }
           },
+          investments: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              baiodfOnboarding: {
+                select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+              }
+            }
+          },
           baiv506cOnboarding: {
             select: {
               step1Data: true,
@@ -2972,6 +3286,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               step1Data: true,
               step2Data: true,
               step3Data: true
+            }
+          },
+          investments: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              baiodfOnboarding: {
+                select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+              }
             }
           },
           baiv506cOnboarding: {
@@ -3110,6 +3433,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               step3Data: true
             }
           },
+          investments: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              baiodfOnboarding: {
+                select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+              }
+            }
+          },
           baiv506cOnboarding: {
             select: {
               step1Data: true,
@@ -3218,6 +3550,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               step1Data: true,
               step2Data: true,
               step3Data: true
+            }
+          },
+          investments: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              baiodfOnboarding: {
+                select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+              }
             }
           },
           baiv506cOnboarding: {
@@ -3679,6 +4020,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               step3Data: true
             }
           },
+          investments: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              baiodfOnboarding: {
+                select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+              }
+            }
+          },
           baiv506cOnboarding: {
             select: {
               step1Data: true,
@@ -3724,6 +4074,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                 (selection) => selection.form.code === BAIODF_FORM_CODE
               ),
               baiodfOnboarding: client.baiodfOnboarding,
+              investments: client.investments,
               hasBaiv506c: client.formSelections.some(
                 (selection) => selection.form.code === BAIV_506C_FORM_CODE
               ),
@@ -3801,6 +4152,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               step1Data: true,
               step2Data: true,
               step3Data: true
+            }
+          },
+          investments: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              baiodfOnboarding: {
+                select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+              }
             }
           },
           baiv506cOnboarding: {
@@ -3941,6 +4301,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                 (selection) => selection.form.code === BAIODF_FORM_CODE
               ),
               baiodfOnboarding: client.baiodfOnboarding,
+              investments: client.investments,
               hasBaiv506c: client.formSelections.some(
                 (selection) => selection.form.code === BAIV_506C_FORM_CODE
               ),
@@ -4002,6 +4363,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                 step3Data: true
               }
             },
+            investments: {
+              orderBy: { position: "asc" },
+              select: {
+                id: true,
+                baiodfOnboarding: {
+                  select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+                }
+              }
+            },
             baiv506cOnboarding: {
               select: {
                 step1Data: true,
@@ -4047,6 +4417,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                   (selection) => selection.form.code === BAIODF_FORM_CODE
                 ),
                 baiodfOnboarding: client.baiodfOnboarding,
+              investments: client.investments,
                 hasBaiv506c: client.formSelections.some(
                   (selection) => selection.form.code === BAIV_506C_FORM_CODE
                 ),
@@ -4129,6 +4500,15 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                 step1Data: true,
                 step2Data: true,
                 step3Data: true
+              }
+            },
+            investments: {
+              orderBy: { position: "asc" },
+              select: {
+                id: true,
+                baiodfOnboarding: {
+                  select: { status: true, step1Data: true, step2Data: true, step3Data: true }
+                }
               }
             },
             baiv506cOnboarding: {
@@ -4340,6 +4720,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
                   (selection) => selection.form.code === BAIODF_FORM_CODE
                 ),
                 baiodfOnboarding: client.baiodfOnboarding,
+              investments: client.investments,
                 hasBaiv506c: client.formSelections.some(
                   (selection) => selection.form.code === BAIV_506C_FORM_CODE
                 ),

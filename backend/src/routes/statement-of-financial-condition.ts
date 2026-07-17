@@ -1,4 +1,5 @@
 import {
+  BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus,
   type InvestorProfileOnboardingStatus,
   Prisma,
   StatementOfFinancialConditionOnboardingStatus
@@ -173,6 +174,15 @@ interface SfcClientContext {
     step2Data: Prisma.JsonValue | null;
     step3Data: Prisma.JsonValue | null;
   } | null;
+  investments: Array<{
+    id: string;
+    baiodfOnboarding: {
+      status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus;
+      step1Data: Prisma.JsonValue | null;
+      step2Data: Prisma.JsonValue | null;
+      step3Data: Prisma.JsonValue | null;
+    } | null;
+  }>;
   baiv506cOnboarding: {
     step1Data: Prisma.JsonValue | null;
     step2Data: Prisma.JsonValue | null;
@@ -389,6 +399,7 @@ function toSfcReviewResponse(
 function getNextRouteAfterSfcCompletion(params: {
   clientId: string;
   hasBaiodf: boolean;
+  investments?: SfcClientContext['investments'];
   baiodfOnboarding:
     | {
         step1Data: Prisma.JsonValue | null;
@@ -408,6 +419,24 @@ function getNextRouteAfterSfcCompletion(params: {
   requiresJointOwnerSignature: boolean;
 }): string | null {
   if (params.hasBaiodf) {
+    const firstIncompleteInvestment = params.investments?.find(
+      (investment) =>
+        investment.baiodfOnboarding?.status !==
+        BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
+    );
+    if (firstIncompleteInvestment) {
+      const base = `/clients/${params.clientId}/investments/${firstIncompleteInvestment.id}/baiodf`;
+      const onboarding = firstIncompleteInvestment.baiodfOnboarding;
+      if (!onboarding) return `${base}/step-1`;
+      if (Object.keys(validateBaiodfStep1Completion(normalizeBaiodfStep1Fields(onboarding.step1Data))).length > 0) {
+        return `${base}/step-1`;
+      }
+      if (Object.keys(validateBaiodfStep2Completion(normalizeBaiodfStep2Fields(onboarding.step2Data))).length > 0) {
+        return `${base}/step-2`;
+      }
+      return `${base}/step-3`;
+    }
+    if ((params.investments?.length ?? 0) === 0) {
     const baiodfBase = `/clients/${params.clientId}/brokerage-alternative-investment-order-disclosure`;
     const baiodfOnboarding = params.baiodfOnboarding;
 
@@ -434,6 +463,7 @@ function getNextRouteAfterSfcCompletion(params: {
       ).length > 0
     ) {
       return `${baiodfBase}/step-3`;
+    }
     }
   }
 
@@ -472,6 +502,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
     return deps.prisma.client.findFirst({
       where: {
         id: clientId,
+        setupStatus: 'ACTIVE',
         ...clientAccessWhere(ownerUserId)
       },
       select: {
@@ -501,6 +532,20 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
             step1Data: true,
             step2Data: true,
             step3Data: true
+          }
+        },
+        investments: {
+          orderBy: { position: 'asc' },
+          select: {
+            id: true,
+            baiodfOnboarding: {
+              select: {
+                status: true,
+                step1Data: true,
+                step2Data: true,
+                step3Data: true
+              }
+            }
           }
         },
         baiv506cOnboarding: {
@@ -756,6 +801,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
               clientId,
               hasBaiodf: client.formSelections.some((selection) => selection.form.code === BAIODF_FORM_CODE),
               baiodfOnboarding: client.baiodfOnboarding,
+              investments: client.investments,
               hasBaiv506c: client.formSelections.some((selection) => selection.form.code === BAIV_506C_FORM_CODE),
               baiv506cOnboarding: client.baiv506cOnboarding,
               requiresJointOwnerSignature
@@ -918,6 +964,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
               clientId,
               hasBaiodf: client.formSelections.some((selection) => selection.form.code === BAIODF_FORM_CODE),
               baiodfOnboarding: client.baiodfOnboarding,
+              investments: client.investments,
               hasBaiv506c: client.formSelections.some((selection) => selection.form.code === BAIV_506C_FORM_CODE),
               baiv506cOnboarding: client.baiv506cOnboarding,
               requiresJointOwnerSignature
@@ -1006,6 +1053,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
                 clientId,
                 hasBaiodf: client.formSelections.some((selection) => selection.form.code === BAIODF_FORM_CODE),
                 baiodfOnboarding: client.baiodfOnboarding,
+                investments: client.investments,
                 hasBaiv506c: client.formSelections.some(
                   (selection) => selection.form.code === BAIV_506C_FORM_CODE
                 ),
@@ -1152,6 +1200,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
                 clientId,
                 hasBaiodf: client.formSelections.some((selection) => selection.form.code === BAIODF_FORM_CODE),
                 baiodfOnboarding: client.baiodfOnboarding,
+                investments: client.investments,
                 hasBaiv506c: client.formSelections.some(
                   (selection) => selection.form.code === BAIV_506C_FORM_CODE
                 ),

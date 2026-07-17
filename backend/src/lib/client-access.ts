@@ -5,13 +5,18 @@ export function clientAccessWhere(userId: string): Prisma.ClientWhereInput {
     OR: [
       { ownerUserId: userId },
       {
-        brokerLinks: {
-          some: {
-            broker: {
-              ownerUserId: userId
+        AND: [
+          { setupStatus: 'ACTIVE' },
+          {
+            brokerLinks: {
+              some: {
+                broker: {
+                  ownerUserId: userId
+                }
+              }
             }
           }
-        }
+        ]
       }
     ]
   };

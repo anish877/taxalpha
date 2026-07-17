@@ -202,8 +202,8 @@ export function ClientPdfFillReviewPage() {
     try {
       const value = selectedTarget.widgetType === 'checkbox' ? draftChecked : draftValue;
       const result = await savePdfFillValues(clientId, fillId, { [selectedTarget.id]: { value } });
-      setFill((current) => (current ? { ...current, resolvedLayout: result.resolvedLayout, warnings: result.warnings } : current));
-      pushToast('PDF field updated.');
+      setFill((current) => (current ? { ...current, status: result.status, resolvedLayout: result.resolvedLayout, warnings: result.warnings } : current));
+      pushToast(fill?.generatedAt ? 'Field saved. Generate an updated PDF when you are ready.' : 'PDF field updated.');
     } catch (requestError) {
       if (requestError instanceof ApiError && requestError.statusCode === 401) {
         await handleUnauthorized();
@@ -220,8 +220,8 @@ export function ClientPdfFillReviewPage() {
     setSaving(true);
     try {
       const result = await savePdfFillValues(clientId, fillId, { [selectedTarget.id]: { value: null } });
-      setFill((current) => (current ? { ...current, resolvedLayout: result.resolvedLayout, warnings: result.warnings } : current));
-      pushToast('PDF field cleared.');
+      setFill((current) => (current ? { ...current, status: result.status, resolvedLayout: result.resolvedLayout, warnings: result.warnings } : current));
+      pushToast(fill?.generatedAt ? 'Field cleared. Generate an updated PDF when you are ready.' : 'PDF field cleared.');
     } catch (requestError) {
       pushToast(requestError instanceof ApiError ? requestError.message : 'Unable to clear PDF field.', 'error');
     } finally {
@@ -234,7 +234,7 @@ export function ClientPdfFillReviewPage() {
     setReanalyzing(true);
     try {
       const result = await reanalyzePdfFill(clientId, fillId);
-      setFill((current) => (current ? { ...current, resolvedLayout: result.resolvedLayout, warnings: result.warnings } : current));
+      setFill((current) => (current ? { ...current, status: 'DRAFT', resolvedLayout: result.resolvedLayout, warnings: result.warnings } : current));
       pushToast('PDF re-analyzed with the latest client data.');
     } catch (requestError) {
       pushToast(requestError instanceof ApiError ? requestError.message : 'Unable to reanalyze PDF.', 'error');
@@ -274,77 +274,98 @@ export function ClientPdfFillReviewPage() {
   };
 
   return (
-    <main className="min-h-screen bg-fog px-4 py-6 sm:px-8">
-      <div className="mx-auto max-w-[96rem]">
-        <header className="border border-black/10 bg-paper px-5 py-5 shadow-hairline sm:px-6">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-mute">Client PDF Fill</p>
-              <h1 className="mt-2 text-3xl font-light tracking-tight text-ink">{fill?.fileName ?? 'Uploaded PDF'}</h1>
-              <p className="mt-2 text-sm text-mute">
-                Review actual filled data, edit anything needed, then generate the final PDF.
-              </p>
+    <main className="workspace-premium min-h-screen px-4 py-5 sm:px-7 sm:py-7">
+      <div className="mx-auto max-w-7xl">
+        <header className="premium-header rounded-[2rem] px-5 py-5 sm:px-7 sm:py-6">
+          <button
+            className="relative z-10 -ml-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-sm text-[#6e6e73] transition hover:bg-black/[0.04] hover:text-[#1d1d1f]"
+            type="button"
+            onClick={() => navigate(`/clients/${clientId}/forms`)}
+          >
+            <span aria-hidden="true">←</span>
+            Workspace
+          </button>
+
+          <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-[#86868b]">Document editor</p>
+              <h1 className="mt-1.5 truncate text-[1.7rem] font-semibold tracking-[-0.03em] text-[#1d1d1f] sm:text-[2rem]" title={fill?.fileName ?? 'Uploaded PDF'}>
+                {fill?.fileName ?? 'Uploaded PDF'}
+              </h1>
+              <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#86868b]">
+                <span>{filledCount} fields filled</span>
+                <span aria-hidden="true">·</span>
+                <span className={reviewCount > 0 ? 'text-amber-700' : undefined}>{reviewCount} need review</span>
+                <span aria-hidden="true">·</span>
+                <span>{skippedCount} signatures skipped</span>
+                {fill?.generatedAt && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span>Generated {formatTimestamp(fill.generatedAt)}</span>
+                  </>
+                )}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+
+            <div className="relative z-10 flex shrink-0 flex-wrap items-center gap-2">
+              {fill?.generatedPdfUrl && (
+                <a
+                  className="premium-secondary inline-flex items-center px-5 py-2.5 text-sm text-[#1d1d1f]"
+                  href={fill.generatedPdfUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open current PDF
+                </a>
+              )}
+              <details className="relative">
+                <summary className="premium-secondary flex cursor-pointer list-none items-center px-5 py-2.5 text-sm text-[#1d1d1f]">
+                  More
+                </summary>
+                <div className="absolute right-0 z-30 mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white p-2 shadow-panel">
+                  <button
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm text-[#1d1d1f] transition hover:bg-[#f5f5f7] disabled:opacity-45"
+                    disabled={reanalyzing}
+                    type="button"
+                    onClick={() => void handleReanalyze()}
+                  >
+                    {reanalyzing ? 'Refreshing fields…' : 'Refresh suggested fields'}
+                  </button>
+                </div>
+              </details>
               <button
-                className="border border-line bg-white px-4 py-2 text-xs uppercase tracking-[0.16em] text-ink transition hover:border-black"
-                type="button"
-                onClick={() => navigate(`/clients/${clientId}/forms`)}
-              >
-                Workspace
-              </button>
-              <button
-                className="border border-line bg-white px-4 py-2 text-xs uppercase tracking-[0.16em] text-ink transition hover:border-black disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={reanalyzing}
-                type="button"
-                onClick={() => void handleReanalyze()}
-              >
-                {reanalyzing ? 'Re-analyzing...' : 'Re-analyze PDF'}
-              </button>
-              <button
-                className="bg-accent px-5 py-2 text-xs uppercase tracking-[0.16em] text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/45"
+                className="premium-primary px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-45"
                 disabled={generating || !fill}
                 type="button"
                 onClick={() => void handleGenerate()}
               >
-                {generating ? 'Generating...' : 'Generate PDF'}
+                {generating ? 'Generating…' : fill?.generatedAt ? 'Generate updated PDF' : 'Generate PDF'}
               </button>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-4">
-            <div className="border border-line bg-fog px-4 py-3">
-              <p className="text-xs text-mute">Filled</p>
-              <p className="mt-1 text-xl font-light text-ink">{filledCount}</p>
-            </div>
-            <div className="border border-line bg-fog px-4 py-3">
-              <p className="text-xs text-mute">Needs Review</p>
-              <p className="mt-1 text-xl font-light text-ink">{reviewCount}</p>
-            </div>
-            <div className="border border-line bg-fog px-4 py-3">
-              <p className="text-xs text-mute">Skipped Signatures</p>
-              <p className="mt-1 text-xl font-light text-ink">{skippedCount}</p>
-            </div>
-            <div className="border border-line bg-fog px-4 py-3">
-              <p className="text-xs text-mute">Generated</p>
-              <p className="mt-1 truncate text-sm text-ink">{formatTimestamp(fill?.generatedAt ?? null)}</p>
             </div>
           </div>
         </header>
 
-        {loading && <div className="mt-6 h-40 animate-pulse border border-line bg-white/60" />}
+        {loading && <div className="premium-card mt-5 h-40 animate-pulse rounded-[2rem]" />}
         {!loading && error && (
-          <div className="mt-6 border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div>
+          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div>
         )}
 
         {!loading && !error && fill && (
-          <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="min-w-0 overflow-auto border border-line bg-[#e7e5df] p-4 shadow-hairline">
-              {!pdfDoc && <div className="border border-line bg-paper px-4 py-3 text-sm text-mute">Rendering PDF...</div>}
+          <>
+            {fill.status === 'DRAFT' && fill.generatedAt && (
+              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                Edits saved. Generate an updated PDF when you are ready.
+              </div>
+            )}
+            <section className="mt-5 grid gap-4 min-[900px]:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="order-2 min-w-0 overflow-auto rounded-[2rem] border border-black/[0.055] bg-[#e9e9ed] p-4 shadow-hairline sm:p-6 min-[900px]:col-start-1 min-[900px]:row-start-1">
+              {!pdfDoc && <div className="rounded-2xl bg-white px-4 py-3 text-sm text-mute">Rendering PDF…</div>}
               {pdfDoc && (
                 <div className="space-y-6">
                   {fill.resolvedLayout.pages.map((page) => (
                     <div key={page.page} className="mx-auto w-max">
-                      <div className="mb-2 text-xs text-mute">Page {page.page}</div>
+                      <div className="mb-2 px-1 text-xs font-medium text-[#6e6e73]">Page {page.page}</div>
                       <PdfPageCanvas doc={pdfDoc} page={page}>
                         {(targetByPage.get(page.page) ?? []).map((target) => {
                           const selected = target.id === selectedTargetId;
@@ -369,21 +390,21 @@ export function ClientPdfFillReviewPage() {
               )}
             </div>
 
-            <aside className="border border-line bg-paper p-5 shadow-hairline xl:sticky xl:top-5 xl:max-h-[calc(100vh-2.5rem)] xl:overflow-auto">
-              <h2 className="text-base font-medium text-ink">Selected field</h2>
+            <aside className="premium-card order-1 rounded-[2rem] p-5 sm:p-6 min-[900px]:sticky min-[900px]:top-5 min-[900px]:col-start-2 min-[900px]:row-start-1 min-[900px]:max-h-[calc(100vh-2.5rem)] min-[900px]:overflow-auto">
+              <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#1d1d1f]">Field details</h2>
               {!selectedTarget && (
-                <p className="mt-4 border border-line bg-fog px-4 py-3 text-sm text-mute">Select a highlighted PDF field.</p>
+                <p className="mt-3 rounded-2xl bg-[#f5f5f7] px-4 py-3 text-sm text-mute">Select a highlighted field in the PDF.</p>
               )}
               {selectedTarget && (
                 <div className="mt-4 space-y-4">
-                  <div className="border border-line bg-fog px-4 py-3">
+                  <div className="rounded-2xl bg-[#f5f5f7] px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-medium text-ink">{selectedTarget.label}</p>
                         <p className="mt-1 text-xs text-mute">Page {selectedTarget.page} · {selectedTarget.widgetType}</p>
                       </div>
-                      <span className="border border-line bg-white px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-mute">
-                        {selectedTarget.status.replace('_', ' ')}
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-medium text-mute">
+                        {selectedTarget.status === 'needs_review' ? 'Needs review' : selectedTarget.status === 'filled' ? 'Filled' : 'Skipped'}
                       </span>
                     </div>
                     {selectedTarget.sourceLabel && (
@@ -393,14 +414,14 @@ export function ClientPdfFillReviewPage() {
                       <p className="mt-2 text-xs leading-5 text-ink">{selectedTarget.explanation}</p>
                     )}
                     {selectedTarget.warning && (
-                      <p className="mt-3 border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">
                         {selectedTarget.warning}
                       </p>
                     )}
                   </div>
 
                   {selectedTarget.editable && selectedTarget.widgetType === 'checkbox' && (
-                    <label className="flex items-center justify-between border border-line bg-white px-4 py-3 text-sm text-ink">
+                    <label className="flex items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink">
                       Checked
                       <input
                         checked={draftChecked}
@@ -412,19 +433,19 @@ export function ClientPdfFillReviewPage() {
                   )}
 
                   {selectedTarget.editable && selectedTarget.widgetType !== 'checkbox' && (
-                    <label className="block text-xs font-medium uppercase tracking-[0.12em] text-mute">
+                    <label className="block text-xs font-medium text-mute">
                       Value
                       <textarea
                         value={draftValue}
                         onChange={(event) => setDraftValue(event.target.value)}
-                        className="mt-2 min-h-28 w-full border border-line bg-white px-3 py-2 text-sm normal-case tracking-normal text-ink outline-none focus:border-accent"
+                        className="mt-2 min-h-28 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-[#0071e3] focus:ring-4 focus:ring-[#0071e3]/10"
                       />
                     </label>
                   )}
 
                   <div className="flex gap-2">
                     <button
-                      className="flex-1 bg-accent px-4 py-2 text-xs uppercase tracking-[0.16em] text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/45"
+                      className="premium-primary flex-1 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-45"
                       disabled={!selectedTarget.editable || saving}
                       type="button"
                       onClick={() => void saveSelected()}
@@ -432,7 +453,7 @@ export function ClientPdfFillReviewPage() {
                       {saving ? 'Saving...' : 'Save'}
                     </button>
                     <button
-                      className="flex-1 border border-line px-4 py-2 text-xs uppercase tracking-[0.16em] text-ink transition hover:border-black disabled:cursor-not-allowed disabled:opacity-50"
+                      className="premium-secondary flex-1 px-4 py-2.5 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-50"
                       disabled={!selectedTarget.editable || saving}
                       type="button"
                       onClick={() => void clearSelected()}
@@ -444,13 +465,16 @@ export function ClientPdfFillReviewPage() {
               )}
 
               {fill.warnings.length > 0 && (
-                <div className="mt-6 border-t border-line pt-5">
-                  <h3 className="text-sm font-medium text-ink">Review warnings</h3>
+                <div className="mt-6 border-t border-black/[0.07] pt-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-ink">Needs attention</h3>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800">{fill.warnings.length}</span>
+                  </div>
                   <div className="mt-3 space-y-2">
                     {fill.warnings.slice(0, 8).map((warning) => (
                       <button
                         key={`${warning.targetId}:${warning.reason}`}
-                        className="w-full border border-amber-300 bg-amber-50 px-3 py-2 text-left text-xs text-amber-900 transition hover:border-amber-500"
+                        className="w-full rounded-2xl bg-amber-50 px-3.5 py-3 text-left text-xs text-amber-900 transition hover:bg-amber-100"
                         type="button"
                         onClick={() => setSelectedTargetId(warning.targetId)}
                       >
@@ -462,7 +486,8 @@ export function ClientPdfFillReviewPage() {
                 </div>
               )}
             </aside>
-          </section>
+            </section>
+          </>
         )}
       </div>
     </main>

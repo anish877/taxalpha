@@ -122,7 +122,7 @@ export function BrokerageAccreditedInvestorVerificationStep1Page() {
           return;
         }
 
-        setError('Unable to load BAIV 506(c) Step 1.');
+        setError('Unable to load Step 1 of the Brokerage Accredited Investor Verification Form for SEC Rule 506(c).');
       } finally {
         setLoading(false);
       }
@@ -206,7 +206,7 @@ export function BrokerageAccreditedInvestorVerificationStep1Page() {
         response.onboarding.step.currentQuestionId === currentQuestionId;
 
       if (isStillLastQuestion) {
-        pushToast('BAIV 506(c) Step 1 saved.');
+        pushToast('Step 1 of the Brokerage Accredited Investor Verification Form for SEC Rule 506(c) was saved.');
         navigate(`/clients/${clientId}/brokerage-accredited-investor-verification/step-2`, { replace: true });
       }
     } catch (requestError) {

@@ -1,10 +1,19 @@
+import { randomUUID } from 'node:crypto';
+
 import type { Prisma } from '@prisma/client';
 import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import { extractPdfStructure } from '../lib/ingestion/extract.js';
 import { clientAccessWhere } from '../lib/client-access.js';
-import { loadFilled, loadTemplate, storeFilled, storeTemplate } from '../lib/ingestion/template-store.js';
+import {
+  deleteFilled,
+  deleteTemplate,
+  loadFilled,
+  loadTemplate,
+  storeFilled,
+  storeTemplate
+} from '../lib/ingestion/template-store.js';
 import { HttpError } from '../lib/http-error.js';
 import { buildAiPdfFill } from '../lib/pdf-fill/ai-map.js';
 import {
@@ -18,11 +27,13 @@ import {
   type PublicPdfFillLayout
 } from '../lib/pdf-fill/engine.js';
 import { getProfileLookup } from '../lib/profile/lookup.js';
+import { requestBaseUrl } from '../lib/request-base-url.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
 const MAX_PDF_BYTES = 15 * 1024 * 1024;
 const PDF_UPLOAD_WORKSPACE_CODE = 'PDF_UPLOAD';
+const PDF_ANALYSIS_TIMEOUT_MS = 5 * 60 * 1000;
 
 const createFillBodySchema = z.object({
   fileName: z.string().trim().min(1).max(255).default('uploaded.pdf'),
@@ -65,6 +76,74 @@ function json(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
+function schedulePdfFillAnalysis(params: {
+  deps: RouteDeps;
+  fillId: string;
+  clientId: string;
+  originalPdfUrl: string;
+  investmentId: string | null;
+  analysisRunId: string;
+}) {
+  const { deps, fillId, clientId, originalPdfUrl, investmentId, analysisRunId } = params;
+
+  void (async () => {
+    try {
+      const setStage = async (analysisStage: string) => {
+        await deps.prisma.clientUploadedPdfFill.updateMany({
+          where: { id: fillId, analysisRunId },
+          data: { analysisStage }
+        });
+      };
+
+      await setStage('READING_PDF');
+      const original = await loadTemplate(originalPdfUrl, deps.config);
+      if (!original) throw new HttpError(404, 'Original PDF is not available.');
+      const structure = await extractPdfStructure(new Uint8Array(original));
+
+      await setStage('MATCHING_CLIENT_DATA');
+      const lookup = await getProfileLookup(deps.prisma, clientId, {
+        investmentId: investmentId ?? undefined
+      });
+
+      await setStage('MAPPING_FIELDS');
+      const built = await buildAiPdfFill(new Uint8Array(original), structure, lookup, requireOpenRouter(deps));
+
+      await setStage('FINALIZING');
+      await deps.prisma.clientUploadedPdfFill.updateMany({
+        where: { id: fillId, analysisRunId },
+        data: {
+          status: 'DRAFT',
+          analysisStartedAt: null,
+          analysisRunId: null,
+          analysisStage: null,
+          analysisError: null,
+          pdfFingerprint: built.fingerprint,
+          mappingLayout: json(built.mappingLayout),
+          resolvedLayout: json(built.resolvedLayout),
+          warnings: json(built.warnings)
+        }
+      });
+    } catch (analysisError) {
+      console.error('Direct PDF fill analysis failed', { fillId, clientId, error: analysisError });
+      await deps.prisma.clientUploadedPdfFill
+        .updateMany({
+          where: { id: fillId, analysisRunId },
+          data: {
+            status: 'ANALYSIS_FAILED',
+            analysisStartedAt: null,
+            analysisRunId: null,
+            analysisStage: null,
+            analysisError:
+              analysisError instanceof HttpError
+                ? analysisError.message.slice(0, 500)
+                : 'PDF analysis did not complete. Retry analysis.'
+          }
+        })
+        .catch(() => undefined);
+    }
+  })();
+}
+
 function requireOpenRouter(deps: RouteDeps) {
   const openrouter = deps.config.openrouter;
   if (!openrouter?.apiKey) {
@@ -104,7 +183,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
       const clientId = String(request.params.clientId);
       await ownedClient(deps, clientId, request.authUser!.id);
       const fills = await deps.prisma.clientUploadedPdfFill.findMany({
-        where: { clientId },
+        where: { clientId, investmentId: null },
         orderBy: { updatedAt: 'desc' },
         select: {
           id: true,
@@ -114,22 +193,66 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
           generatedAt: true,
           createdAt: true,
           updatedAt: true,
-          warnings: true
+          warnings: true,
+          analysisStartedAt: true,
+          analysisStage: true,
+          analysisError: true,
+          analysisAttempts: true
         }
       });
 
       response.json({
-        fills: fills.map((fill) => ({
-          id: fill.id,
-          fileName: fill.fileName,
-          status: fill.status,
-          generatedPdfUrl: fill.generatedPdfUrl,
-          generatedAt: fill.generatedAt?.toISOString() ?? null,
-          createdAt: fill.createdAt.toISOString(),
-          updatedAt: fill.updatedAt.toISOString(),
-          warningCount: Array.isArray(fill.warnings) ? fill.warnings.length : 0
-        }))
+        fills: fills.map((fill) => {
+          const analysisIsStale = Boolean(
+            fill.status === 'ANALYZING' &&
+            Date.now() - (fill.analysisStartedAt ?? fill.updatedAt).getTime() >= PDF_ANALYSIS_TIMEOUT_MS
+          );
+          return {
+            id: fill.id,
+            fileName: fill.fileName,
+            status: analysisIsStale ? 'ANALYSIS_FAILED' : fill.status,
+            generatedPdfUrl: fill.generatedPdfUrl,
+            generatedAt: fill.generatedAt?.toISOString() ?? null,
+            createdAt: fill.createdAt.toISOString(),
+            updatedAt: fill.updatedAt.toISOString(),
+            warningCount: Array.isArray(fill.warnings) ? fill.warnings.length : 0,
+            analysisStartedAt: fill.analysisStartedAt?.toISOString() ?? null,
+            analysisStage: fill.analysisStage,
+            analysisError: analysisIsStale
+              ? 'Analysis was interrupted or timed out. Retry analysis.'
+              : fill.analysisError,
+            analysisAttempts: fill.analysisAttempts
+          };
+        })
       });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete('/:clientId/pdf-fills/:fillId', requireAuth(deps), async (request, response, next) => {
+    try {
+      const clientId = String(request.params.clientId);
+      const fillId = String(request.params.fillId);
+      await ownedClient(deps, clientId, request.authUser!.id);
+      const fill = await deps.prisma.clientUploadedPdfFill.findFirst({
+        where: { id: fillId, clientId, investmentId: null },
+        select: { id: true, originalPdfUrl: true }
+      });
+      if (!fill) throw new HttpError(404, 'Direct PDF fill session not found.');
+
+      await deps.prisma.$transaction([
+        deps.prisma.clientFormPdf.deleteMany({
+          where: { clientId, investmentId: null, sourceRunId: fill.id }
+        }),
+        deps.prisma.clientUploadedPdfFill.delete({ where: { id: fill.id } })
+      ]);
+
+      await Promise.allSettled([
+        deleteTemplate(fill.originalPdfUrl, deps.config),
+        deleteFilled(`pdf-fill-${fill.id}`, deps.config)
+      ]);
+      response.status(204).send();
     } catch (error) {
       next(error);
     }
@@ -143,42 +266,94 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
       if (!parsed.success) throw new HttpError(400, 'Upload a valid PDF.');
 
       const pdf = decodePdfBase64(parsed.data.pdfBase64);
-      const ai = requireOpenRouter(deps);
-      const [structure, lookup] = await Promise.all([
-        extractPdfStructure(new Uint8Array(pdf)),
-        getProfileLookup(deps.prisma, clientId)
-      ]);
-      const built = await buildAiPdfFill(pdf, structure, lookup, ai);
-      const originalPdfUrl = await storeTemplate(`pdf-fill-original-${built.id}`, pdf, deps.config);
-      const originalUrl = publicPdfFillUrl(deps.config.backendPublicUrl, clientId, built.id, 'original');
+      requireOpenRouter(deps);
+      const fillId = randomUUID();
+      const originalPdfUrl = await storeTemplate(`pdf-fill-original-${fillId}`, pdf, deps.config);
+      const originalUrl = publicPdfFillUrl(requestBaseUrl(request), clientId, fillId, 'original');
+      const analysisRunId = randomUUID();
+      const startedAt = new Date();
 
       await deps.prisma.clientUploadedPdfFill.create({
         data: {
-          id: built.id,
+          id: fillId,
           clientId,
           ownerUserId: request.authUser!.id,
           originalPdfUrl,
           fileName: parsed.data.fileName,
-          pdfFingerprint: built.fingerprint,
-          mappingLayout: json(built.mappingLayout),
-          resolvedLayout: json(built.resolvedLayout),
           valueOverrides: json({}),
-          warnings: json(built.warnings),
-          status: 'DRAFT'
+          warnings: json([]),
+          status: 'ANALYZING',
+          analysisStartedAt: startedAt,
+          analysisRunId,
+          analysisStage: 'QUEUED',
+          analysisAttempts: 1
         }
       });
 
-      response.status(201).json({
+      response.status(202).json({
         fill: {
-          id: built.id,
+          id: fillId,
           fileName: parsed.data.fileName,
-          status: 'DRAFT',
+          status: 'ANALYZING',
           originalPdfUrl: originalUrl,
           generatedPdfUrl: null,
-          profileTitle: built.profileTitle,
-          resolvedLayout: built.resolvedLayout,
-          warnings: built.warnings
+          generatedAt: null,
+          resolvedLayout: { pages: [], targets: [] },
+          warnings: []
         }
+      });
+
+      schedulePdfFillAnalysis({
+        deps,
+        fillId,
+        clientId,
+        originalPdfUrl,
+        investmentId: null,
+        analysisRunId
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/:clientId/pdf-fills/:fillId/analyze', requireAuth(deps), async (request, response, next) => {
+    try {
+      const clientId = String(request.params.clientId);
+      const fillId = String(request.params.fillId);
+      const fill = await ownedFill(deps, clientId, fillId, request.authUser!.id);
+      if (!fill.originalPdfUrl) throw new HttpError(409, 'Original PDF is not available.');
+      requireOpenRouter(deps);
+
+      const analysisStartedAt = fill.analysisStartedAt ?? fill.updatedAt;
+      const analysisIsStale = Date.now() - analysisStartedAt.getTime() >= PDF_ANALYSIS_TIMEOUT_MS;
+      if (fill.status === 'ANALYZING' && !analysisIsStale) {
+        throw new HttpError(409, 'PDF analysis is already running.');
+      }
+      if (!['UPLOADED', 'ANALYSIS_FAILED', 'ANALYZING'].includes(fill.status)) {
+        throw new HttpError(409, 'This PDF is already ready for review.');
+      }
+
+      const analysisRunId = randomUUID();
+      await deps.prisma.clientUploadedPdfFill.update({
+        where: { id: fill.id },
+        data: {
+          status: 'ANALYZING',
+          analysisStartedAt: new Date(),
+          analysisRunId,
+          analysisStage: 'QUEUED',
+          analysisError: null,
+          analysisAttempts: { increment: 1 }
+        }
+      });
+
+      response.status(202).json({ fillId: fill.id, status: 'ANALYZING' });
+      schedulePdfFillAnalysis({
+        deps,
+        fillId: fill.id,
+        clientId,
+        originalPdfUrl: fill.originalPdfUrl,
+        investmentId: fill.investmentId,
+        analysisRunId
       });
     } catch (error) {
       next(error);
@@ -190,7 +365,15 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
       const clientId = String(request.params.clientId);
       const fillId = String(request.params.fillId);
       const fill = await ownedFill(deps, clientId, fillId, request.authUser!.id);
-      const lookup = await getProfileLookup(deps.prisma, clientId);
+      if (fill.status === 'ANALYZING') {
+        throw new HttpError(409, 'PDF analysis is still running.');
+      }
+      if (fill.status === 'ANALYSIS_FAILED') {
+        throw new HttpError(409, fill.analysisError ?? 'PDF analysis failed. Retry analysis from the PDF Fill tab.');
+      }
+      const lookup = await getProfileLookup(deps.prisma, clientId, {
+        investmentId: fill.investmentId ?? undefined
+      });
       const previous = asResolvedLayout(fill.resolvedLayout);
       const layout = parseMappingLayout(fill.mappingLayout);
       const overrides = parsePdfFillOverrides(fill.valueOverrides);
@@ -204,8 +387,10 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
           id: fill.id,
           fileName: fill.fileName,
           status: fill.status,
-          originalPdfUrl: publicPdfFillUrl(deps.config.backendPublicUrl, clientId, fill.id, 'original'),
-          generatedPdfUrl: fill.generatedPdfUrl,
+          originalPdfUrl: publicPdfFillUrl(requestBaseUrl(request), clientId, fill.id, 'original'),
+          generatedPdfUrl: fill.generatedPdfUrl
+            ? publicPdfFillUrl(requestBaseUrl(request), clientId, fill.id, 'filled')
+            : null,
           generatedAt: fill.generatedAt?.toISOString() ?? null,
           resolvedLayout,
           warnings
@@ -226,7 +411,9 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
 
       const existing = parsePdfFillOverrides(fill.valueOverrides);
       const nextOverrides = mergePdfFillOverrides(existing, parsed.data.overrides as PdfFillOverrides);
-      const lookup = await getProfileLookup(deps.prisma, clientId);
+      const lookup = await getProfileLookup(deps.prisma, clientId, {
+        investmentId: fill.investmentId ?? undefined
+      });
       const previous = asResolvedLayout(fill.resolvedLayout);
       const layout = parseMappingLayout(fill.mappingLayout);
       const { resolvedLayout, warnings } = resolvePublicPdfFillLayout(previous?.pages ?? [], layout, lookup, {
@@ -239,11 +426,14 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
         data: {
           valueOverrides: json(nextOverrides),
           resolvedLayout: json(resolvedLayout),
-          warnings: json(warnings)
+          warnings: json(warnings),
+          // A previously generated file remains available, but it no longer
+          // represents the saved field values until the user generates again.
+          status: 'DRAFT'
         }
       });
 
-      response.json({ resolvedLayout, warnings });
+      response.json({ resolvedLayout, warnings, status: 'DRAFT' });
     } catch (error) {
       next(error);
     }
@@ -259,7 +449,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
       const overrides = parsePdfFillOverrides(fill.valueOverrides);
       const [structure, lookup] = await Promise.all([
         extractPdfStructure(new Uint8Array(original)),
-        getProfileLookup(deps.prisma, clientId)
+        getProfileLookup(deps.prisma, clientId, { investmentId: fill.investmentId ?? undefined })
       ]);
       const built = await buildAiPdfFill(new Uint8Array(original), structure, lookup, requireOpenRouter(deps));
       const { resolvedLayout, warnings } = resolvePublicPdfFillLayout(structure.pages, built.mappingLayout, lookup, {
@@ -297,7 +487,9 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
       const previous = asResolvedLayout(fill.resolvedLayout);
       const layout = parseMappingLayout(fill.mappingLayout);
       const overrides = parsePdfFillOverrides(fill.valueOverrides);
-      const lookup = await getProfileLookup(deps.prisma, clientId);
+      const lookup = await getProfileLookup(deps.prisma, clientId, {
+        investmentId: fill.investmentId ?? undefined
+      });
       const generated = await generateFilledPdfFromSession(
         new Uint8Array(original),
         previous?.pages ?? [],
@@ -307,7 +499,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
         previous
       );
       await storeFilled(generatedStorageKey(fill.id), generated.bytes, deps.config);
-      const generatedPdfUrl = publicPdfFillUrl(deps.config.backendPublicUrl, clientId, fill.id, 'filled');
+      const generatedPdfUrl = publicPdfFillUrl(requestBaseUrl(request), clientId, fill.id, 'filled');
       const now = new Date();
 
       await deps.prisma.$transaction([
@@ -330,6 +522,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
             }
           },
           update: {
+            investmentId: fill.investmentId,
             workspaceFormCode: PDF_UPLOAD_WORKSPACE_CODE,
             documentTitle: fill.fileName ?? 'Uploaded PDF',
             fileName: fill.fileName ?? `${fill.id}.pdf`,
@@ -338,6 +531,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
           },
           create: {
             clientId,
+            investmentId: fill.investmentId,
             formCode: PDF_UPLOAD_WORKSPACE_CODE,
             workspaceFormCode: PDF_UPLOAD_WORKSPACE_CODE,
             pdfUrl: generatedPdfUrl,

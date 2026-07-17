@@ -94,11 +94,13 @@ const STEP4_REQUIRED_ACCOUNT_TYPES = new Set<PrimaryTypeKey>([
 ]);
 
 const clientIdParamsSchema = z.object({
-  clientId: z.string().trim().min(1)
+  clientId: z.string().trim().min(1),
+  investmentId: z.string().trim().min(1).optional()
 });
 
 const baiodfReviewStepParamsSchema = z.object({
   clientId: z.string().trim().min(1),
+  investmentId: z.string().trim().min(1).optional(),
   stepNumber: z.coerce.number().int().min(1).max(3)
 });
 
@@ -565,13 +567,80 @@ function toBaiodfReviewResponse(
   );
 }
 
-export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
+export function createBaiodfRouter(
+  deps: RouteDeps,
+  options?: { investmentAware?: boolean }
+): ExpressRouter {
   const router = Router();
+  const investmentAware = options?.investmentAware === true;
+  const basePath = investmentAware
+    ? '/:clientId/investments/:investmentId/baiodf'
+    : '/:clientId/brokerage-alternative-investment-order-disclosure';
+  const onboardingStore: any = investmentAware
+    ? deps.prisma.investmentBaiodfOnboarding
+    : deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding;
+  const onboardingWhere = (clientId: string, investmentId?: string) =>
+    investmentAware ? { investmentId } : { clientId };
+  const onboardingIdentity = (clientId: string, investmentId?: string) =>
+    investmentAware ? { clientId, investmentId } : { clientId };
+  const nextInvestmentRoute = async (clientId: string, investmentId: string | undefined) => {
+    if (!investmentAware || !investmentId) return null;
+    const current = await deps.prisma.clientInvestment.findUnique({
+      where: { id: investmentId },
+      select: { position: true }
+    });
+    if (!current) return null;
+    const nextInvestment = await deps.prisma.clientInvestment.findFirst({
+      where: {
+        clientId,
+        position: { gt: current.position },
+        baiodfOnboarding: { status: { not: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED } }
+      },
+      orderBy: { position: 'asc' },
+      select: { id: true }
+    });
+    return nextInvestment
+      ? `/clients/${clientId}/investments/${nextInvestment.id}/baiodf/step-1`
+      : null;
+  };
+
+  if (investmentAware) {
+    router.use(basePath, requireAuth(deps), async (request, response, next) => {
+      try {
+        const parsed = clientIdParamsSchema.safeParse(request.params);
+        if (!parsed.success || !parsed.data.investmentId) {
+          response.status(400).json({ message: 'Invalid investment identifier.' });
+          return;
+        }
+        const investment = await deps.prisma.clientInvestment.findFirst({
+          where: {
+            id: parsed.data.investmentId,
+            clientId: parsed.data.clientId,
+            client: {
+              AND: [
+                clientAccessWhere(request.authUser!.id),
+                { setupStatus: 'ACTIVE' }
+              ]
+            }
+          },
+          select: { id: true }
+        });
+        if (!investment) {
+          response.status(404).json({ message: 'Investment not found.' });
+          return;
+        }
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  }
 
   async function loadClientContext(clientId: string, ownerUserId: string): Promise<BaiodfClientContext | null> {
     return deps.prisma.client.findFirst({
       where: {
         id: clientId,
+        setupStatus: 'ACTIVE',
         ...clientAccessWhere(ownerUserId)
       },
       select: {
@@ -612,7 +681,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     });
   }
 
-  router.get('/:clientId/brokerage-alternative-investment-order-disclosure/step-1', requireAuth(deps), async (request, response, next) => {
+  router.get(`${basePath}/step-1`, requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -639,11 +708,11 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const defaults = createDefaultBaiodfOnboardingPayload();
-      const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-        where: { clientId },
+      const onboarding = await onboardingStore.upsert({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         update: {},
         create: {
-          clientId,
+          ...onboardingIdentity(clientId, parsedParams.data.investmentId),
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
           ...defaults
         },
@@ -672,7 +741,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
-  router.post('/:clientId/brokerage-alternative-investment-order-disclosure/step-1', requireAuth(deps), async (request, response, next) => {
+  router.post(`${basePath}/step-1`, requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -718,8 +787,8 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const existingOnboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.findUnique({
-        where: { clientId },
+      const existingOnboarding = await onboardingStore.findUnique({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         select: {
           status: true,
           step1CurrentQuestionIndex: true,
@@ -760,15 +829,15 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
       const nextIndex = Math.min(safeAnsweredIndex + 1, Math.max(visibleAfter.length - 1, 0));
       const defaults = createDefaultBaiodfOnboardingPayload();
 
-      const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-        where: { clientId },
+      const onboarding = await onboardingStore.upsert({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         update: {
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS,
           step1CurrentQuestionIndex: nextIndex,
           step1Data: serializeBaiodfStep1Fields(nextFields)
         },
         create: {
-          clientId,
+          ...onboardingIdentity(clientId, parsedParams.data.investmentId),
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS,
           ...defaults,
           step1CurrentQuestionIndex: nextIndex,
@@ -789,7 +858,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
-  router.get('/:clientId/brokerage-alternative-investment-order-disclosure/step-2', requireAuth(deps), async (request, response, next) => {
+  router.get(`${basePath}/step-2`, requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -816,11 +885,11 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const defaults = createDefaultBaiodfOnboardingPayload();
-      const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-        where: { clientId },
+      const onboarding = await onboardingStore.upsert({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         update: {},
         create: {
-          clientId,
+          ...onboardingIdentity(clientId, parsedParams.data.investmentId),
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
           ...defaults
         },
@@ -847,7 +916,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
-  router.post('/:clientId/brokerage-alternative-investment-order-disclosure/step-2', requireAuth(deps), async (request, response, next) => {
+  router.post(`${basePath}/step-2`, requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -893,8 +962,8 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const existingOnboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.findUnique({
-        where: { clientId },
+      const existingOnboarding = await onboardingStore.findUnique({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         select: {
           status: true,
           step1Data: true,
@@ -925,15 +994,15 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
       const nextIndex = Math.min(safeAnsweredIndex + 1, Math.max(visibleAfter.length - 1, 0));
       const defaults = createDefaultBaiodfOnboardingPayload();
 
-      const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-        where: { clientId },
+      const onboarding = await onboardingStore.upsert({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         update: {
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS,
           step2CurrentQuestionIndex: nextIndex,
           step2Data: serializeBaiodfStep2Fields(nextFields)
         },
         create: {
-          clientId,
+          ...onboardingIdentity(clientId, parsedParams.data.investmentId),
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS,
           ...defaults,
           step2CurrentQuestionIndex: nextIndex,
@@ -962,7 +1031,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
-  router.get('/:clientId/brokerage-alternative-investment-order-disclosure/step-3', requireAuth(deps), async (request, response, next) => {
+  router.get(`${basePath}/step-3`, requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -989,11 +1058,11 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const defaults = createDefaultBaiodfOnboardingPayload();
-      const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-        where: { clientId },
+      const onboarding = await onboardingStore.upsert({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         update: {},
         create: {
-          clientId,
+          ...onboardingIdentity(clientId, parsedParams.data.investmentId),
           status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
           ...defaults
         },
@@ -1031,7 +1100,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
-  router.post('/:clientId/brokerage-alternative-investment-order-disclosure/step-3', requireAuth(deps), async (request, response, next) => {
+  router.post(`${basePath}/step-3`, requireAuth(deps), async (request, response, next) => {
     const parsedParams = clientIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -1077,8 +1146,8 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const existingOnboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.findUnique({
-        where: { clientId },
+      const existingOnboarding = await onboardingStore.findUnique({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         select: {
           status: true,
           step1Data: true,
@@ -1136,15 +1205,15 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
           ? BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
           : BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS;
 
-      const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-        where: { clientId },
+      const onboarding = await onboardingStore.upsert({
+        where: onboardingWhere(clientId, parsedParams.data.investmentId),
         update: {
           status: nextStatus,
           step3CurrentQuestionIndex: nextIndex,
           step3Data: serializeBaiodfStep3Fields(nextFields)
         },
         create: {
-          clientId,
+          ...onboardingIdentity(clientId, parsedParams.data.investmentId),
           status: nextStatus,
           ...defaults,
           step3CurrentQuestionIndex: nextIndex,
@@ -1158,12 +1227,14 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
       });
       const nextRouteAfterCompletion =
         onboarding.status === BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
-          ? getNextRouteAfterBaiodfCompletion({
+          ? (await nextInvestmentRoute(clientId, parsedParams.data.investmentId)) ??
+            getNextRouteAfterBaiodfCompletion({
               clientId,
               hasBaiv506c: client.formSelections.some((selection) => selection.form.code === BAIV_506C_FORM_CODE),
               baiv506cOnboarding: client.baiv506cOnboarding,
               requiresJointOwnerSignature: validationContext.requiresJointOwnerSignature
-            })
+            }) ??
+            `/clients/${clientId}/forms`
           : null;
 
       response.json(
@@ -1182,7 +1253,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
   });
 
   router.get(
-    '/:clientId/brokerage-alternative-investment-order-disclosure/review/step-:stepNumber',
+    `${basePath}/review/step-:stepNumber`,
     requireAuth(deps),
     async (request, response, next) => {
       const parsedParams = baiodfReviewStepParamsSchema.safeParse(request.params);
@@ -1209,11 +1280,11 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
         }
 
         const defaults = createDefaultBaiodfOnboardingPayload();
-        const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-          where: { clientId },
+        const onboarding = await onboardingStore.upsert({
+          where: onboardingWhere(clientId, parsedParams.data.investmentId),
           update: {},
           create: {
-            clientId,
+            ...onboardingIdentity(clientId, parsedParams.data.investmentId),
             status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED,
             ...defaults
           },
@@ -1263,7 +1334,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
   );
 
   router.post(
-    '/:clientId/brokerage-alternative-investment-order-disclosure/review/step-:stepNumber',
+    `${basePath}/review/step-:stepNumber`,
     requireAuth(deps),
     async (request, response, next) => {
       const parsedParams = baiodfReviewStepParamsSchema.safeParse(request.params);
@@ -1299,8 +1370,8 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
         }
 
         const defaults = createDefaultBaiodfOnboardingPayload();
-        const existing = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.findUnique({
-          where: { clientId },
+        const existing = await onboardingStore.findUnique({
+          where: onboardingWhere(clientId, parsedParams.data.investmentId),
           select: baiodfReviewSelect
         });
 
@@ -1360,8 +1431,8 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
             ? BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
             : BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.IN_PROGRESS;
 
-        const onboarding = await deps.prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.upsert({
-          where: { clientId },
+        const onboarding = await onboardingStore.upsert({
+          where: onboardingWhere(clientId, parsedParams.data.investmentId),
           update: {
             status: nextStatus,
             ...(stepNumber === 1
@@ -1371,7 +1442,7 @@ export function createBaiodfRouter(deps: RouteDeps): ExpressRouter {
                 : { step3Data: toNullableJsonInput(nextStep3Data) })
           },
           create: {
-            clientId,
+            ...onboardingIdentity(clientId, parsedParams.data.investmentId),
             status: nextStatus,
             ...defaults,
             ...(stepNumber === 1

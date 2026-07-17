@@ -49,6 +49,10 @@ export async function uploadClientDocument(
   return payload.document;
 }
 
+export async function deleteClientDocument(clientId: string, documentId: string): Promise<void> {
+  await apiRequest(`/api/clients/${clientId}/documents/${documentId}`, { method: 'DELETE' });
+}
+
 export function clientDocumentViewUrl(document: ClientDocumentRecord): string {
   return `${API_BASE_URL}${document.viewUrl}`;
 }

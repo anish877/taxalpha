@@ -65,23 +65,31 @@ const REVIEW_CONFIG_BY_FORM: Record<string, FormReviewConfig> = {
     endpointBase: 'statement-of-financial-condition'
   },
   BAIODF: {
-    title: 'Brokerage Alternative Investment Order and Disclosure',
+    title: 'Brokerage Alternative Investment Order and Disclosure Form',
     totalSteps: 3,
     endpointBase: 'brokerage-alternative-investment-order-disclosure'
   },
   BAIV_506C: {
-    title: 'Brokerage Accredited Investor Verification (Rule 506(c))',
+    title: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)',
     totalSteps: 2,
     endpointBase: 'brokerage-accredited-investor-verification'
   }
 };
 
-function getReviewEndpoint(clientId: string, formCode: string, stepNumber: number): string | null {
+function getReviewEndpoint(
+  clientId: string,
+  formCode: string,
+  stepNumber: number,
+  investmentId?: string
+): string | null {
   const config = REVIEW_CONFIG_BY_FORM[formCode];
   if (!config) {
     return null;
   }
 
+  if (formCode === 'BAIODF' && investmentId) {
+    return `/api/clients/${clientId}/investments/${investmentId}/baiodf/review/step-${stepNumber}`;
+  }
   return `/api/clients/${clientId}/${config.endpointBase}/review/step-${stepNumber}`;
 }
 
@@ -192,8 +200,9 @@ function groupLabel(pathSegments: string[]): string {
 
 export function ClientFormReviewPage() {
   const navigate = useNavigate();
-  const { clientId, formCode, mode, stepNumber } = useParams<{
+  const { clientId, investmentId, formCode, mode, stepNumber } = useParams<{
     clientId: string;
+    investmentId?: string;
     formCode: string;
     mode: ReviewMode;
     stepNumber: string;
@@ -216,8 +225,11 @@ export function ClientFormReviewPage() {
   const isStepNumberValid = Number.isInteger(resolvedStepNumber) && resolvedStepNumber > 0;
   const endpoint =
     clientId && config && isStepNumberValid
-      ? getReviewEndpoint(clientId, resolvedFormCode, resolvedStepNumber)
+      ? getReviewEndpoint(clientId, resolvedFormCode, resolvedStepNumber, investmentId)
       : null;
+  const reviewRouteBase = investmentId
+    ? `/clients/${clientId}/investments/${investmentId}/forms/${resolvedFormCode}`
+    : `/clients/${clientId}/forms/${resolvedFormCode}`;
   const stepPrefix = `step${resolvedStepNumber}`;
 
   const loadStep = useCallback(async () => {
@@ -395,7 +407,7 @@ export function ClientFormReviewPage() {
       return;
     }
 
-    navigate(`/clients/${clientId}/forms/${resolvedFormCode}/${resolvedMode}/step/${nextStep}`);
+    navigate(`${reviewRouteBase}/${resolvedMode}/step/${nextStep}`);
   };
 
   const totalSteps = payload?.review?.totalSteps ?? config?.totalSteps ?? 0;
@@ -437,7 +449,7 @@ export function ClientFormReviewPage() {
                     onClick={() =>
                       clientId &&
                       config &&
-                      navigate(`/clients/${clientId}/forms/${resolvedFormCode}/edit/step/${resolvedStepNumber}`)
+                      navigate(`${reviewRouteBase}/edit/step/${resolvedStepNumber}`)
                     }
                   >
                     Edit Form
@@ -450,7 +462,7 @@ export function ClientFormReviewPage() {
                       onClick={() =>
                         clientId &&
                         config &&
-                        navigate(`/clients/${clientId}/forms/${resolvedFormCode}/view/step/${resolvedStepNumber}`)
+                        navigate(`${reviewRouteBase}/view/step/${resolvedStepNumber}`)
                       }
                     >
                       View Mode
@@ -737,4 +749,3 @@ export function ClientFormReviewPage() {
     </main >
   );
 }
-

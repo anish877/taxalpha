@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ApiError, apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { InvestmentBaiodfContext } from '../components/InvestmentBaiodfContext';
 import type {
   BaiodfStepTwoConcentrations,
   BaiodfStepTwoFields,
@@ -163,7 +164,10 @@ function applyAnswer(
 
 export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
   const navigate = useNavigate();
-  const { clientId } = useParams<{ clientId: string }>();
+  const { clientId, investmentId } = useParams<{ clientId: string; investmentId?: string }>();
+  const baiodfPath = investmentId
+    ? `/clients/${clientId}/investments/${investmentId}/baiodf`
+    : `/clients/${clientId}/brokerage-alternative-investment-order-disclosure`;
   const { signOut } = useAuth();
   const { pushToast } = useToast();
 
@@ -189,7 +193,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
 
       try {
         const response = await apiRequest<BaiodfStepTwoResponse>(
-          `/api/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-2`
+          `/api${baiodfPath}/step-2`
         );
         setFields(response.onboarding.step.fields);
         setConcentrations(response.onboarding.step.concentrations);
@@ -207,14 +211,14 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
           return;
         }
 
-        setError('Unable to load BAIODF Step 2.');
+        setError('Unable to load Step 2 of the Brokerage Alternative Investment Order and Disclosure Form.');
       } finally {
         setLoading(false);
       }
     };
 
     void loadStep();
-  }, [clientId, navigate, signOut]);
+  }, [baiodfPath, clientId, navigate, signOut]);
 
   const activeQuestion = useMemo(
     () => (currentQuestionId ? QUESTION_CONFIG[currentQuestionId] ?? null : null),
@@ -287,7 +291,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
 
     try {
       const response = await apiRequest<BaiodfStepTwoResponse>(
-        `/api/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-2`,
+        `/api${baiodfPath}/step-2`,
         {
           method: 'POST',
           body: JSON.stringify(payload)
@@ -307,8 +311,8 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
         response.onboarding.step.currentQuestionId === currentQuestionId;
 
       if (isStillLastQuestion) {
-        pushToast('BAIODF Step 2 saved.');
-        navigate(`/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-3`, {
+        pushToast('Step 2 of the Brokerage Alternative Investment Order and Disclosure Form was saved.');
+        navigate(`${baiodfPath}/step-3`, {
           replace: true
         });
       }
@@ -569,7 +573,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
               onClick={() =>
                 navigate(
                   clientId
-                    ? `/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-1`
+                    ? `${baiodfPath}/step-1`
                     : '/dashboard'
                 )
               }
@@ -602,6 +606,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
           <p className="text-xs uppercase tracking-[0.22em] text-accent">
             BROKERAGE ALTERNATIVE INVESTMENT ORDER AND DISCLOSURE - STEP 2
           </p>
+          <InvestmentBaiodfContext clientId={clientId} investmentId={investmentId} />
           <h1 className="mt-5 max-w-5xl text-4xl font-light tracking-tight sm:text-6xl lg:text-7xl">
             {activeQuestion?.title ?? 'Loading question...'}
           </h1>

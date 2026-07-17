@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 import type { RuntimeConfig, S3UploadConfig } from '../../types/deps.js';
 
@@ -28,6 +28,12 @@ function getClient(region: string): S3Client {
 
 function isS3Configured(config: RuntimeConfig | undefined): config is RuntimeConfig & { s3: ConfiguredS3 } {
   return typeof config?.s3?.bucket === 'string' && config.s3.bucket.length > 0;
+}
+
+function assertPersistentStorageConfigured(config: RuntimeConfig | undefined): void {
+  if (config?.nodeEnv === 'production' && !isS3Configured(config)) {
+    throw new Error('S3 storage is required in production; refusing to persist a PDF on local disk.');
+  }
 }
 
 function sanitizePathSegment(value: string): string {
@@ -78,6 +84,8 @@ export async function storeTemplate(
   bytes: Uint8Array,
   config: RuntimeConfig
 ): Promise<string> {
+  assertPersistentStorageConfigured(config);
+
   if (isS3Configured(config)) {
     const key = `form-templates/${id}.pdf`;
     await getClient(config.s3.region).send(
@@ -123,8 +131,26 @@ export async function loadTemplate(templateUrl: string | null, config?: RuntimeC
   return null;
 }
 
+export async function deleteTemplate(templateUrl: string | null, config?: RuntimeConfig): Promise<void> {
+  if (!templateUrl) return;
+  if (templateUrl.startsWith('local:')) {
+    const id = templateUrl.slice('local:'.length);
+    await rm(resolve(LOCAL_DIR, `${id}.pdf`), { force: true });
+    return;
+  }
+  if (templateUrl.startsWith('s3://') && config?.s3?.bucket) {
+    const parsed = parseS3Uri(templateUrl);
+    if (!parsed || parsed.bucket !== config.s3.bucket) return;
+    await getClient(config.s3.region).send(
+      new DeleteObjectCommand({ Bucket: parsed.bucket, Key: parsed.key })
+    );
+  }
+}
+
 /** Store a completed (filled) PDF; returns a reference accepted by `loadFilled`. */
 export async function storeFilled(key: string, bytes: Uint8Array, config?: RuntimeConfig): Promise<string> {
+  assertPersistentStorageConfigured(config);
+
   if (isS3Configured(config)) {
     const s3Key = buildFilledPdfS3Key(config.s3, key);
     await getClient(config.s3.region).send(
@@ -176,4 +202,21 @@ export async function loadFilled(key: string, config?: RuntimeConfig): Promise<B
 
   const path = resolve(FILLED_DIR, `${key}.pdf`);
   return existsSync(path) ? readFile(path) : null;
+}
+
+export async function deleteFilled(key: string, config?: RuntimeConfig): Promise<void> {
+  const parsed = parseS3Uri(key);
+  if (parsed && isS3Configured(config) && parsed.bucket === config.s3.bucket) {
+    await getClient(config.s3.region).send(
+      new DeleteObjectCommand({ Bucket: parsed.bucket, Key: parsed.key })
+    );
+    return;
+  }
+  if (isS3Configured(config)) {
+    await getClient(config.s3.region).send(
+      new DeleteObjectCommand({ Bucket: config.s3.bucket, Key: buildFilledPdfS3Key(config.s3, key) })
+    );
+    return;
+  }
+  await rm(resolve(FILLED_DIR, `${key}.pdf`), { force: true });
 }

@@ -82,6 +82,14 @@ export function App() {
                 <ClientFormReviewPage />
               </ProtectedRoute>
             }
+            path="/clients/:clientId/investments/:investmentId/forms/:formCode/:mode/step/:stepNumber"
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <ClientFormReviewPage />
+              </ProtectedRoute>
+            }
             path="/clients/:clientId/forms/:formCode/:mode/step/:stepNumber"
           />
           <Route
@@ -165,6 +173,10 @@ export function App() {
             path="/clients/:clientId/brokerage-alternative-investment-order-disclosure/step-1"
           />
           <Route
+            element={<ProtectedRoute><BrokerageAlternativeInvestmentOrderDisclosureStep1Page /></ProtectedRoute>}
+            path="/clients/:clientId/investments/:investmentId/baiodf/step-1"
+          />
+          <Route
             element={
               <ProtectedRoute>
                 <BrokerageAlternativeInvestmentOrderDisclosureStep2Page />
@@ -173,12 +185,20 @@ export function App() {
             path="/clients/:clientId/brokerage-alternative-investment-order-disclosure/step-2"
           />
           <Route
+            element={<ProtectedRoute><BrokerageAlternativeInvestmentOrderDisclosureStep2Page /></ProtectedRoute>}
+            path="/clients/:clientId/investments/:investmentId/baiodf/step-2"
+          />
+          <Route
             element={
               <ProtectedRoute>
                 <BrokerageAlternativeInvestmentOrderDisclosureStep3Page />
               </ProtectedRoute>
             }
             path="/clients/:clientId/brokerage-alternative-investment-order-disclosure/step-3"
+          />
+          <Route
+            element={<ProtectedRoute><BrokerageAlternativeInvestmentOrderDisclosureStep3Page /></ProtectedRoute>}
+            path="/clients/:clientId/investments/:investmentId/baiodf/step-3"
           />
           <Route
             element={

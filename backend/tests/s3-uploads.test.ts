@@ -6,9 +6,9 @@ import {
   isKeyWithinPrefix,
   isUploadsConfigured
 } from '../src/lib/s3-uploads.js';
-import { buildFilledPdfS3Key } from '../src/lib/ingestion/template-store.js';
+import { buildFilledPdfS3Key, storeFilled } from '../src/lib/ingestion/template-store.js';
 import { buildClientDocumentS3Key } from '../src/lib/s3-client-documents.js';
-import type { S3UploadConfig } from '../src/types/deps.js';
+import type { RuntimeConfig, S3UploadConfig } from '../src/types/deps.js';
 
 const baseConfig: S3UploadConfig = {
   region: 'us-east-1',
@@ -84,6 +84,29 @@ describe('s3-uploads helpers', () => {
     expect(buildFilledPdfS3Key(baseConfig, 'pdf-fill-fill_123')).toBe('filled-pdfs/pdf-fill-fill_123.pdf');
     expect(buildFilledPdfS3Key({ ...baseConfig, filledPdfPrefix: '../generated pdfs' }, 'client/one__BAIODF')).toBe(
       'generated-pdfs/client-one__BAIODF.pdf'
+    );
+  });
+
+  it('refuses local generated-PDF persistence in production', async () => {
+    const runtimeConfig: RuntimeConfig = {
+      nodeEnv: 'production',
+      frontendUrl: 'https://app.example.com',
+      jwtSecret: 'test_secret_test_secret_test_secret_1234',
+      jwtExpiresIn: '7d',
+      n8nWebhooks: {
+        investorProfileUrl: null,
+        investorProfileAdditionalHolderUrl: null,
+        statementOfFinancialConditionUrl: null,
+        baiodfUrl: null,
+        baiv506cUrl: null,
+        timeoutMs: 5000,
+        callbackSecret: 'callback-secret'
+      },
+      s3: { ...baseConfig, bucket: null }
+    };
+
+    await expect(storeFilled('must-not-be-local', Buffer.from('%PDF-1.4'), runtimeConfig)).rejects.toThrow(
+      'S3 storage is required in production'
     );
   });
 });

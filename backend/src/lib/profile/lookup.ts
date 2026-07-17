@@ -24,7 +24,11 @@ function deepMerge(target: Record<string, unknown>, src: unknown): Record<string
   return target;
 }
 
-export async function getProfileLookup(prisma: PrismaClient, clientId: string): Promise<ProfileLookup> {
+export async function getProfileLookup(
+  prisma: PrismaClient,
+  clientId: string,
+  options?: { investmentId?: string }
+): Promise<ProfileLookup> {
   const entries: ProjectedEntry[] = [];
 
   // 1. Investor Profile onboarding (the rich source).
@@ -60,7 +64,11 @@ export async function getProfileLookup(prisma: PrismaClient, clientId: string): 
 
   // 3. Alternative Investment Order Disclosure: subscription amount/product and
   // alternative-investment concentration inputs.
-  const baiodf = await prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.findUnique({ where: { clientId } });
+  const baiodf = options?.investmentId
+    ? await prisma.investmentBaiodfOnboarding.findFirst({
+        where: { clientId, investmentId: options.investmentId }
+      })
+    : await prisma.brokerageAlternativeInvestmentOrderDisclosureOnboarding.findUnique({ where: { clientId } });
   if (baiodf) {
     const merged: Record<string, unknown> = {};
     for (const key of ['step1Data', 'step2Data', 'step3Data'] as const) {

@@ -11,7 +11,9 @@ import { createAuthRouter } from './routes/auth.js';
 import { createBaiv506cRouter } from './routes/baiv-506c.js';
 import { createBaiodfRouter } from './routes/baiodf.js';
 import { createClientDocumentsRouter } from './routes/client-documents.js';
+import { createClientInvestmentsRouter } from './routes/client-investments.js';
 import { createClientPdfFillsRouter } from './routes/client-pdf-fills.js';
+import { createClientPdfTicketsRouter } from './routes/client-pdf-tickets.js';
 import { createClientsRouter } from './routes/clients.js';
 import { createDynamicFormsRouter } from './routes/dynamic-forms.js';
 import { createDynamicStepsRouter } from './routes/dynamic-steps.js';
@@ -51,6 +53,8 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/forms', createFormsRouter({ prisma: prismaClient, config }));
   app.use('/api/admin', createAdminFormsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientDocumentsRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createClientInvestmentsRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createClientPdfTicketsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientPdfFillsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createDynamicFormsRouter({ prisma: prismaClient, config }));
@@ -63,6 +67,7 @@ export function createApp(options: CreateAppOptions = {}): Express {
   );
   app.use('/api/clients', createStatementOfFinancialConditionRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createBaiodfRouter({ prisma: prismaClient, config }));
+  app.use('/api/clients', createBaiodfRouter({ prisma: prismaClient, config }, { investmentAware: true }));
   app.use('/api/clients', createBaiv506cRouter({ prisma: prismaClient, config }));
 
   app.use('/api/*', (_request, response) => {

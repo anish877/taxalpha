@@ -42,6 +42,14 @@ const envSchema = z.object({
   OPENROUTER_MODEL: z.string().default('openai/gpt-5.5'),
   OPENROUTER_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
   OPENROUTER_REASONING_EFFORT: z.enum(['low', 'medium', 'high']).default('high')
+}).superRefine((environment, context) => {
+  if (environment.NODE_ENV === 'production' && !environment.S3_BUCKET) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['S3_BUCKET'],
+      message: 'S3_BUCKET is required in production so generated PDFs are never stored on local disk.'
+    });
+  }
 });
 
 export type Environment = z.infer<typeof envSchema>;

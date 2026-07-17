@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ApiError, apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { InvestmentBaiodfContext } from '../components/InvestmentBaiodfContext';
 import type {
   BaiodfStepThreeFields,
   BaiodfStepThreeQuestionConfig,
@@ -114,7 +115,7 @@ const QUESTION_CONFIG: Record<BaiodfStepThreeQuestionId, BaiodfStepThreeQuestion
   'step3.signatures.financialProfessional': {
     key: 'step3.signatures.financialProfessional',
     title: 'Capture financial professional signature.',
-    helper: 'Final required signature to complete BAIODF.',
+    helper: 'Final required signature to complete the Brokerage Alternative Investment Order and Disclosure Form.',
     type: 'financial-professional-signature-block'
   }
 };
@@ -206,7 +207,10 @@ function applyAnswer(
 
 export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
   const navigate = useNavigate();
-  const { clientId } = useParams<{ clientId: string }>();
+  const { clientId, investmentId } = useParams<{ clientId: string; investmentId?: string }>();
+  const baiodfPath = investmentId
+    ? `/clients/${clientId}/investments/${investmentId}/baiodf`
+    : `/clients/${clientId}/brokerage-alternative-investment-order-disclosure`;
   const { signOut } = useAuth();
   const { pushToast } = useToast();
 
@@ -232,7 +236,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
 
       try {
         const response = await apiRequest<BaiodfStepThreeResponse>(
-          `/api/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-3`
+          `/api${baiodfPath}/step-3`
         );
         setFields(response.onboarding.step.fields);
         setVisibleQuestionIds(response.onboarding.step.visibleQuestionIds);
@@ -250,14 +254,14 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
           return;
         }
 
-        setError('Unable to load BAIODF Step 3.');
+        setError('Unable to load Step 3 of the Brokerage Alternative Investment Order and Disclosure Form.');
       } finally {
         setLoading(false);
       }
     };
 
     void loadStep();
-  }, [clientId, navigate, signOut]);
+  }, [baiodfPath, clientId, navigate, signOut]);
 
   const activeQuestion = useMemo(
     () => (currentQuestionId ? QUESTION_CONFIG[currentQuestionId] ?? null : null),
@@ -330,7 +334,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
 
     try {
       const response = await apiRequest<BaiodfStepThreeResponse>(
-        `/api/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-3`,
+        `/api${baiodfPath}/step-3`,
         {
           method: 'POST',
           body: JSON.stringify(payload)
@@ -350,7 +354,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
         response.onboarding.step.currentQuestionId === currentQuestionId;
 
       if (isStillLastQuestion) {
-        pushToast('BAIODF onboarding completed.');
+        pushToast('Brokerage Alternative Investment Order and Disclosure Form completed.');
         navigate(response.onboarding.step.nextRouteAfterCompletion ?? '/dashboard', { replace: true });
       }
     } catch (requestError) {
@@ -485,7 +489,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
               onClick={() =>
                 navigate(
                   clientId
-                    ? `/clients/${clientId}/brokerage-alternative-investment-order-disclosure/step-2`
+                    ? `${baiodfPath}/step-2`
                     : '/dashboard'
                 )
               }
@@ -518,6 +522,7 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep3Page() {
           <p className="text-xs uppercase tracking-[0.22em] text-accent">
             BROKERAGE ALTERNATIVE INVESTMENT ORDER AND DISCLOSURE - STEP 3
           </p>
+          <InvestmentBaiodfContext clientId={clientId} investmentId={investmentId} />
           <h1 className="mt-5 max-w-5xl text-4xl font-light tracking-tight sm:text-6xl lg:text-7xl">
             {activeQuestion?.title ?? 'Loading question...'}
           </h1>

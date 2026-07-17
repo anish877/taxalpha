@@ -2,7 +2,9 @@
 
 When a client completes a form, the TaxAlpha backend sends the form data to your
 n8n webhook. After n8n generates the PDF, **n8n must call back into the TaxAlpha
-backend with the PDF URL** so the broker’s frontend can show/track it.
+backend with a temporary downloadable PDF URL**. TaxAlpha validates and copies
+the file into its configured S3 bucket before the callback succeeds, so the
+broker UI never depends on the temporary n8n URL.
 
 This doc is the contract for that callback.
 
@@ -61,7 +63,7 @@ Every form webhook body looks like this:
 
 | Field | Type | Required | Notes |
 |---|---|:--:|---|
-| `pdfUrl` | string (URL) | ✅ | Public/streamable URL of the generated PDF. Must be a valid URL. |
+| `pdfUrl` | string (HTTP/S URL) | ✅ | Temporary downloadable URL. TaxAlpha downloads, validates, and stores the PDF in S3 before returning success. |
 | `sourceRunId` | string | ▶ recommended | The n8n execution id. Used for idempotency — strongly recommended. |
 | `documentTitle` | string | optional | Display title; defaults to the form’s title if omitted. |
 | `fileName` | string | optional | Original/suggested file name. |
@@ -93,6 +95,8 @@ curl -X POST "https://api.taxalpha.example/api/n8n/clients/clbtx123/forms/BAIODF
 | `400 Bad Request` | Missing/invalid `pdfUrl`, or unsupported `formCode` | `{ "message": "Invalid PDF callback payload." }` |
 | `401 Unauthorized` | Missing/wrong `x-taxalpha-callback-secret` | `{ "message": "Invalid callback secret." }` |
 | `404 Not Found` | Unknown client, or form not selected for that client | `{ "message": "Client not found." }` |
+| `413 Payload Too Large` | Generated PDF is larger than 30 MB | `{ "message": "Generated PDF is larger than 30 MB." }` |
+| `422 Unprocessable Entity` | URL could not be downloaded or did not return a PDF | `{ "message": "…" }` |
 
 Treat `200` and `201` as success.
 
@@ -102,8 +106,8 @@ Treat `200` and `201` as success.
 
 The backend de‑duplicates so retries never create duplicates:
 
-- If you send `sourceRunId`, dedupe is by **(clientId, formCode, sourceRunId)**.
-- Otherwise dedupe is by **(clientId, formCode, pdfUrl)** (also a DB unique constraint).
+- If you send `sourceRunId`, dedupe is by **(clientId, formCode, investmentId, sourceRunId)**.
+- Otherwise the backend derives a stable SHA-256 identity from the source URL.
 
 ➡️ **Always send `sourceRunId`** (the n8n execution id). Then re‑running a node or
 retrying on error is harmless.
@@ -127,9 +131,13 @@ Once the callback is stored, the broker UI picks the PDF up automatically by pol
 - `GET /api/clients/pdfs/updates` — newly received PDFs across the broker’s clients
 - `GET /api/clients/:clientId/forms/:formCode/pdfs` — PDFs for one form
 
-Each record exposes `pdfUrl`, `documentTitle`, `fileName`, `sourceRunId`,
+Each record exposes an authenticated TaxAlpha `pdfUrl`, `documentTitle`, `fileName`, `sourceRunId`,
 `generatedAt`, and `receivedAt`. So the moment your callback returns `201`, the
 PDF becomes visible to the broker — no further action needed from n8n.
+
+In production, `S3_BUCKET` is required. Startup and PDF persistence fail closed
+instead of falling back to ephemeral local disk. Local disk remains available
+only in development and test environments.
 
 ---
 

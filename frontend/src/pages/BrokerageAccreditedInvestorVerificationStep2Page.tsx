@@ -82,7 +82,7 @@ const QUESTION_CONFIG: Record<Baiv506cStepTwoQuestionId, Baiv506cStepTwoQuestion
   'step2.signatures.financialProfessional': {
     key: 'step2.signatures.financialProfessional',
     title: 'Finally, capture the financial professional signature.',
-    helper: 'This final signature completes the BAIV 506(c) form.',
+    helper: 'This final signature completes the Brokerage Accredited Investor Verification Form for SEC Rule 506(c).',
     type: 'financial-professional-signature-block'
   }
 };
@@ -220,7 +220,7 @@ export function BrokerageAccreditedInvestorVerificationStep2Page() {
           return;
         }
 
-        setError('Unable to load BAIV 506(c) Step 2.');
+        setError('Unable to load Step 2 of the Brokerage Accredited Investor Verification Form for SEC Rule 506(c).');
       } finally {
         setLoading(false);
       }
@@ -320,7 +320,7 @@ export function BrokerageAccreditedInvestorVerificationStep2Page() {
         response.onboarding.step.currentQuestionId === currentQuestionId;
 
       if (isStillLastQuestion) {
-        pushToast('BAIV 506(c) completed.');
+        pushToast('Brokerage Accredited Investor Verification Form for SEC Rule 506(c) completed.');
         navigate(response.onboarding.step.nextRouteAfterCompletion ?? '/dashboard', { replace: true });
       }
     } catch (requestError) {

@@ -63,7 +63,8 @@ function createMockPrisma() {
     clientDocument: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
-      create: vi.fn()
+      create: vi.fn(),
+      delete: vi.fn()
     }
   };
 }
@@ -196,5 +197,30 @@ describe('client document routes', () => {
     expect(response.headers['content-type']).toContain('text/plain');
     expect(response.headers['content-disposition']).toContain('inline');
     expect(response.text).toBe('client note');
+  });
+
+  it('deletes an owned document and its local stored file', async () => {
+    const prisma = createMockPrisma();
+    const storageKey = `${testClientId}/doc_1-delete.pdf`;
+    const storagePath = path.join(storageRoot, storageKey);
+    await fs.promises.mkdir(path.dirname(storagePath), { recursive: true });
+    await fs.promises.writeFile(storagePath, '%PDF-delete');
+
+    prisma.clientDocument.findFirst.mockResolvedValue({
+      id: 'doc_1',
+      clientId: testClientId,
+      storageKey,
+      storageProvider: 'LOCAL'
+    });
+    prisma.clientDocument.delete.mockResolvedValue({ id: 'doc_1' });
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const response = await request(app)
+      .delete(`/api/clients/${testClientId}/documents/doc_1`)
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(204);
+    expect(prisma.clientDocument.delete).toHaveBeenCalledWith({ where: { id: 'doc_1' } });
+    await expect(fs.promises.access(storagePath)).rejects.toThrow();
   });
 });

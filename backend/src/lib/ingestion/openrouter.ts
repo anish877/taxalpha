@@ -12,6 +12,8 @@ export interface OpenRouterOptions {
   maxTokens?: number;
   /** Enable reasoning ("thinking") for models that support it. */
   reasoningEffort?: 'low' | 'medium' | 'high';
+  /** Hard stop for a remote completion so callers can persist a retryable failure. */
+  timeoutMs?: number;
 }
 
 export interface ChatMessage {
@@ -46,7 +48,8 @@ export async function chatCompletion(
       'Content-Type': 'application/json',
       'X-Title': 'TaxAlpha Form Ingestion'
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(opts.timeoutMs ?? 5 * 60 * 1000)
   });
 
   if (!res.ok) {
@@ -97,7 +100,8 @@ export async function chatWithImage(
       temperature: opts.temperature ?? 0,
       max_tokens: opts.maxTokens ?? 32000,
       ...(opts.reasoningEffort ? { reasoning: { effort: opts.reasoningEffort } } : {})
-    })
+    }),
+    signal: AbortSignal.timeout(opts.timeoutMs ?? 5 * 60 * 1000)
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');

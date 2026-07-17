@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../src/app.js';
 import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
+import { deleteFilled } from '../src/lib/ingestion/template-store.js';
 
 const config = {
   nodeEnv: 'test' as const,
@@ -115,7 +116,8 @@ describe('forms workspace routes', () => {
       {
         code: 'BAIV_506C',
         title: 'Brokerage Accredited Investor Verification Form for SEC Rule 506(c)'
-      }
+      },
+      { code: 'UPLOADED_FORM', title: 'Uploaded form', source: 'UPLOAD' }
     ]);
 
     const app = createApp({
@@ -990,12 +992,22 @@ describe('forms workspace routes', () => {
 
   it('stores callback PDFs under the mapped workspace form code', async () => {
     const prisma = createMockPrisma();
+    const pdfBytes = Buffer.from('%PDF-1.4\n%%EOF');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(pdfBytes, {
+          status: 200,
+          headers: { 'content-type': 'application/pdf', 'content-length': String(pdfBytes.length) }
+        })
+      )
+    );
     prisma.client.findFirst.mockResolvedValue({
       id: 'client_1',
       name: 'Client One',
       formSelections: [{ form: { code: 'INVESTOR_PROFILE' } }]
     });
-    prisma.clientFormPdf.create.mockResolvedValue({ id: 'pdf_1' });
+    prisma.clientFormPdf.create.mockImplementation(async ({ data }: any) => data);
 
     const app = createApp({
       prismaClient: prisma as unknown as PrismaClient,
@@ -1013,16 +1025,37 @@ describe('forms workspace routes', () => {
       });
 
     expect(response.status).toBe(201);
+    const createdPdfId = response.body.pdfId as string;
     expect(prisma.clientFormPdf.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          id: createdPdfId,
           clientId: 'client_1',
           formCode: 'INVESTOR_PROFILE_ADDITIONAL_HOLDER',
           workspaceFormCode: 'INVESTOR_PROFILE',
-          documentTitle: 'Additional Holder'
+          documentTitle: 'Additional Holder',
+          pdfUrl: expect.stringMatching(
+            new RegExp(`/api/n8n/clients/client_1/form-pdfs/${createdPdfId}/file\\.pdf$`)
+          ),
+          sourceRunId: 'run_1'
         })
       })
     );
+
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.clientFormPdf.findFirst.mockResolvedValue({
+      id: createdPdfId,
+      fileName: 'additional-holder.pdf',
+      documentTitle: 'Additional Holder'
+    });
+    const fileResponse = await request(app)
+      .get(`/api/n8n/clients/client_1/form-pdfs/${createdPdfId}/file.pdf`)
+      .set('Cookie', createAuthCookie());
+
+    expect(fileResponse.status).toBe(200);
+    expect(fileResponse.headers['content-type']).toContain('application/pdf');
+
+    await deleteFilled(`n8n-callback-${createdPdfId}`, config);
   });
 
   it('rejects callbacks with an invalid secret', async () => {

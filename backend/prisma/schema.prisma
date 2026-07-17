@@ -28,6 +28,11 @@ enum ClientBrokerRole {
   ADDITIONAL
 }
 
+enum ClientSetupStatus {
+  INCOMPLETE
+  ACTIVE
+}
+
 enum InvestorProfileOnboardingStatus {
   NOT_STARTED
   IN_PROGRESS
@@ -90,6 +95,7 @@ model Client {
   phone       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  setupStatus ClientSetupStatus @default(ACTIVE)
 
   owner                                   User                                                     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   brokerLinks                             ClientBroker[]
@@ -98,14 +104,34 @@ model Client {
   investorProfileOnboarding               InvestorProfileOnboarding?
   statementOfFinancialConditionOnboarding StatementOfFinancialConditionOnboarding?
   baiodfOnboarding                        BrokerageAlternativeInvestmentOrderDisclosureOnboarding?
+  investmentBaiodfOnboardings             InvestmentBaiodfOnboarding[]
   baiv506cOnboarding                      BrokerageAccreditedInvestorVerificationOnboarding?
   dynamicForms                            DynamicFormResponse[]
   clientProfileValues                     ClientProfileValue[]
   uploadedPdfFills                        ClientUploadedPdfFill[]
   documents                               ClientDocument[]
+  investments                             ClientInvestment[]
   isPreview                               Boolean                                                  @default(false)
 
   @@unique([ownerUserId, email])
+}
+
+model ClientInvestment {
+  id                    String   @id @default(cuid())
+  clientId              String
+  name                  String
+  position              Int
+  baiodfSyncRequestedAt DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  client            Client                                                    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  baiodfOnboarding  InvestmentBaiodfOnboarding?
+  agreementPdfFill  ClientUploadedPdfFill?                                    @relation("InvestmentAgreement")
+  formPdfs          ClientFormPdf[]
+
+  @@unique([clientId, position])
+  @@index([clientId])
 }
 
 model ClientBroker {
@@ -187,6 +213,7 @@ model ClientProfileValue {
 model ClientFormPdf {
   id                String    @id @default(cuid())
   clientId          String
+  investmentId      String?
   formCode          String
   workspaceFormCode String
   pdfUrl            String
@@ -197,24 +224,32 @@ model ClientFormPdf {
   receivedAt        DateTime  @default(now())
   createdAt         DateTime  @default(now())
 
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  investment ClientInvestment? @relation(fields: [investmentId], references: [id], onDelete: SetNull)
 
   @@unique([clientId, formCode, pdfUrl])
   @@index([clientId, workspaceFormCode, receivedAt(sort: Desc)])
+  @@index([investmentId, receivedAt(sort: Desc)])
   @@index([receivedAt(sort: Desc)])
 }
 
 model ClientUploadedPdfFill {
   id              String    @id @default(cuid())
   clientId        String
+  investmentId    String?   @unique
   ownerUserId     String
   originalFileKey String?
   originalPdfUrl  String?
   fileName        String?
-  pdfFingerprint  String
+  pdfFingerprint  String?
   status          String    @default("DRAFT")
-  mappingLayout   Json
-  resolvedLayout  Json
+  analysisStartedAt DateTime?
+  analysisRunId     String?
+  analysisStage     String?
+  analysisError     String?
+  analysisAttempts  Int       @default(0)
+  mappingLayout   Json?
+  resolvedLayout  Json?
   valueOverrides  Json      @default("{}")
   warnings        Json      @default("[]")
   generatedPdfUrl String?
@@ -222,8 +257,9 @@ model ClientUploadedPdfFill {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  owner  User   @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  owner      User              @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  investment ClientInvestment? @relation("InvestmentAgreement", fields: [investmentId], references: [id], onDelete: Cascade)
 
   @@index([clientId, updatedAt(sort: Desc)])
   @@index([ownerUserId])
@@ -305,6 +341,26 @@ model BrokerageAlternativeInvestmentOrderDisclosureOnboarding {
   updatedAt                 DateTime                                                      @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model InvestmentBaiodfOnboarding {
+  id                        String                                                        @id @default(cuid())
+  clientId                  String
+  investmentId              String                                                        @unique
+  status                    BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus @default(NOT_STARTED)
+  step1CurrentQuestionIndex Int                                                           @default(0)
+  step1Data                 Json?
+  step2CurrentQuestionIndex Int                                                           @default(0)
+  step2Data                 Json?
+  step3CurrentQuestionIndex Int                                                           @default(0)
+  step3Data                 Json?
+  createdAt                 DateTime                                                      @default(now())
+  updatedAt                 DateTime                                                      @updatedAt
+
+  client     Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  investment ClientInvestment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
 }
 
 model BrokerageAccreditedInvestorVerificationOnboarding {

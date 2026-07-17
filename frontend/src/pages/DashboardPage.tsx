@@ -80,9 +80,10 @@ export function DashboardPage() {
     navigate('/signin', { replace: true });
   };
 
-  const handleClientCreated = (client: ClientRecord) => {
+  const handleClientCreated = (client: ClientRecord, nextOnboardingRoute?: string | null) => {
     setClients((current) => [client, ...current]);
     setDrawerOpen(false);
+    if (nextOnboardingRoute) navigate(nextOnboardingRoute);
   };
 
   return (
@@ -176,6 +177,7 @@ export function DashboardPage() {
                   </thead>
                   <tbody>
                     {clients.map((client) => {
+                      const setupIncomplete = client.setupStatus === 'INCOMPLETE';
                       const investorIncomplete =
                         client.hasInvestorProfile && client.investorProfileOnboardingStatus !== 'COMPLETED';
                       const sfcIncomplete =
@@ -231,7 +233,15 @@ export function DashboardPage() {
                             </button>
                           </td>
                           <td className="px-4 py-3 align-top">
-                            {!client.hasInvestorProfile ? (
+                            {setupIncomplete ? (
+                              <button
+                                className="rounded-full bg-amber-600 px-3 py-1 text-xs uppercase tracking-[0.14em] text-white"
+                                type="button"
+                                onClick={() => navigate(`/clients/${client.id}/forms?resumeSetup=1`)}
+                              >
+                                Resume setup
+                              </button>
+                            ) : !client.hasInvestorProfile ? (
                               <span className="text-xs text-mute">-</span>
                             ) : showContinue ? (
                               <button

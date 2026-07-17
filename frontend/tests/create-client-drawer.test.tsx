@@ -233,7 +233,20 @@ describe('CreateClientDrawer', () => {
     const user = userEvent.setup();
     const onClientCreated = vi.fn();
 
-    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith('/setup/finalize')) {
+        return new Response(
+          JSON.stringify({ nextOnboardingRoute: '/clients/client_1/investor-profile/step-1' }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      if (url.includes('/investments/investment_1/agreement')) {
+        return new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
       return new Response(
         JSON.stringify({
           client: {
@@ -267,7 +280,11 @@ describe('CreateClientDrawer', () => {
             baiodfResumeStepRoute: '/clients/client_1/brokerage-alternative-investment-order-disclosure/step-1',
             hasBaiv506c: false,
             baiv506cOnboardingStatus: 'NOT_STARTED',
-            baiv506cResumeStepRoute: null
+            baiv506cResumeStepRoute: null,
+            setupStatus: 'INCOMPLETE',
+            investments: [
+              { id: 'investment_1', name: 'Growth Fund', position: 1, agreementStatus: null }
+            ]
           }
         }),
         {
@@ -299,7 +316,11 @@ describe('CreateClientDrawer', () => {
     await user.click(screen.getByRole('button', { name: 'Next' }));
 
     await user.click(screen.getByRole('button', { name: /brokerage alternative investment order/i }));
-    await user.click(screen.getByRole('button', { name: 'Create Client' }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.type(screen.getByLabelText('Investment 1 name'), 'Growth Fund');
+    const agreement = new File(['%PDF-1.7'], 'growth-fund.pdf', { type: 'application/pdf' });
+    await user.upload(screen.getByLabelText('Agreement PDF'), agreement);
+    await user.click(screen.getByRole('button', { name: 'Create & Upload' }));
 
     const postCall = fetchMock.mock.calls.find(([input]) => String(input).includes('/api/clients'));
     expect(postCall).toBeDefined();
@@ -307,6 +328,7 @@ describe('CreateClientDrawer', () => {
     const [, requestInit] = postCall as [RequestInfo | URL, RequestInit | undefined];
     const body = JSON.parse(String(requestInit?.body ?? '{}'));
     expect(body.selectedFormCodes).toEqual(['INVESTOR_PROFILE', 'BAIODF']);
+    expect(body.investments).toEqual([{ name: 'Growth Fund' }]);
     expect(onClientCreated).toHaveBeenCalledTimes(1);
   });
 

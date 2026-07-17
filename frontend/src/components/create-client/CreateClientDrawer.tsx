@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { ApiError, apiRequest } from '../../api/client';
+import { finalizeClientSetup, uploadInvestmentAgreement } from '../../api/investments';
 import { useToast } from '../../context/ToastContext';
 import type { BrokerUserOption, ClientRecord, FormCatalogItem, User } from '../../types/api';
 
@@ -10,7 +11,15 @@ interface CreateClientDrawerProps {
   forms: FormCatalogItem[];
   brokerUsers: BrokerUserOption[];
   primaryBroker: User;
-  onClientCreated: (client: ClientRecord) => void;
+  onClientCreated: (client: ClientRecord, nextOnboardingRoute?: string | null) => void;
+}
+
+type InvestmentUploadStatus = 'WAITING' | 'UPLOADING' | 'UPLOADED' | 'FAILED';
+interface InvestmentDraft {
+  name: string;
+  file: File | null;
+  status: InvestmentUploadStatus;
+  error: string | null;
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,9 +60,14 @@ export function CreateClientDrawer({
   const [includeStatementOfFinancialCondition, setIncludeStatementOfFinancialCondition] = useState(false);
   const [includeBaiodf, setIncludeBaiodf] = useState(false);
   const [includeBaiv506c, setIncludeBaiv506c] = useState(false);
+  const [investmentCount, setInvestmentCount] = useState(1);
+  const [investments, setInvestments] = useState<InvestmentDraft[]>([
+    { name: '', file: null, status: 'WAITING', error: null }
+  ]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savedSetupClient, setSavedSetupClient] = useState<ClientRecord | null>(null);
 
   const stepTitle = useMemo(() => {
     if (step === 0) {
@@ -64,8 +78,11 @@ export function CreateClientDrawer({
       return 'Broker Selection';
     }
 
-    return 'Form Selection';
+    if (step === 2) return 'Form Selection';
+    if (step === 3) return 'Investments';
+    return 'Upload & Activate';
   }, [step]);
+  const lastStep = includeBaiodf ? 4 : 2;
 
   const selectedBrokerUsers = useMemo(
     () =>
@@ -96,9 +113,12 @@ export function CreateClientDrawer({
       setIncludeStatementOfFinancialCondition(false);
       setIncludeBaiodf(false);
       setIncludeBaiv506c(false);
+      setInvestmentCount(1);
+      setInvestments([{ name: '', file: null, status: 'WAITING', error: null }]);
       setErrors({});
       setSubmitError(null);
       setIsSubmitting(false);
+      setSavedSetupClient(null);
     }
   }, [open]);
 
@@ -160,6 +180,22 @@ export function CreateClientDrawer({
     return true;
   };
 
+  const validateInvestments = () => {
+    const nextErrors: Record<string, string> = {};
+    const names = investments.map((investment) => investment.name.trim());
+    if (investments.length < 1 || investments.length > 10) {
+      nextErrors.investments = 'Add between 1 and 10 investments.';
+    } else if (names.some((name) => !name)) {
+      nextErrors.investments = 'Enter a name for every investment.';
+    } else if (new Set(names.map((name) => name.toLocaleLowerCase())).size !== names.length) {
+      nextErrors.investments = 'Investment names must be unique.';
+    } else if (investments.some((investment) => !investment.file)) {
+      nextErrors.investments = 'Choose one agreement PDF for every investment.';
+    }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
   const handleNext = () => {
     if (step === 0 && !validateStepOne()) {
       return;
@@ -173,13 +209,44 @@ export function CreateClientDrawer({
       return;
     }
 
+    if (step === 3 && !validateInvestments()) return;
+
     setErrors({});
-    setStep((current) => Math.min(current + 1, 2));
+    setStep((current) => Math.min(current + 1, lastStep));
   };
 
   const handleBack = () => {
+    if (isSubmitting) return;
     setErrors({});
     setStep((current) => Math.max(current - 1, 0));
+  };
+
+  const resizeInvestments = (count: number) => {
+    const nextCount = Math.max(1, Math.min(10, count));
+    if (
+      nextCount < investments.length &&
+      investments.slice(nextCount).some((investment) => investment.name.trim() || investment.file) &&
+      !window.confirm('Reducing the count will remove populated investment rows. Continue?')
+    ) {
+      return;
+    }
+    setInvestmentCount(nextCount);
+    setInvestments((current) =>
+      Array.from({ length: nextCount }, (_, index) =>
+        current[index] ?? { name: '', file: null, status: 'WAITING' as const, error: null }
+      )
+    );
+  };
+
+  const updateInvestment = (index: number, patch: Partial<InvestmentDraft>) => {
+    setInvestments((current) => current.map((investment, itemIndex) =>
+      itemIndex === index ? { ...investment, ...patch } : investment
+    ));
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.investments;
+      return next;
+    });
   };
 
   const addBrokerUser = (userId: string) => {
@@ -201,7 +268,7 @@ export function CreateClientDrawer({
   };
 
   const handleSubmit = async () => {
-    if (step !== 2) {
+    if (step !== lastStep && !(includeBaiodf && step === 3)) {
       handleNext();
       return;
     }
@@ -209,6 +276,7 @@ export function CreateClientDrawer({
     if (!validateStepThree()) {
       return;
     }
+    if (includeBaiodf && !validateInvestments()) return;
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -225,16 +293,47 @@ export function CreateClientDrawer({
           ...(includeStatementOfFinancialCondition ? ['SFC'] : []),
           ...(includeBaiodf ? ['BAIODF'] : []),
           ...(includeBaiv506c ? ['BAIV_506C'] : [])
-        ]
+        ],
+        investments: includeBaiodf ? investments.map((investment) => ({ name: investment.name.trim() })) : []
       };
 
-      const response = await apiRequest<{ client: ClientRecord }>('/api/clients', {
+      const response = await apiRequest<{ client: ClientRecord; nextOnboardingRoute?: string | null }>('/api/clients', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
 
-      onClientCreated(response.client);
-      pushToast('Client created successfully.');
+      let nextRoute = response.nextOnboardingRoute ?? null;
+      let activatedClient = response.client;
+      if (includeBaiodf) {
+        setSavedSetupClient(response.client);
+        setStep(4);
+        const serverInvestments = response.client.investments ?? [];
+        const queue = investments.map((investment, index) => ({ investment, index, server: serverInvestments[index] }));
+        let cursor = 0;
+        const worker = async () => {
+          while (cursor < queue.length) {
+            const item = queue[cursor++];
+            if (!item.server || !item.investment.file) throw new Error('Investment setup could not be matched.');
+            updateInvestment(item.index, { status: 'UPLOADING', error: null });
+            try {
+              await uploadInvestmentAgreement(response.client.id, item.server.id, item.investment.file);
+              updateInvestment(item.index, { status: 'UPLOADED', error: null });
+            } catch (uploadError) {
+              updateInvestment(item.index, {
+                status: 'FAILED',
+                error: uploadError instanceof Error ? uploadError.message : 'Upload failed.'
+              });
+              throw uploadError;
+            }
+          }
+        };
+        await Promise.all([worker(), worker()]);
+        const finalized = await finalizeClientSetup(response.client.id);
+        nextRoute = finalized.nextOnboardingRoute;
+        activatedClient = { ...response.client, setupStatus: 'ACTIVE' };
+      }
+      onClientCreated(activatedClient, nextRoute);
+      pushToast('Client created and ready for onboarding.');
       onClose();
     } catch (error) {
       if (error instanceof ApiError) {
@@ -257,6 +356,38 @@ export function CreateClientDrawer({
       } else {
         setSubmitError('Failed to create client. Please try again.');
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const retryInvestmentUpload = async (index: number) => {
+    const investment = investments[index];
+    const serverInvestment = savedSetupClient?.investments?.[index];
+    if (!savedSetupClient || !serverInvestment || !investment?.file) return;
+    updateInvestment(index, { status: 'UPLOADING', error: null });
+    try {
+      await uploadInvestmentAgreement(savedSetupClient.id, serverInvestment.id, investment.file);
+      updateInvestment(index, { status: 'UPLOADED', error: null });
+    } catch (error) {
+      updateInvestment(index, {
+        status: 'FAILED',
+        error: error instanceof Error ? error.message : 'Upload failed.'
+      });
+    }
+  };
+
+  const activateSavedSetup = async () => {
+    if (!savedSetupClient) return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const finalized = await finalizeClientSetup(savedSetupClient.id);
+      onClientCreated({ ...savedSetupClient, setupStatus: 'ACTIVE' }, finalized.nextOnboardingRoute);
+      pushToast('Client created and ready for onboarding.');
+      onClose();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to activate client setup.');
     } finally {
       setIsSubmitting(false);
     }
@@ -292,8 +423,11 @@ export function CreateClientDrawer({
               Close
             </button>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            {[0, 1, 2].map((index) => (
+          <div
+            className="mt-4 grid gap-2"
+            style={{ gridTemplateColumns: `repeat(${includeBaiodf ? 5 : 3}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: includeBaiodf ? 5 : 3 }, (_, index) => index).map((index) => (
               <div
                 key={index}
                 className={`h-[3px] rounded-full transition ${
@@ -479,8 +613,8 @@ export function CreateClientDrawer({
                   </p>
                   <p className="mt-2 text-sm text-mute">
                     {includeBaiodf
-                      ? 'Selected. If SFC is selected, BAIODF starts after SFC completes. If SFC is not selected, BAIODF starts after Investor Profile Step 7.'
-                      : 'Not selected. Toggle on to include this three-step BAIODF flow.'}
+                      ? `${investmentCount} investment${investmentCount === 1 ? '' : 's'} · ${investmentCount} Brokerage Alternative Investment Order and Disclosure Form${investmentCount === 1 ? '' : 's'} · ${investmentCount} agreement${investmentCount === 1 ? '' : 's'}.`
+                      : 'Not selected. Toggle on to include the three-step Brokerage Alternative Investment Order and Disclosure Form for each investment.'}
                   </p>
                 </button>
 
@@ -506,7 +640,7 @@ export function CreateClientDrawer({
                   </p>
                   <p className="mt-2 text-sm text-mute">
                     {includeBaiv506c
-                      ? 'Selected. Starts after BAIODF if selected; otherwise after prior selected forms.'
+                      ? 'Selected. Starts after all Brokerage Alternative Investment Order and Disclosure Forms, when investments are included; otherwise it starts after the prior selected form.'
                       : 'Not selected. Toggle on to include this two-step accredited investor verification flow.'}
                   </p>
                 </button>
@@ -527,6 +661,111 @@ export function CreateClientDrawer({
               </div>
             )}
 
+            {step === 3 && includeBaiodf && (
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-accent/25 bg-accentSoft p-4">
+                  <label className="block text-sm text-ink">
+                    Number of investments
+                    <span className="mt-2 grid grid-cols-[3.25rem_1fr_3.25rem] overflow-hidden rounded-xl border border-line bg-white">
+                      <button
+                        aria-label="Remove one investment"
+                        className="border-r border-line px-4 py-3 text-xl text-ink transition hover:bg-fog disabled:cursor-not-allowed disabled:text-mute/35 disabled:hover:bg-white"
+                        disabled={investmentCount <= 1}
+                        type="button"
+                        onClick={() => resizeInvestments(investmentCount - 1)}
+                      >
+                        −
+                      </button>
+                      <span
+                        aria-live="polite"
+                        className="flex items-center justify-center px-4 py-3 text-lg font-medium text-ink"
+                      >
+                        {investmentCount}
+                      </span>
+                      <button
+                        aria-label="Add one investment"
+                        className="border-l border-line px-4 py-3 text-xl text-ink transition hover:bg-fog disabled:cursor-not-allowed disabled:text-mute/35 disabled:hover:bg-white"
+                        disabled={investmentCount >= 10}
+                        type="button"
+                        onClick={() => resizeInvestments(investmentCount + 1)}
+                      >
+                        +
+                      </button>
+                    </span>
+                  </label>
+                  <p className="mt-2 text-xs text-mute">Each investment requires its own Brokerage Alternative Investment Order and Disclosure Form and agreement PDF.</p>
+                </div>
+                {investments.map((investment, index) => (
+                  <div key={index} className="rounded-2xl border border-line bg-white p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-mute">Investment {index + 1}</p>
+                    <input
+                      aria-label={`Investment ${index + 1} name`}
+                      className="mt-3 w-full rounded-xl border border-line px-4 py-3 text-sm"
+                      placeholder="Investment or product name"
+                      maxLength={120}
+                      value={investment.name}
+                      onChange={(event) => updateInvestment(index, { name: event.target.value })}
+                    />
+                    <label className="mt-3 block rounded-xl border border-dashed border-line px-4 py-4 text-sm text-mute">
+                      <span className="block text-xs uppercase tracking-[0.14em]">Agreement PDF</span>
+                      <input
+                        className="mt-2 block w-full text-xs"
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(event) => updateInvestment(index, {
+                          file: event.target.files?.[0] ?? null,
+                          status: 'WAITING',
+                          error: null
+                        })}
+                      />
+                      {investment.file && (
+                        <span className="mt-2 flex items-center justify-between gap-3 text-xs text-ink">
+                          <span className="min-w-0 truncate">
+                            {investment.file.name} · {(investment.file.size / (1024 * 1024)).toFixed(2)} MB
+                          </span>
+                          <button
+                            className="shrink-0 text-red-600 underline"
+                            type="button"
+                            onClick={() => updateInvestment(index, { file: null, status: 'WAITING', error: null })}
+                          >
+                            Remove
+                          </button>
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                ))}
+                {errors.investments && <p className="rounded-xl bg-black px-3 py-2 text-xs text-white">{errors.investments}</p>}
+              </div>
+            )}
+
+            {step === 4 && includeBaiodf && (
+              <div className="space-y-4">
+                <p className="text-sm text-mute">Your client is saved. Agreement uploads can be resumed if this drawer is closed.</p>
+                {investments.map((investment, index) => (
+                  <div key={index} className="flex items-center justify-between rounded-2xl border border-line bg-white p-4">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-ink">{investment.name}</p>
+                      <p className="mt-1 truncate text-xs text-mute">{investment.file?.name}</p>
+                      {investment.error && <p className="mt-1 text-xs text-red-600">{investment.error}</p>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {investment.status === 'FAILED' && (
+                        <button
+                          className="rounded-full border border-red-300 px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-red-700"
+                          type="button"
+                          onClick={() => void retryInvestmentUpload(index)}
+                        >
+                          Retry
+                        </button>
+                      )}
+                      <span className="rounded-full border border-line px-3 py-1 text-[10px] uppercase tracking-[0.14em]">{investment.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {submitError && (
               <div className="mt-6 rounded-2xl border border-black/15 bg-black px-4 py-3 text-sm text-white">
                 {submitError}
@@ -538,14 +777,14 @@ export function CreateClientDrawer({
             <div className="flex items-center justify-between">
               <button
                 className="rounded-full border border-line px-5 py-2 text-sm text-ink transition hover:border-black disabled:cursor-not-allowed disabled:opacity-30"
-                disabled={step === 0 || isSubmitting}
+                disabled={step === 0 || isSubmitting || Boolean(savedSetupClient)}
                 type="button"
                 onClick={handleBack}
               >
                 Back
               </button>
 
-              {step < 2 ? (
+              {step < 2 || (step === 2 && includeBaiodf) ? (
                 <button
                   className="rounded-full bg-accent px-5 py-2 text-sm text-white transition hover:bg-accent/90"
                   type="button"
@@ -553,7 +792,7 @@ export function CreateClientDrawer({
                 >
                   Next
                 </button>
-              ) : (
+              ) : step < 4 ? (
                 <button
                   className="rounded-full bg-accent px-5 py-2 text-sm text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:bg-accent/50"
                   disabled={isSubmitting}
@@ -562,7 +801,16 @@ export function CreateClientDrawer({
                     void handleSubmit();
                   }}
                 >
-                  {isSubmitting ? 'Creating...' : 'Create Client'}
+                  {isSubmitting ? 'Creating & uploading...' : includeBaiodf ? 'Create & Upload' : 'Create Client'}
+                </button>
+              ) : (
+                <button
+                  className="rounded-full bg-accent px-5 py-2 text-sm text-white disabled:opacity-40"
+                  disabled={isSubmitting || investments.some((investment) => investment.status !== 'UPLOADED')}
+                  type="button"
+                  onClick={() => void activateSavedSetup()}
+                >
+                  {isSubmitting ? 'Uploading agreements…' : 'Activate client'}
                 </button>
               )}
             </div>

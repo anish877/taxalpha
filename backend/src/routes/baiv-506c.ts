@@ -148,6 +148,9 @@ interface Baiv506cClientContext {
   baiodfOnboarding: {
     step3Data: Prisma.JsonValue | null;
   } | null;
+  investmentBaiodfOnboardings: Array<{
+    step3Data: Prisma.JsonValue | null;
+  }>;
 }
 
 const baiv506cReviewSelect = {
@@ -210,7 +213,9 @@ function resolveSignatureBlock(
 }
 
 function getStep2PrefillContext(client: Baiv506cClientContext, advisorName: string) {
-  const baiodfStep3Fields = normalizeBaiodfStep3Fields(client.baiodfOnboarding?.step3Data ?? null);
+  const baiodfStep3Fields = normalizeBaiodfStep3Fields(
+    client.investmentBaiodfOnboardings?.[0]?.step3Data ?? client.baiodfOnboarding?.step3Data ?? null
+  );
   const sfcStep2Fields = normalizeSfcStep2Fields(client.statementOfFinancialConditionOnboarding?.step2Data ?? null);
   const step7Fields = normalizeStep7Fields(client.investorProfileOnboarding?.step7Data ?? null);
 
@@ -396,6 +401,7 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
     return deps.prisma.client.findFirst({
       where: {
         id: clientId,
+        setupStatus: 'ACTIVE',
         ...clientAccessWhere(ownerUserId)
       },
       select: {
@@ -429,6 +435,12 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
           select: {
             step3Data: true
           }
+        },
+        investmentBaiodfOnboardings: {
+          where: { status: 'COMPLETED' },
+          orderBy: { investment: { position: 'desc' } },
+          take: 1,
+          select: { step3Data: true }
         }
       }
     });

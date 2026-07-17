@@ -829,7 +829,10 @@ describe('client routes', () => {
       statementOfFinancialConditionOnboarding: {
         create: vi.fn()
       },
-      brokerageAlternativeInvestmentOrderDisclosureOnboarding: {
+      clientInvestment: {
+        create: vi.fn().mockResolvedValue({ id: 'investment_1' })
+      },
+      investmentBaiodfOnboarding: {
         create: vi.fn().mockResolvedValue({ id: 'baiodf_onboarding_1' })
       }
     };
@@ -849,21 +852,61 @@ describe('client routes', () => {
         clientEmail: 'john@example.com',
         clientPhone: '+1 222 333 4444',
         additionalBrokers: [],
-        selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF']
+        selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF'],
+        investments: [{ name: 'Growth Fund' }]
       });
 
     expect(response.status).toBe(201);
     expect(response.body.client.hasInvestorProfile).toBe(true);
     expect(response.body.client.hasBaiodf).toBe(true);
     expect(tx.clientFormSelection.createMany).toHaveBeenCalled();
-    expect(tx.brokerageAlternativeInvestmentOrderDisclosureOnboarding.create).toHaveBeenCalledWith(
+    expect(tx.investmentBaiodfOnboarding.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           clientId: 'client_1',
+          investmentId: 'investment_1',
           status: 'NOT_STARTED'
         })
       })
     );
+  });
+
+  it('requires investments when BAIODF is selected', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF'],
+        investments: []
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.fieldErrors.investments).toContain('between 1 and 10');
+  });
+
+  it('rejects duplicate investment names case-insensitively', async () => {
+    const prisma = createMockPrisma();
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+
+    const response = await request(app)
+      .post('/api/clients')
+      .set('Cookie', createAuthCookie())
+      .send({
+        clientName: 'John Smith',
+        clientEmail: 'john@example.com',
+        selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF'],
+        investments: [{ name: 'Growth Fund' }, { name: 'growth fund' }]
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.fieldErrors.investments).toContain('unique');
   });
 
   it('rejects unsupported selected form codes', async () => {

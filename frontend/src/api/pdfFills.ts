@@ -32,17 +32,27 @@ export async function createPdfFill(clientId: string, file: File): Promise<PdfFi
   return response.fill;
 }
 
+export async function analyzePdfFill(clientId: string, fillId: string) {
+  return apiRequest<{ fillId: string; status: 'ANALYZING' }>(`/api/clients/${clientId}/pdf-fills/${fillId}/analyze`, {
+    method: 'POST'
+  });
+}
+
 export async function getPdfFill(clientId: string, fillId: string): Promise<PdfFillRecord> {
   const response = await apiRequest<{ fill: PdfFillRecord }>(`/api/clients/${clientId}/pdf-fills/${fillId}`);
   return response.fill;
+}
+
+export async function deletePdfFill(clientId: string, fillId: string): Promise<void> {
+  await apiRequest(`/api/clients/${clientId}/pdf-fills/${fillId}`, { method: 'DELETE' });
 }
 
 export async function savePdfFillValues(
   clientId: string,
   fillId: string,
   overrides: Record<string, PdfFillOverride>
-): Promise<{ resolvedLayout: PdfFillLayout; warnings: PdfFillWarning[] }> {
-  return apiRequest<{ resolvedLayout: PdfFillLayout; warnings: PdfFillWarning[] }>(
+): Promise<{ resolvedLayout: PdfFillLayout; warnings: PdfFillWarning[]; status: 'DRAFT' }> {
+  return apiRequest<{ resolvedLayout: PdfFillLayout; warnings: PdfFillWarning[]; status: 'DRAFT' }>(
     `/api/clients/${clientId}/pdf-fills/${fillId}/values`,
     {
       method: 'PUT',

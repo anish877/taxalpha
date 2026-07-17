@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { App } from '../src/App';
+import { API_BASE_URL } from '../src/api/client';
 import { AuthProvider } from '../src/context/AuthContext';
 import { ToastProvider } from '../src/context/ToastContext';
 
@@ -440,7 +441,7 @@ describe('Client forms workspace', () => {
     expect(
       screen
         .getAllByRole('link', { name: 'Open' })
-        .some((link) => link.getAttribute('href') === 'http://localhost:4000/api/clients/client_1/documents/doc_2/view')
+        .some((link) => link.getAttribute('href') === `${API_BASE_URL}/api/clients/client_1/documents/doc_2/view`)
     ).toBe(true);
   });
 

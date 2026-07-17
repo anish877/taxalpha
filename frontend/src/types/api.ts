@@ -310,6 +310,10 @@ export interface PdfFillSummary {
   createdAt: string;
   updatedAt: string;
   warningCount: number;
+  analysisStartedAt?: string | null;
+  analysisStage?: 'QUEUED' | 'READING_PDF' | 'MATCHING_CLIENT_DATA' | 'MAPPING_FIELDS' | 'FINALIZING' | null;
+  analysisError?: string | null;
+  analysisAttempts?: number;
 }
 
 export interface PdfFillOverride {
@@ -413,6 +417,7 @@ export interface ClientRecord {
   email: string;
   phone: string | null;
   createdAt: string;
+  setupStatus?: 'INCOMPLETE' | 'ACTIVE';
   primaryBroker: BrokerSummary | null;
   additionalBrokers: BrokerSummary[];
   selectedForms: FormCatalogItem[];
@@ -425,9 +430,46 @@ export interface ClientRecord {
   hasBaiodf: boolean;
   baiodfOnboardingStatus: BaiodfOnboardingStatus;
   baiodfResumeStepRoute: string | null;
+  investments?: ClientInvestmentSummary[];
   hasBaiv506c: boolean;
   baiv506cOnboardingStatus: Baiv506cOnboardingStatus;
   baiv506cResumeStepRoute: string | null;
+}
+
+export interface ClientInvestmentSummary {
+  id: string;
+  name: string;
+  position: number;
+  baiodfStatus: BaiodfOnboardingStatus;
+  agreementStatus: string | null;
+  agreementFileName: string | null;
+}
+
+export interface InvestmentAgreementSummary {
+  fillId: string;
+  fileName: string | null;
+  status: string;
+  warningCount: number;
+  generatedPdfUrl: string | null;
+  generatedAt: string | null;
+  uploadedAt?: string | null;
+  analysisStartedAt?: string | null;
+  analysisStage?: 'QUEUED' | 'READING_PDF' | 'MATCHING_CLIENT_DATA' | 'MAPPING_FIELDS' | 'FINALIZING' | null;
+  analysisError?: string | null;
+  analysisAttempts?: number;
+}
+
+export interface InvestmentWorkspaceItem {
+  id: string;
+  name: string;
+  position: number;
+  baiodfStatus: BaiodfOnboardingStatus;
+  baiodfResumeRoute: string;
+  baiodfSyncRequestedAt?: string | null;
+  baiodfPdf: { id: string; pdfUrl: string; generatedAt: string | null } | null;
+  baiodfPdfCount: number;
+  agreement: InvestmentAgreementSummary | null;
+  pairReady: boolean;
 }
 
 export interface InvestorProfileStepOneResponse {
@@ -1816,7 +1858,18 @@ export interface FormWorkspaceItem {
 export interface FormWorkspaceRecord {
   clientId: string;
   clientName: string;
+  setupStatus?: 'INCOMPLETE' | 'ACTIVE';
   forms: FormWorkspaceItem[];
+  investments?: InvestmentWorkspaceItem[];
+}
+
+export interface InvestmentTicketPair {
+  investmentId: string;
+  name: string;
+  position: number;
+  baiodfPdf: ClientFormPdfRecord | null;
+  agreement: { id: string; status: string; fileName: string | null; generatedPdfUrl: string | null } | null;
+  ready: boolean;
 }
 
 export interface ClientDocumentRecord {
