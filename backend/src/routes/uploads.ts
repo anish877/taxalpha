@@ -1,4 +1,4 @@
-import { Router, type Router as ExpressRouter } from 'express';
+import express, { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import {
@@ -8,12 +8,13 @@ import {
   isAllowedContentType,
   isKeyWithinPrefix,
   isUploadsConfigured,
-  UPLOAD_LIMITS
+  UPLOAD_LIMITS,
+  uploadDocumentToS3
 } from '../lib/s3-uploads.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
-const presignRequestSchema = z.object({
+const uploadRequestSchema = z.object({
   fileName: z.string().trim().min(1).max(255),
   contentType: z.string().trim().min(1).max(128),
   scope: z
@@ -25,9 +26,76 @@ const presignRequestSchema = z.object({
     .default('document')
 });
 
+function decodeFileName(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export function createUploadsRouter(deps: RouteDeps): ExpressRouter {
   const router = Router();
   const { config } = deps;
+  const rawUpload = express.raw({
+    type: '*/*',
+    limit: UPLOAD_LIMITS.maxBytes
+  });
+
+  // Upload through the API so identity-document uploads do not depend on the
+  // S3 bucket's browser CORS configuration.
+  router.post('/', requireAuth(deps), rawUpload, async (request, response, next) => {
+    try {
+      if (!isUploadsConfigured(config.s3)) {
+        response.status(503).json({ message: 'Document uploads are not configured.' });
+        return;
+      }
+
+      const contentType = request.header('content-type')?.split(';')[0]?.trim() ?? '';
+      const parsed = uploadRequestSchema.safeParse({
+        fileName: request.header('x-file-name'),
+        contentType,
+        scope: request.header('x-upload-scope')
+      });
+
+      if (!parsed.success) {
+        response.status(400).json({ message: 'Invalid upload request.' });
+        return;
+      }
+
+      if (!isAllowedContentType(parsed.data.contentType)) {
+        response.status(415).json({
+          message: 'Unsupported file type. Upload a JPG, PNG, WEBP, HEIC, or PDF.'
+        });
+        return;
+      }
+
+      if (!Buffer.isBuffer(request.body) || request.body.length === 0) {
+        response.status(400).json({ message: 'Choose a non-empty document to upload.' });
+        return;
+      }
+
+      const key = buildObjectKey({
+        uploadPrefix: config.s3.uploadPrefix,
+        scope: parsed.data.scope,
+        ownerId: request.authUser!.id,
+        contentType: parsed.data.contentType
+      });
+
+      await uploadDocumentToS3(config.s3, {
+        key,
+        body: request.body,
+        contentType: parsed.data.contentType
+      });
+
+      response.status(201).json({
+        key,
+        fileName: decodeFileName(parsed.data.fileName)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // Issue a short-lived presigned PUT URL so the browser can upload straight to S3.
   router.post('/presign', requireAuth(deps), async (request, response, next) => {
@@ -37,7 +105,7 @@ export function createUploadsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const parsed = presignRequestSchema.safeParse(request.body);
+      const parsed = uploadRequestSchema.safeParse(request.body);
       if (!parsed.success) {
         response.status(400).json({ message: 'Invalid upload request.' });
         return;

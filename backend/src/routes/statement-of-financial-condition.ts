@@ -696,7 +696,11 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
         prefillContext
       );
 
-      const answerValidation = validateSfcStep1Answer(questionId, parsedBody.data.answer);
+      const answerValidation = validateSfcStep1Answer(
+        questionId,
+        parsedBody.data.answer,
+        existingFields
+      );
 
       if (!answerValidation.success) {
         response.status(400).json({

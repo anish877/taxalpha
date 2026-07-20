@@ -288,19 +288,30 @@ function buildInvestorProfilePayload(
   backendPublicUrl: string
 ): FormWebhookPayload {
   const step1Fields = getInvestorStep1Fields(client);
+  const sfcTotals = client.statementOfFinancialConditionOnboarding?.step1Data
+    ? getSfcStep1Totals(
+        normalizeSfcStep1Fields(client.statementOfFinancialConditionOnboarding.step1Data)
+      )
+    : null;
   const step3DefaultKind = inferDefaultHolderKindFromStep1(client.investorProfileOnboarding?.step1Data ?? null);
   const step3Fields = applyStep3Prefill(
     normalizeStep3Fields(client.investorProfileOnboarding?.step3Data ?? null),
     {
       defaultKind: step3DefaultKind,
       contactEmail: client.email,
-      contactMobile: client.phone
+      contactMobile: client.phone,
+      annualIncome: sfcTotals?.totalAnnualIncome,
+      netWorthExPrimaryResidence: sfcTotals?.accreditedInvestorNetWorth,
+      liquidNetWorth: sfcTotals?.totalPotentialLiquidity
     }
   );
   const step4Fields = applyStep4Prefill(
     normalizeStep4Fields(client.investorProfileOnboarding?.step4Data ?? null),
     {
-      defaultKind: step3DefaultKind
+      defaultKind: step3DefaultKind,
+      annualIncome: sfcTotals?.totalAnnualIncome,
+      netWorthExPrimaryResidence: sfcTotals?.accreditedInvestorNetWorth,
+      liquidNetWorth: sfcTotals?.totalPotentialLiquidity
     }
   );
   const step7Fields = applyStep7Prefill(
@@ -339,10 +350,18 @@ function buildAdditionalHolderPayload(
   backendPublicUrl: string
 ): FormWebhookPayload {
   const defaultKind = inferDefaultHolderKindFromStep1(client.investorProfileOnboarding?.step1Data ?? null);
+  const sfcTotals = client.statementOfFinancialConditionOnboarding?.step1Data
+    ? getSfcStep1Totals(
+        normalizeSfcStep1Fields(client.statementOfFinancialConditionOnboarding.step1Data)
+      )
+    : null;
   const step4Fields = applyStep4Prefill(
     normalizeStep4Fields(client.investorProfileOnboarding?.step4Data ?? null),
     {
-      defaultKind
+      defaultKind,
+      annualIncome: sfcTotals?.totalAnnualIncome,
+      netWorthExPrimaryResidence: sfcTotals?.accreditedInvestorNetWorth,
+      liquidNetWorth: sfcTotals?.totalPotentialLiquidity
     }
   );
 
@@ -368,6 +387,15 @@ function buildStatementOfFinancialConditionPayload(
 ): FormWebhookPayload {
   const investorStep1 = getInvestorStep1Fields(client);
   const investorStep7 = normalizeStep7Fields(client.investorProfileOnboarding?.step7Data ?? null);
+  const step1 = applySfcStep1Prefill(
+    normalizeSfcStep1Fields(client.statementOfFinancialConditionOnboarding?.step1Data ?? null),
+    {
+      rrName: investorStep1.accountRegistration.rrName || null,
+      rrNo: investorStep1.accountRegistration.rrNo || null,
+      customerNames: investorStep1.accountRegistration.customerNames || client.name || null
+    }
+  );
+  const totals = getSfcStep1Totals(step1);
   const requiresJointOwnerSignature = isStep4RequiredFromStep1(
     client.investorProfileOnboarding?.step1Data ?? null
   );
@@ -382,14 +410,7 @@ function buildStatementOfFinancialConditionPayload(
           StatementOfFinancialConditionOnboardingStatus.NOT_STARTED
       ),
       {
-        step1: applySfcStep1Prefill(
-          normalizeSfcStep1Fields(client.statementOfFinancialConditionOnboarding?.step1Data ?? null),
-          {
-            rrName: investorStep1.accountRegistration.rrName || null,
-            rrNo: investorStep1.accountRegistration.rrNo || null,
-            customerNames: investorStep1.accountRegistration.customerNames || client.name || null
-          }
-        ),
+        step1,
         step2: applySfcStep2Prefill(
           normalizeSfcStep2Fields(client.statementOfFinancialConditionOnboarding?.step2Data ?? null),
           {
@@ -399,7 +420,19 @@ function buildStatementOfFinancialConditionPayload(
             financialProfessional: investorStep7.signatures.financialProfessional,
             registeredPrincipal: investorStep7.signatures.supervisorPrincipal
           }
-        )
+        ),
+        computed: {
+          financial: {
+            totalAssets: totals.totalAssets,
+            totalLiabilities: totals.totalLiabilities,
+            totalNetWorth: totals.totalNetWorth,
+            netWorthExPrimaryResidence: totals.accreditedInvestorNetWorth,
+            accreditedInvestorLiabilities: totals.accreditedInvestorLiabilities,
+            totalAnnualIncome: totals.totalAnnualIncome,
+            totalPotentialLiquidity: totals.totalPotentialLiquidity,
+            totalIlliquidSecurities: totals.totalIlliquidSecurities
+          }
+        }
       }
     )
   };

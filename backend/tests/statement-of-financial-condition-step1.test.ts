@@ -63,10 +63,66 @@ describe('statement-of-financial-condition-step1', () => {
     const totals = getSfcStep1Totals(fields);
     expect(totals.totalLiabilities).toBe(50);
     expect(totals.totalLiquidAssets).toBe(300);
-    expect(totals.totalAssetsLessPrimaryResidence).toBe(800);
-    expect(totals.totalNetWorth).toBe(1250);
+    expect(totals.totalAssets).toBe(1400);
+    expect(totals.totalAssetsLessPrimaryResidence).toBe(900);
+    expect(totals.accreditedInvestorLiabilities).toBe(50);
+    expect(totals.accreditedInvestorNetWorth).toBe(850);
+    expect(totals.totalNetWorthAssetsLessPrimaryResidenceLiabilities).toBe(850);
+    expect(totals.totalNetWorth).toBe(1350);
+    expect(totals.totalIlliquidSecurities).toBe(525);
     expect(totals.totalPotentialLiquidity).toBe(375);
     expect(totals.totalIlliquidQualifiedAssets).toBe(25);
+  });
+
+  it('applies the SEC primary-residence asset and secured-debt exclusions', () => {
+    const fields = defaultSfcStep1Fields();
+    fields.liquidNonQualifiedAssets.cashMoneyMarketsCds = 850_000;
+    fields.illiquidNonQualifiedAssets.primaryResidence = 1_200_000;
+    fields.liabilities.mortgagePrimaryResidence = 800_000;
+    fields.liabilities.otherLiabilities = 20_000;
+
+    const totals = getSfcStep1Totals(fields);
+    expect(totals.totalNetWorth).toBe(1_230_000);
+    expect(totals.primaryResidenceSecuredDebt).toBe(800_000);
+    expect(totals.excludedPrimaryResidenceSecuredDebt).toBe(800_000);
+    expect(totals.countedPrimaryResidenceSecuredDebt).toBe(0);
+    expect(totals.accreditedInvestorLiabilities).toBe(20_000);
+    expect(totals.accreditedInvestorNetWorth).toBe(830_000);
+  });
+
+  it('counts underwater home debt and recent non-acquisition debt increases once', () => {
+    const fields = defaultSfcStep1Fields();
+    fields.liquidNonQualifiedAssets.cashMoneyMarketsCds = 1_500_000;
+    fields.illiquidNonQualifiedAssets.primaryResidence = 1_200_000;
+    fields.liabilities.mortgagePrimaryResidence = 1_100_000;
+    fields.liabilities.homeEquityLoans = 200_000;
+    fields.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days = 200_000;
+
+    const totals = getSfcStep1Totals(fields);
+    expect(totals.primaryResidenceSecuredDebt).toBe(1_300_000);
+    expect(totals.countedPrimaryResidenceSecuredDebt).toBe(200_000);
+    expect(totals.excludedPrimaryResidenceSecuredDebt).toBe(1_100_000);
+    expect(totals.accreditedInvestorNetWorth).toBe(1_300_000);
+  });
+
+  it('rejects a 60-day increase larger than current residence-secured debt', () => {
+    const fields = defaultSfcStep1Fields();
+    fields.liabilities.mortgagePrimaryResidence = 100_000;
+
+    const validation = validateSfcStep1Answer(
+      'step1.accreditationAdjustments',
+      { primaryResidenceSecuredDebtIncreaseLast60Days: 100_001 },
+      fields
+    );
+
+    expect(validation.success).toBe(false);
+    if (!validation.success) {
+      expect(
+        validation.fieldErrors[
+          'step1.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days'
+        ]
+      ).toContain('cannot exceed');
+    }
   });
 
   it('requires account registration completion fields', () => {

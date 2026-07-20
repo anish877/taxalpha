@@ -95,8 +95,8 @@ describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
     } as unknown as PrismaClient;
 
     const lookup = await getProfileLookup(prisma, 'c1');
-    expect(lookup['financial.totalNetWorth']?.value).toBe(1390000);
-    expect(lookup['financial.netWorthExPrimaryResidence']?.value).toBe(640000);
+    expect(lookup['financial.totalNetWorth']?.value).toBe(1690000);
+    expect(lookup['financial.netWorthExPrimaryResidence']?.value).toBe(940000);
     expect(lookup['financial.liquidNetWorth']?.value).toBe(400000);
     expect(lookup['financial.totalAnnualIncome']?.value).toBe(200000);
     expect(lookup['investment.amount']?.value).toBe(250000);

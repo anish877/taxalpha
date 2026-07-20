@@ -210,6 +210,28 @@ function normalizeAlternativesInsuranceValues(source: unknown): AlternativesInsu
   };
 }
 
+function zeroMarketIncomeValues(): MarketIncomeValues {
+  return {
+    equities: 0,
+    options: 0,
+    fixedIncome: 0,
+    mutualFunds: 0,
+    unitInvestmentTrusts: 0,
+    exchangeTradedFunds: 0
+  };
+}
+
+function zeroAlternativesInsuranceValues(): AlternativesInsuranceValues {
+  return {
+    realEstate: 0,
+    insurance: 0,
+    variableAnnuities: 0,
+    fixedAnnuities: 0,
+    preciousMetals: 0,
+    commoditiesFutures: 0
+  };
+}
+
 function normalizeOtherEntries(source: unknown): Step5Fields['investments']['otherEntries']['entries'] {
   if (!Array.isArray(source)) {
     return [];
@@ -235,13 +257,12 @@ function normalizeOtherEntries(source: unknown): Step5Fields['investments']['oth
 
 function sanitizeStep5Fields(fields: Step5Fields): Step5Fields {
   const next = structuredClone(fields);
-  const hasOtherSelection = getSingleSelection(next.investments.hasOther, YES_NO_KEYS);
-
-  next.investments.otherEntries.entries = normalizeOtherEntries(next.investments.otherEntries.entries);
-
-  if (hasOtherSelection !== 'yes') {
-    next.investments.otherEntries.entries = [];
-  }
+  // The Statement of Financial Condition is the source of truth for holdings.
+  // Keep the Investor Profile PDF payload complete while skipping duplicate entry.
+  next.investments.fixedValues.marketIncome = zeroMarketIncomeValues();
+  next.investments.fixedValues.alternativesInsurance = zeroAlternativesInsuranceValues();
+  next.investments.hasOther = { yes: false, no: true };
+  next.investments.otherEntries.entries = [];
 
   return next;
 }
@@ -453,24 +474,10 @@ export function defaultStep5Fields(): Step5Fields {
     },
     investments: {
       fixedValues: {
-        marketIncome: {
-          equities: null,
-          options: null,
-          fixedIncome: null,
-          mutualFunds: null,
-          unitInvestmentTrusts: null,
-          exchangeTradedFunds: null
-        },
-        alternativesInsurance: {
-          realEstate: null,
-          insurance: null,
-          variableAnnuities: null,
-          fixedAnnuities: null,
-          preciousMetals: null,
-          commoditiesFutures: null
-        }
+        marketIncome: zeroMarketIncomeValues(),
+        alternativesInsurance: zeroAlternativesInsuranceValues()
       },
-      hasOther: createBooleanMap(YES_NO_KEYS),
+      hasOther: { yes: false, no: true },
       otherEntries: {
         entries: []
       }
@@ -502,12 +509,12 @@ export function normalizeStep5Fields(step5Data: Prisma.JsonValue | null | undefi
     },
     investments: {
       fixedValues: {
-        marketIncome: normalizeMarketIncomeValues(fixedValues.marketIncome),
-        alternativesInsurance: normalizeAlternativesInsuranceValues(fixedValues.alternativesInsurance)
+        marketIncome: zeroMarketIncomeValues(),
+        alternativesInsurance: zeroAlternativesInsuranceValues()
       },
-      hasOther: createBooleanMap(YES_NO_KEYS, investments.hasOther),
+      hasOther: { yes: false, no: true },
       otherEntries: {
-        entries: normalizeOtherEntries(otherEntries.entries)
+        entries: []
       }
     },
     horizonAndLiquidity: {
@@ -533,22 +540,12 @@ function hasOtherInvestments(fields: Step5Fields): boolean {
   return getSingleSelection(fields.investments.hasOther, YES_NO_KEYS) === 'yes';
 }
 
-export function getVisibleStep5QuestionIds(fields: Step5Fields): Step5QuestionId[] {
-  const sanitized = sanitizeStep5Fields(fields);
-  const visible: Step5QuestionId[] = [
+export function getVisibleStep5QuestionIds(_fields: Step5Fields): Step5QuestionId[] {
+  return [
     'step5.profile.riskExposure',
     'step5.profile.accountObjectives',
-    'step5.investments.fixedValues.marketIncome',
-    'step5.investments.fixedValues.alternativesInsurance',
-    'step5.investments.hasOther'
+    'step5.horizonAndLiquidity'
   ];
-
-  if (hasOtherInvestments(sanitized)) {
-    visible.push('step5.investments.otherEntries');
-  }
-
-  visible.push('step5.horizonAndLiquidity');
-  return visible;
 }
 
 export function clampStep5QuestionIndex(index: number | null | undefined, visibleQuestionIds: Step5QuestionId[]): number {
@@ -636,30 +633,6 @@ export function validateStep5Completion(fields: Step5Fields): Record<string, str
 
   if (countTrueFlags(normalized.profile.accountObjectives) === 0) {
     errors['step5.profile.accountObjectives'] = 'Select at least one account investment objective.';
-  }
-
-  const marketValidation = validateMarketIncomeBlock(normalized.investments.fixedValues.marketIncome);
-  if (!marketValidation.success) {
-    Object.assign(errors, marketValidation.fieldErrors);
-  }
-
-  const alternativesValidation = validateAlternativesInsuranceBlock(
-    normalized.investments.fixedValues.alternativesInsurance
-  );
-  if (!alternativesValidation.success) {
-    Object.assign(errors, alternativesValidation.fieldErrors);
-  }
-
-  const hasOtherSelection = getSingleSelection(normalized.investments.hasOther, YES_NO_KEYS);
-  if (!hasOtherSelection) {
-    errors['step5.investments.hasOther'] = 'Select whether to add other investment categories.';
-  }
-
-  if (hasOtherSelection === 'yes') {
-    const otherValidation = validateOtherEntriesBlock(normalized.investments.otherEntries);
-    if (!otherValidation.success) {
-      Object.assign(errors, otherValidation.fieldErrors);
-    }
   }
 
   const horizonValidation = validateHorizonAndLiquidityBlock(normalized.horizonAndLiquidity);

@@ -1412,7 +1412,22 @@ describe('client routes', () => {
     prisma.client.findFirst.mockResolvedValue({
       id: 'client_1',
       email: 'client@example.com',
-      phone: '+1 555 555 5555'
+      phone: '+1 555 555 5555',
+      statementOfFinancialConditionOnboarding: {
+        step1Data: {
+          liquidNonQualifiedAssets: { cashMoneyMarketsCds: 100000 },
+          liabilities: { mortgagePrimaryResidence: 200000, otherLiabilities: 10000 },
+          illiquidNonQualifiedAssets: {
+            primaryResidence: 300000,
+            investmentRealEstate: 500000
+          },
+          liquidQualifiedAssets: { retirementPlans: 20000 },
+          incomeSummary: { salaryCommissions: 50000 },
+          accreditationAdjustments: {
+            primaryResidenceSecuredDebtIncreaseLast60Days: 0
+          }
+        }
+      }
     });
     prisma.investorProfileOnboarding.upsert.mockResolvedValue({
       status: 'IN_PROGRESS',
@@ -1435,6 +1450,21 @@ describe('client routes', () => {
     expect(response.body.onboarding.step.fields.holder.kind.person).toBe(true);
     expect(response.body.onboarding.step.fields.holder.contact.email).toBe('client@example.com');
     expect(response.body.onboarding.step.fields.holder.contact.phones.mobile).toBe('+1 555 555 5555');
+    expect(response.body.onboarding.step.fields.financialInformation.annualIncomeRange).toEqual({
+      fromBracket: 50000,
+      toBracket: null
+    });
+    expect(response.body.onboarding.step.fields.financialInformation.netWorthExPrimaryResidenceRange).toEqual({
+      fromBracket: 610000,
+      toBracket: null
+    });
+    expect(response.body.onboarding.step.fields.financialInformation.liquidNetWorthRange).toEqual({
+      fromBracket: 120000,
+      toBracket: null
+    });
+    expect(response.body.onboarding.step.visibleQuestionIds).not.toContain(
+      'step3.financial.annualIncomeRange'
+    );
   });
 
   it('saves step 3 answer patch and moves cursor', async () => {

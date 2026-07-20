@@ -21,9 +21,9 @@ interface DocumentUploadFieldProps extends DocumentValue {
 }
 
 /**
- * Optional document upload for a form field. Picks a file, uploads it straight
- * to S3 via a backend presigned URL, and reports back the stored key + file
- * name. Viewing fetches a fresh short-lived signed URL on demand.
+ * Optional document upload for a form field. The API stores the file in S3 and
+ * returns the stored key + original file name. Viewing fetches a fresh
+ * short-lived signed URL on demand.
  */
 export function DocumentUploadField({
   scope,

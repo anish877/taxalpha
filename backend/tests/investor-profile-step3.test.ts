@@ -86,6 +86,9 @@ describe('investor-profile-step3', () => {
     expect(visible).toContain('step3.holder.contact.phones');
     expect(visible).toContain('step3.holder.legalAddress');
     expect(visible).toContain('step3.investment.knowledgeExperience');
+    expect(visible).not.toContain('step3.financial.annualIncomeRange');
+    expect(visible).not.toContain('step3.financial.netWorthExPrimaryResidenceRange');
+    expect(visible).not.toContain('step3.financial.liquidNetWorthRange');
     expect(visible).not.toContain('step3.holder.contact.phones.mobile');
     expect(visible).not.toContain('step3.holder.legalAddress.line1');
     expect(visible).not.toContain('step3.investment.byType.equities.sinceYear');
@@ -242,12 +245,27 @@ describe('investor-profile-step3', () => {
     const prefilled = applyStep3Prefill(fields, {
       defaultKind: 'entity',
       contactEmail: 'client@example.com',
-      contactMobile: '+1 555 555 5555'
+      contactMobile: '+1 555 555 5555',
+      annualIncome: 275000,
+      netWorthExPrimaryResidence: 1400000,
+      liquidNetWorth: 650000
     });
 
     expect(prefilled.holder.kind).toEqual({ person: false, entity: true });
     expect(prefilled.holder.contact.email).toBe('client@example.com');
     expect(prefilled.holder.contact.phones.mobile).toBe('+1 555 555 5555');
+    expect(prefilled.financialInformation.annualIncomeRange).toEqual({
+      fromBracket: 275000,
+      toBracket: null
+    });
+    expect(prefilled.financialInformation.netWorthExPrimaryResidenceRange).toEqual({
+      fromBracket: 1400000,
+      toBracket: null
+    });
+    expect(prefilled.financialInformation.liquidNetWorthRange).toEqual({
+      fromBracket: 650000,
+      toBracket: null
+    });
 
     const existing = defaultStep3Fields();
     existing.holder.kind = { person: true, entity: false };
@@ -332,6 +350,19 @@ describe('investor-profile-step3', () => {
     expect(validYear.success).toBe(true);
   });
 
+  it('accepts years employed as a non-negative whole number instead of a calendar year', () => {
+    const validResult = validateStep3Answer('step3.holder.employment.yearsEmployed', 23);
+    expect(validResult.success).toBe(true);
+
+    const invalidResult = validateStep3Answer('step3.holder.employment.yearsEmployed', -1);
+    expect(invalidResult.success).toBe(false);
+    if (!invalidResult.success) {
+      expect(invalidResult.fieldErrors['step3.holder.employment.yearsEmployed']).toContain(
+        'whole number (0 or more)'
+      );
+    }
+  });
+
   it('allows completion without gov ID when requirement context is unknown', () => {
     const fields = buildCompleteStep3EntityFields();
     const errors = validateStep3Completion(fields);
@@ -348,7 +379,7 @@ describe('investor-profile-step3', () => {
     expect(errors['step3.govId.photoId1']).toContain('required');
   });
 
-  it('rejects invalid liquid net worth range and partial gov ID', () => {
+  it('does not require obsolete financial range endpoints and still rejects partial gov ID', () => {
     const fields = buildCompleteStep3EntityFields();
     fields.financialInformation.liquidNetWorthRange = {
       fromBracket: 750000,
@@ -357,7 +388,7 @@ describe('investor-profile-step3', () => {
     fields.governmentIdentification.photoId1.type = 'Passport';
 
     const errors = validateStep3Completion(fields);
-    expect(errors['step3.financial.liquidNetWorthRange.toBracket']).toContain('cannot exceed');
+    expect(errors['step3.financial.liquidNetWorthRange.toBracket']).toBeUndefined();
     expect(errors['step3.govId.photoId1.idNumber']).toContain('required');
   });
 });

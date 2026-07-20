@@ -107,6 +107,24 @@ export async function createPresignedUpload(
   return { uploadUrl, expiresIn: PRESIGN_EXPIRES_SECONDS };
 }
 
+/**
+ * Upload from the API server. This avoids requiring the browser's origin to
+ * be allowed by the S3 bucket CORS policy.
+ */
+export async function uploadDocumentToS3(
+  config: ConfiguredS3,
+  input: { key: string; body: Buffer; contentType: string }
+): Promise<void> {
+  await getClient(config.region).send(
+    new PutObjectCommand({
+      Bucket: config.bucket,
+      Key: input.key,
+      Body: input.body,
+      ContentType: input.contentType
+    })
+  );
+}
+
 export async function createPresignedDownload(
   config: ConfiguredS3,
   input: { key: string }

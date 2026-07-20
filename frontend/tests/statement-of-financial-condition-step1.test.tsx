@@ -78,6 +78,9 @@ describe('StatementOfFinancialConditionStep1Page', () => {
                     investmentRealEstate: 0,
                     privateBusiness: 0
                   },
+                  accreditationAdjustments: {
+                    primaryResidenceSecuredDebtIncreaseLast60Days: 0
+                  },
                   liquidQualifiedAssets: {
                     cashMoneyMarketsCds: 0,
                     retirementPlans: 0,
@@ -104,12 +107,18 @@ describe('StatementOfFinancialConditionStep1Page', () => {
                   totalLiquidQualifiedAssets: 0,
                   totalAnnualIncome: 0,
                   totalIlliquidAssetsEquity: 0,
+                  totalAssets: 0,
                   totalAssetsLessPrimaryResidence: 0,
                   totalNetWorthAssetsLessPrimaryResidenceLiabilities: -45,
                   totalIlliquidSecurities: 0,
                   totalNetWorth: -45,
                   totalPotentialLiquidity: 0,
-                  totalIlliquidQualifiedAssets: 0
+                  totalIlliquidQualifiedAssets: 0,
+                  primaryResidenceSecuredDebt: 45,
+                  excludedPrimaryResidenceSecuredDebt: 0,
+                  countedPrimaryResidenceSecuredDebt: 45,
+                  accreditedInvestorLiabilities: 45,
+                  accreditedInvestorNetWorth: -45
                 }
               }
             }
@@ -160,6 +169,9 @@ describe('StatementOfFinancialConditionStep1Page', () => {
                     investmentRealEstate: 0,
                     privateBusiness: 0
                   },
+                  accreditationAdjustments: {
+                    primaryResidenceSecuredDebtIncreaseLast60Days: 0
+                  },
                   liquidQualifiedAssets: {
                     cashMoneyMarketsCds: 0,
                     retirementPlans: 0,
@@ -186,12 +198,18 @@ describe('StatementOfFinancialConditionStep1Page', () => {
                   totalLiquidQualifiedAssets: 0,
                   totalAnnualIncome: 0,
                   totalIlliquidAssetsEquity: 0,
+                  totalAssets: 0,
                   totalAssetsLessPrimaryResidence: 0,
                   totalNetWorthAssetsLessPrimaryResidenceLiabilities: -45,
                   totalIlliquidSecurities: 0,
                   totalNetWorth: -45,
                   totalPotentialLiquidity: 0,
-                  totalIlliquidQualifiedAssets: 0
+                  totalIlliquidQualifiedAssets: 0,
+                  primaryResidenceSecuredDebt: 45,
+                  excludedPrimaryResidenceSecuredDebt: 0,
+                  countedPrimaryResidenceSecuredDebt: 45,
+                  accreditedInvestorLiabilities: 45,
+                  accreditedInvestorNetWorth: -45
                 }
               }
             }
@@ -318,6 +336,9 @@ describe('StatementOfFinancialConditionStep1Page', () => {
                     investmentRealEstate: 0,
                     privateBusiness: 0
                   },
+                  accreditationAdjustments: {
+                    primaryResidenceSecuredDebtIncreaseLast60Days: 0
+                  },
                   liquidQualifiedAssets: {
                     cashMoneyMarketsCds: 0,
                     retirementPlans: 0,
@@ -344,12 +365,18 @@ describe('StatementOfFinancialConditionStep1Page', () => {
                   totalLiquidQualifiedAssets: 0,
                   totalAnnualIncome: 0,
                   totalIlliquidAssetsEquity: 0,
+                  totalAssets: 0,
                   totalAssetsLessPrimaryResidence: 0,
                   totalNetWorthAssetsLessPrimaryResidenceLiabilities: 0,
                   totalIlliquidSecurities: 0,
                   totalNetWorth: 0,
                   totalPotentialLiquidity: 0,
-                  totalIlliquidQualifiedAssets: 0
+                  totalIlliquidQualifiedAssets: 0,
+                  primaryResidenceSecuredDebt: 0,
+                  excludedPrimaryResidenceSecuredDebt: 0,
+                  countedPrimaryResidenceSecuredDebt: 0,
+                  accreditedInvestorLiabilities: 0,
+                  accreditedInvestorNetWorth: 0
                 }
               }
             }

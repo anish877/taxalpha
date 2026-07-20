@@ -538,7 +538,7 @@ function buildSourceValues(client: FormWebhookClientSnapshot & { owner: { name: 
       naturalPersonIncomeCandidate: sfcTotals.totalAnnualIncome >= annualIncomeThreshold,
       incomeThresholdUsed: annualIncomeThreshold,
       naturalPersonNetWorthCandidate:
-        sfcTotals.totalNetWorthAssetsLessPrimaryResidenceLiabilities >= 1_000_000,
+        sfcTotals.accreditedInvestorNetWorth > 1_000_000,
       netWorthExPrimaryResidenceThresholdUsed: 1_000_000,
       documentEvidenceCapturedInCurrentForms: false,
       note:

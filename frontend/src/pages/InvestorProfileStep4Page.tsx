@@ -562,20 +562,20 @@ const QUESTION_CONFIG: Partial<
   },
   'step4.financial.annualIncomeRange': {
     key: 'step4.financial.annualIncomeRange',
-    title: 'What is annual income range?',
-    helper: 'Enter both From and To amounts.',
+    title: 'What is annual income?',
+    helper: 'This amount is supplied by the Statement of Financial Condition.',
     type: 'range-bracket'
   },
   'step4.financial.netWorthExPrimaryResidenceRange': {
     key: 'step4.financial.netWorthExPrimaryResidenceRange',
-    title: 'What is net worth (excluding primary residence) range?',
-    helper: 'Enter both From and To amounts.',
+    title: 'What is net worth (excluding primary residence)?',
+    helper: 'This amount is supplied by the Statement of Financial Condition.',
     type: 'range-bracket'
   },
   'step4.financial.liquidNetWorthRange': {
     key: 'step4.financial.liquidNetWorthRange',
-    title: 'What is liquid net worth range?',
-    helper: 'Enter both From and To amounts.',
+    title: 'What is liquid net worth?',
+    helper: 'This amount is supplied by the Statement of Financial Condition.',
     type: 'range-bracket'
   },
   'step4.financial.taxBracket': {
@@ -1337,37 +1337,26 @@ export function InvestorProfileStep4Page() {
       toBracket: number | null;
     };
 
-    const updateAmount = (field: 'fromBracket' | 'toBracket') => (value: number | null) => {
+    const updateAmount = (value: number | null) => {
       if (!currentQuestionId) return;
       setFields((current) =>
         applyAnswer(current, currentQuestionId, {
-          ...answer,
-          [field]: value
+          fromBracket: value,
+          toBracket: null
         })
       );
     };
 
     return (
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4">
         <label className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-xs uppercase tracking-[0.14em] text-mute">From</p>
+          <p className="text-xs uppercase tracking-[0.14em] text-mute">Amount</p>
           <MoneyInput
             className="mt-2"
-            aria-label="From amount"
+            aria-label="Amount"
             placeholder="0"
             value={answer.fromBracket}
-            onValueChange={updateAmount('fromBracket')}
-          />
-        </label>
-
-        <label className="rounded-2xl border border-line bg-paper p-4">
-          <p className="text-xs uppercase tracking-[0.14em] text-mute">To</p>
-          <MoneyInput
-            className="mt-2"
-            aria-label="To amount"
-            placeholder="0"
-            value={answer.toBracket}
-            onValueChange={updateAmount('toBracket')}
+            onValueChange={updateAmount}
           />
         </label>
       </div>
@@ -2199,4 +2188,3 @@ export function InvestorProfileStep4Page() {
     </main>
   );
 }
-

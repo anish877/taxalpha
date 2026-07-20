@@ -54,7 +54,7 @@ export async function getProfileLookup(
     const totals = getSfcStep1Totals(sfcStep1);
     entries.push(
       { canonicalField: 'financial.totalNetWorth', value: totals.totalNetWorth, sourceFormCode: 'SFC', sourceRank: GOLD_SOURCE_RANK.SFC },
-      { canonicalField: 'financial.netWorthExPrimaryResidence', value: totals.totalNetWorthAssetsLessPrimaryResidenceLiabilities, sourceFormCode: 'SFC', sourceRank: GOLD_SOURCE_RANK.SFC },
+      { canonicalField: 'financial.netWorthExPrimaryResidence', value: totals.accreditedInvestorNetWorth, sourceFormCode: 'SFC', sourceRank: GOLD_SOURCE_RANK.SFC },
       { canonicalField: 'financial.totalAnnualIncome', value: totals.totalAnnualIncome, sourceFormCode: 'SFC', sourceRank: GOLD_SOURCE_RANK.SFC },
       { canonicalField: 'financial.totalLiquidAssets', value: totals.totalLiquidAssets, sourceFormCode: 'SFC', sourceRank: GOLD_SOURCE_RANK.SFC },
       { canonicalField: 'financial.totalLiabilities', value: totals.totalLiabilities, sourceFormCode: 'SFC', sourceRank: GOLD_SOURCE_RANK.SFC },

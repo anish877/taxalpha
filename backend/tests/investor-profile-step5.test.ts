@@ -4,6 +4,8 @@ import {
   applyStep5Answer,
   defaultStep5Fields,
   getVisibleStep5QuestionIds,
+  normalizeStep5Fields,
+  serializeStep5Fields,
   validateStep5Answer,
   validateStep5Completion,
   type Step5Fields
@@ -58,16 +60,52 @@ function buildCompleteStep5Fields(): Step5Fields {
 }
 
 describe('investor-profile-step5', () => {
-  it('shows otherEntries only when hasOther is yes', () => {
+  it('skips duplicate holding questions and always serializes their values as zero', () => {
     const fields = defaultStep5Fields();
-    fields.investments.hasOther = { yes: false, no: true };
-
-    const withoutOther = getVisibleStep5QuestionIds(fields);
-    expect(withoutOther).not.toContain('step5.investments.otherEntries');
-
+    fields.investments.fixedValues.marketIncome.equities = 25_000;
+    fields.investments.fixedValues.alternativesInsurance.realEstate = 500_000;
     fields.investments.hasOther = { yes: true, no: false };
-    const withOther = getVisibleStep5QuestionIds(fields);
-    expect(withOther).toContain('step5.investments.otherEntries');
+    fields.investments.otherEntries.entries = [{ label: 'Private credit', value: 10_000 }];
+
+    const visible = getVisibleStep5QuestionIds(fields);
+    expect(visible).not.toContain('step5.investments.fixedValues.marketIncome');
+    expect(visible).not.toContain('step5.investments.fixedValues.alternativesInsurance');
+    expect(visible).not.toContain('step5.investments.hasOther');
+    expect(visible).not.toContain('step5.investments.otherEntries');
+
+    const serialized = serializeStep5Fields(fields) as typeof fields;
+    expect(serialized.investments.fixedValues.marketIncome).toEqual({
+      equities: 0,
+      options: 0,
+      fixedIncome: 0,
+      mutualFunds: 0,
+      unitInvestmentTrusts: 0,
+      exchangeTradedFunds: 0
+    });
+    expect(serialized.investments.fixedValues.alternativesInsurance).toEqual({
+      realEstate: 0,
+      insurance: 0,
+      variableAnnuities: 0,
+      fixedAnnuities: 0,
+      preciousMetals: 0,
+      commoditiesFutures: 0
+    });
+    expect(serialized.investments.hasOther).toEqual({ yes: false, no: true });
+    expect(serialized.investments.otherEntries.entries).toEqual([]);
+
+    const legacy = normalizeStep5Fields({
+      investments: {
+        fixedValues: {
+          marketIncome: { equities: 123 },
+          alternativesInsurance: { realEstate: 456 }
+        },
+        hasOther: { yes: true, no: false },
+        otherEntries: { entries: [{ label: 'Legacy item', value: 789 }] }
+      }
+    });
+    expect(legacy.investments.fixedValues.marketIncome.equities).toBe(0);
+    expect(legacy.investments.fixedValues.alternativesInsurance.realEstate).toBe(0);
+    expect(legacy.investments.otherEntries.entries).toEqual([]);
   });
 
   it('validates risk and liquidity as exactly-one selections', () => {

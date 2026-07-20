@@ -171,7 +171,8 @@ type Step4InvestmentKnowledgeByType = Record<InvestmentTypeKey, Step4InvestmentT
   };
 };
 
-// Annual income / net worth ranges are stored as raw dollar amounts (From and To).
+// The source PDF presents From/To boxes, but operations uses only the first box.
+// Keep the legacy shape for PDF-map compatibility and always leave To empty.
 interface Step4Range {
   fromBracket: number | null;
   toBracket: number | null;
@@ -266,6 +267,9 @@ export interface Step4Fields {
 
 export interface Step4PrefillContext {
   defaultKind?: 'person' | 'entity';
+  annualIncome?: number | null;
+  netWorthExPrimaryResidence?: number | null;
+  liquidNetWorth?: number | null;
 }
 
 interface ValidationSuccess<T> {
@@ -614,10 +618,6 @@ function clearPersonOnlyFields(fields: Step4Fields): void {
 
 function getKnowledgeSelectionForType(fields: Step4Fields, typeKey: InvestmentTypeKey): KnowledgeLevelKey | null {
   return getSingleSelection(fields.investmentKnowledge.byType[typeKey].knowledge, KNOWLEDGE_LEVEL_KEYS);
-}
-
-function getRangeOrderError(fromBracket: number, toBracket: number): string | null {
-  return fromBracket <= toBracket ? null : 'The From amount must be less than or equal to the To amount.';
 }
 
 function isPhotoIdEmpty(block: Step4PhotoId): boolean {
@@ -1139,13 +1139,43 @@ function validateRequiredYear(answer: unknown, fieldPath: string, label: string)
   };
 }
 
+function validateRequiredNonNegativeInteger(
+  answer: unknown,
+  fieldPath: string,
+  label: string
+): ValidationResult<number> {
+  if (answer === '' || answer === null || answer === undefined) {
+    return {
+      success: false,
+      fieldErrors: {
+        [fieldPath]: `${label} is required.`
+      }
+    };
+  }
+
+  const numberValue = typeof answer === 'number' ? answer : Number(answer);
+
+  if (!Number.isInteger(numberValue) || numberValue < 0) {
+    return {
+      success: false,
+      fieldErrors: {
+        [fieldPath]: `Enter ${label.toLowerCase()} as a whole number (0 or more).`
+      }
+    };
+  }
+
+  return {
+    success: true,
+    value: numberValue
+  };
+}
+
 function validateRangeAnswer(answer: unknown, questionId: string): ValidationResult<Step4Range> {
   if (!answer || typeof answer !== 'object' || Array.isArray(answer)) {
     return {
       success: false,
       fieldErrors: {
-        [`${questionId}.fromBracket`]: 'Enter a From amount.',
-        [`${questionId}.toBracket`]: 'Enter a To amount.'
+        [`${questionId}.fromBracket`]: 'Enter an amount.'
       }
     };
   }
@@ -1154,18 +1184,7 @@ function validateRangeAnswer(answer: unknown, questionId: string): ValidationRes
   const fieldErrors: Record<string, string> = {};
 
   if (range.fromBracket === null) {
-    fieldErrors[`${questionId}.fromBracket`] = 'Enter a From amount.';
-  }
-
-  if (range.toBracket === null) {
-    fieldErrors[`${questionId}.toBracket`] = 'Enter a To amount.';
-  }
-
-  if (range.fromBracket !== null && range.toBracket !== null) {
-    const rangeOrderError = getRangeOrderError(range.fromBracket, range.toBracket);
-    if (rangeOrderError) {
-      fieldErrors[`${questionId}.toBracket`] = rangeOrderError;
-    }
+    fieldErrors[`${questionId}.fromBracket`] = 'Enter an amount.';
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -1177,7 +1196,10 @@ function validateRangeAnswer(answer: unknown, questionId: string): ValidationRes
 
   return {
     success: true,
-    value: range
+    value: {
+      fromBracket: range.fromBracket,
+      toBracket: null
+    }
   };
 }
 
@@ -1258,31 +1280,6 @@ function validateRequiredWhenYes(
   }
 
   return null;
-}
-
-function validateStep4RangesForCompletion(
-  errors: Record<string, string>,
-  range: Step4Range,
-  questionId:
-    | 'step4.financial.annualIncomeRange'
-    | 'step4.financial.netWorthExPrimaryResidenceRange'
-    | 'step4.financial.liquidNetWorthRange',
-  label: string
-): void {
-  if (range.fromBracket === null) {
-    errors[`${questionId}.fromBracket`] = `${label} from amount is required.`;
-  }
-
-  if (range.toBracket === null) {
-    errors[`${questionId}.toBracket`] = `${label} to amount is required.`;
-  }
-
-  if (range.fromBracket !== null && range.toBracket !== null) {
-    const orderError = getRangeOrderError(range.fromBracket, range.toBracket);
-    if (orderError) {
-      errors[`${questionId}.toBracket`] = orderError;
-    }
-  }
 }
 
 function validateAffiliationCompletion(
@@ -1589,6 +1586,23 @@ export function applyStep4Prefill(fields: Step4Fields, context: Step4PrefillCont
     };
   }
 
+  const sfcFinancialValues: Array<[
+    Exclude<keyof Step4Fields['financialInformation'], 'taxBracket'>,
+    number | null | undefined
+  ]> = [
+    ['annualIncomeRange', context.annualIncome],
+    ['netWorthExPrimaryResidenceRange', context.netWorthExPrimaryResidence],
+    ['liquidNetWorthRange', context.liquidNetWorth]
+  ];
+
+  for (const [field, value] of sfcFinancialValues) {
+    const normalizedValue = normalizeRangeAmount(value);
+    if (normalizedValue !== null) {
+      next.financialInformation[field].fromBracket = normalizedValue;
+    }
+    next.financialInformation[field].toBracket = null;
+  }
+
   return sanitizeStep4Fields(next);
 }
 
@@ -1669,9 +1683,6 @@ export function getVisibleStep4QuestionIds(fields: Step4Fields): Step4QuestionId
 
   visible.push('step4.investment.knowledgeExperience');
 
-  visible.push('step4.financial.annualIncomeRange');
-  visible.push('step4.financial.netWorthExPrimaryResidenceRange');
-  visible.push('step4.financial.liquidNetWorthRange');
   visible.push('step4.financial.taxBracket');
 
   visible.push('step4.govId.photoId1');
@@ -1920,7 +1931,11 @@ export function validateStep4Answer(
     case 'step4.holder.employment.occupation':
       return validateRequiredString(answer, 'step4.holder.employment.occupation', 'Occupation');
     case 'step4.holder.employment.yearsEmployed':
-      return validateRequiredYear(answer, 'step4.holder.employment.yearsEmployed', 'Years employed');
+      return validateRequiredNonNegativeInteger(
+        answer,
+        'step4.holder.employment.yearsEmployed',
+        'Years employed'
+      );
     case 'step4.holder.employment.typeOfBusiness':
       return validateRequiredString(
         answer,
@@ -1985,12 +2000,12 @@ export function validateStep4Answer(
       if (questionId === 'step4.financial.liquidNetWorthRange' && currentFields) {
         const netWorthRange = currentFields.financialInformation.netWorthExPrimaryResidenceRange;
 
-        if (netWorthRange.toBracket !== null && rangeValidation.value.toBracket !== null) {
-          if (rangeValidation.value.toBracket > netWorthRange.toBracket) {
+        if (netWorthRange.fromBracket !== null && rangeValidation.value.fromBracket !== null) {
+          if (rangeValidation.value.fromBracket > netWorthRange.fromBracket) {
             return {
               success: false,
               fieldErrors: {
-                'step4.financial.liquidNetWorthRange.toBracket':
+                'step4.financial.liquidNetWorthRange.fromBracket':
                   'Liquid net worth cannot exceed net worth (excluding primary residence).'
               }
             };
@@ -2793,35 +2808,6 @@ export function validateStep4Completion(fields: Step4Fields): Record<string, str
       if (typeKey === 'other' && !normalized.investmentKnowledge.byType.other.label?.trim()) {
         errors['step4.investment.byType.other.label'] = 'Other investment type is required.';
       }
-    }
-  }
-
-  validateStep4RangesForCompletion(
-    errors,
-    normalized.financialInformation.annualIncomeRange,
-    'step4.financial.annualIncomeRange',
-    'Annual income'
-  );
-  validateStep4RangesForCompletion(
-    errors,
-    normalized.financialInformation.netWorthExPrimaryResidenceRange,
-    'step4.financial.netWorthExPrimaryResidenceRange',
-    'Net worth (excluding primary residence)'
-  );
-  validateStep4RangesForCompletion(
-    errors,
-    normalized.financialInformation.liquidNetWorthRange,
-    'step4.financial.liquidNetWorthRange',
-    'Liquid net worth'
-  );
-
-  const netWorthTo = normalized.financialInformation.netWorthExPrimaryResidenceRange.toBracket;
-  const liquidTo = normalized.financialInformation.liquidNetWorthRange.toBracket;
-
-  if (netWorthTo !== null && liquidTo !== null) {
-    if (liquidTo > netWorthTo) {
-      errors['step4.financial.liquidNetWorthRange.toBracket'] =
-        'Liquid net worth cannot exceed net worth (excluding primary residence).';
     }
   }
 

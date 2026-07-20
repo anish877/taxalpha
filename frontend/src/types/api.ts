@@ -1357,6 +1357,7 @@ export type StatementOfFinancialConditionStepOneQuestionId =
   | 'step1.liquidNonQualifiedAssets'
   | 'step1.liabilities'
   | 'step1.illiquidNonQualifiedAssets'
+  | 'step1.accreditationAdjustments'
   | 'step1.liquidQualifiedAssets'
   | 'step1.incomeSummary'
   | 'step1.illiquidQualifiedAssets';
@@ -1388,6 +1389,9 @@ export interface StatementOfFinancialConditionStepOneFields {
     investmentRealEstate: number | null;
     privateBusiness: number | null;
   };
+  accreditationAdjustments: {
+    primaryResidenceSecuredDebtIncreaseLast60Days: number | null;
+  };
   liquidQualifiedAssets: {
     cashMoneyMarketsCds: number | null;
     retirementPlans: number | null;
@@ -1415,12 +1419,18 @@ export interface StatementOfFinancialConditionStepOneTotals {
   totalLiquidQualifiedAssets: number;
   totalAnnualIncome: number;
   totalIlliquidAssetsEquity: number;
+  totalAssets: number;
   totalAssetsLessPrimaryResidence: number;
   totalNetWorthAssetsLessPrimaryResidenceLiabilities: number;
   totalIlliquidSecurities: number;
   totalNetWorth: number;
   totalPotentialLiquidity: number;
   totalIlliquidQualifiedAssets: number;
+  primaryResidenceSecuredDebt: number;
+  excludedPrimaryResidenceSecuredDebt: number;
+  countedPrimaryResidenceSecuredDebt: number;
+  accreditedInvestorLiabilities: number;
+  accreditedInvestorNetWorth: number;
 }
 
 export interface StatementOfFinancialConditionStepOneResponse {

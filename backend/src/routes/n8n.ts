@@ -13,7 +13,7 @@ import {
 } from '../lib/form-pdf-utils.js';
 import { HttpError } from '../lib/http-error.js';
 import { deleteFilled, loadFilled, storeFilled } from '../lib/ingestion/template-store.js';
-import { requestBaseUrl } from '../lib/request-base-url.js';
+import { publicRequestBaseUrl } from '../lib/request-base-url.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
@@ -30,8 +30,8 @@ function callbackPdfStorageKey(pdfId: string): string {
   return `n8n-callback-${pdfId}`;
 }
 
-function callbackPdfUrl(request: any, clientId: string, pdfId: string): string {
-  return `${requestBaseUrl(request)}/api/n8n/clients/${encodeURIComponent(clientId)}/form-pdfs/${encodeURIComponent(pdfId)}/file.pdf`;
+function callbackPdfUrl(request: any, config: RouteDeps['config'], clientId: string, pdfId: string): string {
+  return `${publicRequestBaseUrl(request, config)}/api/clients/${encodeURIComponent(clientId)}/form-pdfs/${encodeURIComponent(pdfId)}/file.pdf`;
 }
 
 function effectiveSourceRunId(sourceRunId: string | null, pdfUrl: string): string {
@@ -194,7 +194,7 @@ export function createN8nRouter(deps: RouteDeps): ExpressRouter {
             investmentId: investmentId ?? null,
             formCode,
             workspaceFormCode,
-            pdfUrl: callbackPdfUrl(request, clientId, pdfId),
+            pdfUrl: callbackPdfUrl(request, deps.config, clientId, pdfId),
             documentTitle: fallbackDocumentTitle,
             fileName,
             sourceRunId: dedupeSourceRunId,

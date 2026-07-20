@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 import { clientAccessWhere } from '../lib/client-access.js';
 import { resolveClientDocumentStoragePath } from '../lib/client-document-storage.js';
+import { loadFilled } from '../lib/ingestion/template-store.js';
 import {
   buildClientDocumentS3Key,
   createClientDocumentViewUrl,
@@ -25,6 +26,10 @@ const clientDocumentParamsSchema = z.object({
 
 const clientDocumentViewParamsSchema = clientDocumentParamsSchema.extend({
   documentId: z.string().trim().min(1)
+});
+
+const clientFormPdfViewParamsSchema = clientDocumentParamsSchema.extend({
+  pdfId: z.string().trim().min(1)
 });
 
 function sanitizeFileName(value: string | undefined): string {
@@ -304,6 +309,45 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
       response.setHeader('Content-Disposition', contentDisposition(document.fileName));
 
       fs.createReadStream(storagePath).on('error', next).pipe(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get('/:clientId/form-pdfs/:pdfId/file.pdf', requireAuth(deps), async (request, response, next) => {
+    const parsedParams = clientFormPdfViewParamsSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      response.status(400).json({ message: 'Invalid PDF identifier.' });
+      return;
+    }
+
+    const { clientId, pdfId } = parsedParams.data;
+    try {
+      const pdf = await deps.prisma.clientFormPdf.findFirst({
+        where: {
+          id: pdfId,
+          clientId,
+          client: clientAccessWhere(request.authUser!.id)
+        },
+        select: { id: true, fileName: true, documentTitle: true }
+      });
+
+      if (!pdf) {
+        response.status(404).json({ message: 'PDF not found.' });
+        return;
+      }
+
+      const bytes = await loadFilled(`n8n-callback-${pdf.id}`, deps.config);
+      if (!bytes) {
+        response.status(404).json({ message: 'PDF file is not available.' });
+        return;
+      }
+
+      const requestedName = sanitizeFileName(pdf.fileName || pdf.documentTitle || 'generated-document.pdf');
+      response.setHeader('Content-Type', 'application/pdf');
+      response.setHeader('Content-Length', String(bytes.length));
+      response.setHeader('Content-Disposition', contentDisposition(requestedName.endsWith('.pdf') ? requestedName : `${requestedName}.pdf`));
+      response.send(bytes);
     } catch (error) {
       next(error);
     }

@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../src/app.js';
 import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
+import { deleteFilled, storeFilled } from '../src/lib/ingestion/template-store.js';
 
 const config = {
   nodeEnv: 'test' as const,
@@ -65,6 +66,9 @@ function createMockPrisma() {
       findFirst: vi.fn(),
       create: vi.fn(),
       delete: vi.fn()
+    },
+    clientFormPdf: {
+      findFirst: vi.fn()
     }
   };
 }
@@ -74,6 +78,33 @@ afterEach(async () => {
 });
 
 describe('client document routes', () => {
+  it('serves generated form PDFs from the authenticated client route', async () => {
+    const prisma = createMockPrisma();
+    const pdfId = 'pdf_1';
+    const pdfBytes = Buffer.from('%PDF-1.4\nclient form pdf\n%%EOF');
+    await storeFilled(`n8n-callback-${pdfId}`, pdfBytes, config);
+    prisma.clientFormPdf.findFirst.mockResolvedValue({
+      id: pdfId,
+      fileName: 'Disclosure.pdf',
+      documentTitle: 'Disclosure'
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config
+    });
+
+    const response = await request(app)
+      .get(`/api/clients/${testClientId}/form-pdfs/${pdfId}/file.pdf`)
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toContain('application/pdf');
+    expect(response.headers['content-disposition']).toContain('Disclosure.pdf');
+
+    await deleteFilled(`n8n-callback-${pdfId}`, config);
+  });
+
   it('lists documents for an owned client', async () => {
     const prisma = createMockPrisma();
     prisma.client.findFirst.mockResolvedValue({ id: testClientId });

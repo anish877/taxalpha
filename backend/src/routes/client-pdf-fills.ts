@@ -27,7 +27,7 @@ import {
   type PublicPdfFillLayout
 } from '../lib/pdf-fill/engine.js';
 import { getProfileLookup } from '../lib/profile/lookup.js';
-import { requestBaseUrl } from '../lib/request-base-url.js';
+import { publicRequestBaseUrl } from '../lib/request-base-url.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
@@ -269,7 +269,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
       requireOpenRouter(deps);
       const fillId = randomUUID();
       const originalPdfUrl = await storeTemplate(`pdf-fill-original-${fillId}`, pdf, deps.config);
-      const originalUrl = publicPdfFillUrl(requestBaseUrl(request), clientId, fillId, 'original');
+      const originalUrl = publicPdfFillUrl(publicRequestBaseUrl(request, deps.config), clientId, fillId, 'original');
       const analysisRunId = randomUUID();
       const startedAt = new Date();
 
@@ -387,9 +387,9 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
           id: fill.id,
           fileName: fill.fileName,
           status: fill.status,
-          originalPdfUrl: publicPdfFillUrl(requestBaseUrl(request), clientId, fill.id, 'original'),
+          originalPdfUrl: publicPdfFillUrl(publicRequestBaseUrl(request, deps.config), clientId, fill.id, 'original'),
           generatedPdfUrl: fill.generatedPdfUrl
-            ? publicPdfFillUrl(requestBaseUrl(request), clientId, fill.id, 'filled')
+            ? publicPdfFillUrl(publicRequestBaseUrl(request, deps.config), clientId, fill.id, 'filled')
             : null,
           generatedAt: fill.generatedAt?.toISOString() ?? null,
           resolvedLayout,
@@ -499,7 +499,7 @@ export function createClientPdfFillsRouter(deps: RouteDeps): ExpressRouter {
         previous
       );
       await storeFilled(generatedStorageKey(fill.id), generated.bytes, deps.config);
-      const generatedPdfUrl = publicPdfFillUrl(requestBaseUrl(request), clientId, fill.id, 'filled');
+      const generatedPdfUrl = publicPdfFillUrl(publicRequestBaseUrl(request, deps.config), clientId, fill.id, 'filled');
       const now = new Date();
 
       await deps.prisma.$transaction([

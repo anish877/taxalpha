@@ -1581,7 +1581,7 @@ export function ClientFormsWorkspacePage() {
                                     </button>
                                   ) : (
                                     <>
-                                      {investment.baiodfPdf && (
+                                      {investment.baiodfPdf && !generatingDisclosure && (
                                         <a className="premium-secondary inline-flex items-center px-5 py-2.5 text-sm text-ink" href={investment.baiodfPdf.pdfUrl} target="_blank" rel="noreferrer">
                                           Open document
                                         </a>

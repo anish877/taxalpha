@@ -41,9 +41,19 @@ const ILLIQUID_NON_QUALIFIED_FIELDS: Array<{
   key: keyof StatementOfFinancialConditionStepOneFields['illiquidNonQualifiedAssets'];
   label: string;
 }> = [
-  { key: 'primaryResidence', label: 'Primary Residence' },
+  { key: 'primaryResidence', label: 'Primary Residence (estimated fair market value)' },
   { key: 'investmentRealEstate', label: 'Investment Real Estate' },
   { key: 'privateBusiness', label: 'Private Business' }
+];
+
+const ACCREDITATION_ADJUSTMENT_FIELDS: Array<{
+  key: keyof StatementOfFinancialConditionStepOneFields['accreditationAdjustments'];
+  label: string;
+}> = [
+  {
+    key: 'primaryResidenceSecuredDebtIncreaseLast60Days',
+    label: 'Increase in primary-residence secured debt during the last 60 days'
+  }
 ];
 
 const LIQUID_QUALIFIED_FIELDS: Array<{
@@ -103,6 +113,9 @@ function createEmptyStep1Fields(): StatementOfFinancialConditionStepOneFields {
       investmentRealEstate: 0,
       privateBusiness: 0
     },
+    accreditationAdjustments: {
+      primaryResidenceSecuredDebtIncreaseLast60Days: 0
+    },
     liquidQualifiedAssets: {
       cashMoneyMarketsCds: 0,
       retirementPlans: 0,
@@ -132,12 +145,18 @@ function createEmptyTotals(): StatementOfFinancialConditionStepOneTotals {
     totalLiquidQualifiedAssets: 0,
     totalAnnualIncome: 0,
     totalIlliquidAssetsEquity: 0,
+    totalAssets: 0,
     totalAssetsLessPrimaryResidence: 0,
     totalNetWorthAssetsLessPrimaryResidenceLiabilities: 0,
     totalIlliquidSecurities: 0,
     totalNetWorth: 0,
     totalPotentialLiquidity: 0,
-    totalIlliquidQualifiedAssets: 0
+    totalIlliquidQualifiedAssets: 0,
+    primaryResidenceSecuredDebt: 0,
+    excludedPrimaryResidenceSecuredDebt: 0,
+    countedPrimaryResidenceSecuredDebt: 0,
+    accreditedInvestorLiabilities: 0,
+    accreditedInvestorNetWorth: 0
   };
 }
 
@@ -160,13 +179,21 @@ const QUESTION_CONFIG: Record<
   'step1.liabilities': {
     key: 'step1.liabilities',
     title: 'What liabilities should we include?',
-    helper: 'Enter all applicable liabilities. Blank amounts are treated as 0.',
+    helper: 'Enter current outstanding balances for all applicable liabilities. Blank amounts are treated as 0.',
     type: 'amount-grid-block'
   },
   'step1.illiquidNonQualifiedAssets': {
     key: 'step1.illiquidNonQualifiedAssets',
     title: 'Now, the illiquid non-qualified assets.',
-    helper: 'Enter current value/equity amounts for these items.',
+    helper:
+      'Enter the primary residence at estimated fair market value. For investment real estate and private businesses, enter current equity value.',
+    type: 'amount-grid-block'
+  },
+  'step1.accreditationAdjustments': {
+    key: 'step1.accreditationAdjustments',
+    title: 'Did primary-residence secured debt increase recently?',
+    helper:
+      'Enter how much the current mortgage and home-equity debt exceeds its balance 60 days ago, excluding debt incurred to acquire the residence. Enter 0 if none.',
     type: 'amount-grid-block'
   },
   'step1.liquidQualifiedAssets': {
@@ -240,6 +267,8 @@ function getAnswer(
       return fields.liabilities;
     case 'step1.illiquidNonQualifiedAssets':
       return fields.illiquidNonQualifiedAssets;
+    case 'step1.accreditationAdjustments':
+      return fields.accreditationAdjustments;
     case 'step1.liquidQualifiedAssets':
       return fields.liquidQualifiedAssets;
     case 'step1.incomeSummary':
@@ -272,6 +301,10 @@ function applyAnswer(
     case 'step1.illiquidNonQualifiedAssets':
       next.illiquidNonQualifiedAssets =
         answer as StatementOfFinancialConditionStepOneFields['illiquidNonQualifiedAssets'];
+      break;
+    case 'step1.accreditationAdjustments':
+      next.accreditationAdjustments =
+        answer as StatementOfFinancialConditionStepOneFields['accreditationAdjustments'];
       break;
     case 'step1.liquidQualifiedAssets':
       next.liquidQualifiedAssets = answer as StatementOfFinancialConditionStepOneFields['liquidQualifiedAssets'];
@@ -455,6 +488,7 @@ export function StatementOfFinancialConditionStep1Page() {
       | 'liquidNonQualifiedAssets'
       | 'liabilities'
       | 'illiquidNonQualifiedAssets'
+      | 'accreditationAdjustments'
       | 'liquidQualifiedAssets'
       | 'incomeSummary'
       | 'illiquidQualifiedAssets',
@@ -473,6 +507,9 @@ export function StatementOfFinancialConditionStep1Page() {
               step="any"
               type="number"
               value={answer[entry.key] ?? ''}
+              onFocus={(event) => {
+                if (event.currentTarget.value === '0') event.currentTarget.select();
+              }}
               onChange={(event) => {
                 const payload = structuredClone(answer);
                 payload[entry.key] = parseAmountInput(event.target.value);
@@ -547,6 +584,10 @@ export function StatementOfFinancialConditionStep1Page() {
       return renderAmountGrid('illiquidNonQualifiedAssets', ILLIQUID_NON_QUALIFIED_FIELDS);
     }
 
+    if (currentQuestionId === 'step1.accreditationAdjustments') {
+      return renderAmountGrid('accreditationAdjustments', ACCREDITATION_ADJUSTMENT_FIELDS);
+    }
+
     if (currentQuestionId === 'step1.liquidQualifiedAssets') {
       return renderAmountGrid('liquidQualifiedAssets', LIQUID_QUALIFIED_FIELDS);
     }
@@ -598,7 +639,12 @@ export function StatementOfFinancialConditionStep1Page() {
             <div className="mt-8 grid gap-3 rounded-2xl border border-line bg-paper/70 p-4 sm:grid-cols-2 lg:grid-cols-3">
               <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Liabilities: {totals.totalLiabilities}</p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Liquid Assets: {totals.totalLiquidAssets}</p>
-              <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Net Worth: {totals.totalNetWorth}</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-mute">
+                Total Net Worth (all assets): {totals.totalNetWorth}
+              </p>
+              <p className="text-xs uppercase tracking-[0.14em] text-mute">
+                Accredited Net Worth (excludes primary residence): {totals.accreditedInvestorNetWorth}
+              </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
                 Total Annual Income: {totals.totalAnnualIncome}
               </p>
@@ -607,6 +653,9 @@ export function StatementOfFinancialConditionStep1Page() {
               </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
                 Total Illiquid Qualified Assets: {totals.totalIlliquidQualifiedAssets}
+              </p>
+              <p className="text-xs uppercase tracking-[0.14em] text-mute">
+                Counted Accredited Liabilities: {totals.accreditedInvestorLiabilities}
               </p>
             </div>
 

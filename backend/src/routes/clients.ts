@@ -10,7 +10,7 @@ import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import { publicPdfFillUrl } from '../lib/pdf-fill/engine.js';
-import { requestBaseUrl } from '../lib/request-base-url.js';
+import { publicRequestBaseUrl } from '../lib/request-base-url.js';
 
 import {
   STEP_1_LABEL,
@@ -136,6 +136,7 @@ import {
 } from '../lib/baiodf-step3.js';
 import {
   defaultSfcStep1Fields,
+  getSfcStep1Totals,
   normalizeSfcStep1Fields,
   serializeSfcStep1Fields,
   validateSfcStep1Completion
@@ -801,22 +802,36 @@ function getStep1FieldsWithAutofill(params: {
 function getStep3FieldsWithAutofill(params: {
   step1Data: Prisma.JsonValue | null | undefined;
   step3Data: Prisma.JsonValue | null | undefined;
+  sfcStep1Data?: Prisma.JsonValue | null;
   clientEmail?: string | null;
   clientPhone?: string | null;
 }): Step3Fields {
+  const sfcTotals = params.sfcStep1Data
+    ? getSfcStep1Totals(normalizeSfcStep1Fields(params.sfcStep1Data))
+    : null;
   return applyStep3Prefill(normalizeStep3Fields(params.step3Data ?? null), {
     defaultKind: inferDefaultHolderKindFromStep1(params.step1Data ?? null),
     contactEmail: params.clientEmail ?? null,
-    contactMobile: params.clientPhone ?? null
+    contactMobile: params.clientPhone ?? null,
+    annualIncome: sfcTotals?.totalAnnualIncome,
+    netWorthExPrimaryResidence: sfcTotals?.accreditedInvestorNetWorth,
+    liquidNetWorth: sfcTotals?.totalPotentialLiquidity
   });
 }
 
 function getStep4FieldsWithAutofill(params: {
   step1Data: Prisma.JsonValue | null | undefined;
   step4Data: Prisma.JsonValue | null | undefined;
+  sfcStep1Data?: Prisma.JsonValue | null;
 }): Step4Fields {
+  const sfcTotals = params.sfcStep1Data
+    ? getSfcStep1Totals(normalizeSfcStep1Fields(params.sfcStep1Data))
+    : null;
   return applyStep4Prefill(normalizeStep4Fields(params.step4Data ?? null), {
-    defaultKind: inferDefaultHolderKindFromStep1(params.step1Data ?? null)
+    defaultKind: inferDefaultHolderKindFromStep1(params.step1Data ?? null),
+    annualIncome: sfcTotals?.totalAnnualIncome,
+    netWorthExPrimaryResidence: sfcTotals?.accreditedInvestorNetWorth,
+    liquidNetWorth: sfcTotals?.totalPotentialLiquidity
   });
 }
 
@@ -854,6 +869,7 @@ function getInvestorProfileResumeStepRoute(client: HydratedClient): string | nul
   const step3Fields = getStep3FieldsWithAutofill({
     step1Data: onboarding.step1Data,
     step3Data: onboarding.step3Data,
+    sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data,
     clientEmail: client.email,
     clientPhone: client.phone
   });
@@ -865,7 +881,8 @@ function getInvestorProfileResumeStepRoute(client: HydratedClient): string | nul
   if (isStep4RequiredFromStep1(onboarding.step1Data)) {
     const step4Fields = getStep4FieldsWithAutofill({
       step1Data: onboarding.step1Data,
-      step4Data: onboarding.step4Data
+      step4Data: onboarding.step4Data,
+      sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
     });
 
     if (Object.keys(validateStep4Completion(step4Fields)).length > 0) {
@@ -1222,6 +1239,23 @@ function isOnboardingIncomplete(status: WorkspaceOnboardingStatus | null): boole
   return status !== InvestorProfileOnboardingStatus.COMPLETED;
 }
 
+function clientFormPdfViewUrl(clientId: string, pdfId: string): string {
+  return `/api/clients/${encodeURIComponent(clientId)}/form-pdfs/${encodeURIComponent(pdfId)}/file.pdf`;
+}
+
+function browserPdfUrl(pdf: { id: string; clientId: string; pdfUrl: string }): string {
+  try {
+    const pathname = new URL(pdf.pdfUrl, 'http://taxalpha.local').pathname;
+    if (/^\/api\/n8n\/clients\/[^/]+\/form-pdfs\/[^/]+\/file\.pdf$/.test(pathname)) {
+      return clientFormPdfViewUrl(pdf.clientId, pdf.id);
+    }
+  } catch {
+    // Preserve external and legacy URLs that cannot be parsed.
+  }
+
+  return pdf.pdfUrl;
+}
+
 function toClientFormPdfRecord(pdf: {
   id: string;
   clientId: string;
@@ -1244,7 +1278,7 @@ function toClientFormPdfRecord(pdf: {
     formCode: pdf.formCode,
     workspaceFormCode: pdf.workspaceFormCode,
     workspaceFormTitle: getWorkspaceFormTitle(pdf.workspaceFormCode),
-    pdfUrl: pdf.pdfUrl,
+    pdfUrl: browserPdfUrl(pdf),
     documentTitle: pdf.documentTitle,
     fileName: pdf.fileName,
     sourceRunId: pdf.sourceRunId,
@@ -1355,8 +1389,12 @@ function toFormWorkspaceRecord(
         baiodfPdf: latestBaiodfPdf
           ? {
               id: latestBaiodfPdf.id,
-              pdfUrl: latestBaiodfPdf.pdfUrl,
-              generatedAt: latestBaiodfPdf.generatedAt?.toISOString() ?? null
+              pdfUrl: browserPdfUrl({
+                id: latestBaiodfPdf.id,
+                clientId: client.id,
+                pdfUrl: latestBaiodfPdf.pdfUrl
+              }),
+              generatedAt: (latestBaiodfPdf.generatedAt ?? latestBaiodfPdf.receivedAt).toISOString()
             }
           : null,
         baiodfPdfCount: baiodfPdfs.length,
@@ -1639,11 +1677,16 @@ function toStepTwoResponse(clientId: string, onboarding: StepTwoSelectableOnboar
 function toStepThreeResponse(
   clientId: string,
   onboarding: StepThreeSelectableOnboarding,
-  clientContact: { email?: string | null; phone?: string | null } = {}
+  clientContact: {
+    email?: string | null;
+    phone?: string | null;
+    sfcStep1Data?: Prisma.JsonValue | null;
+  } = {}
 ): Step3Response {
   const fields = getStep3FieldsWithAutofill({
     step1Data: onboarding.step1Data,
     step3Data: onboarding.step3Data,
+    sfcStep1Data: clientContact.sfcStep1Data,
     clientEmail: clientContact.email ?? null,
     clientPhone: clientContact.phone ?? null
   });
@@ -1669,10 +1712,15 @@ function toStepThreeResponse(
   };
 }
 
-function toStepFourResponse(clientId: string, onboarding: StepFourSelectableOnboarding): Step4Response {
+function toStepFourResponse(
+  clientId: string,
+  onboarding: StepFourSelectableOnboarding,
+  sfcStep1Data?: Prisma.JsonValue | null
+): Step4Response {
   const fields = getStep4FieldsWithAutofill({
     step1Data: onboarding.step1Data,
-    step4Data: onboarding.step4Data
+    step4Data: onboarding.step4Data,
+    sfcStep1Data
   });
   const visibleQuestionIds = getVisibleStep4QuestionIds(fields);
   const currentQuestionIndex = clampStep4QuestionIndex(onboarding.step4CurrentQuestionIndex, visibleQuestionIds);
@@ -1871,7 +1919,12 @@ function toInvestorReviewResponse(
   clientId: string,
   stepNumber: number,
   onboarding: InvestorProfileReviewSelectableOnboarding,
-  clientContact: { name?: string | null; email?: string | null; phone?: string | null },
+  clientContact: {
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    sfcStep1Data?: Prisma.JsonValue | null;
+  },
   advisorName: string,
   nextRouteAfterCompletion: string | null
 ) {
@@ -1906,7 +1959,11 @@ function toInvestorReviewResponse(
           step1Data: onboarding.step1Data,
           step3CurrentQuestionIndex: onboarding.step3CurrentQuestionIndex,
           step3Data: onboarding.step3Data
-        }, { email: clientContact.email ?? null, phone: clientContact.phone ?? null }),
+        }, {
+          email: clientContact.email ?? null,
+          phone: clientContact.phone ?? null,
+          sfcStep1Data: clientContact.sfcStep1Data
+        }),
         stepNumber
       );
     case 4:
@@ -1916,7 +1973,7 @@ function toInvestorReviewResponse(
           step1Data: onboarding.step1Data,
           step4CurrentQuestionIndex: onboarding.step4CurrentQuestionIndex,
           step4Data: onboarding.step4Data
-        }),
+        }, clientContact.sfcStep1Data),
         stepNumber
       );
     case 5:
@@ -2563,7 +2620,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           client,
           activeForms,
           summarizeClientFormPdfs(pdfs),
-          requestBaseUrl(request)
+          publicRequestBaseUrl(request, deps.config)
         )
       };
 
@@ -2758,7 +2815,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           hydratedClient,
           activeForms,
           summarizeClientFormPdfs(pdfs),
-          requestBaseUrl(request)
+          publicRequestBaseUrl(request, deps.config)
         )
       };
 
@@ -3216,7 +3273,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       response.json(
         toStepThreeResponse(clientId, onboarding, {
           email: client.email,
-          phone: client.phone
+          phone: client.phone,
+          sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
         })
       );
     } catch (error) {
@@ -3324,6 +3382,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const existingFields = getStep3FieldsWithAutofill({
         step1Data: existingOnboarding?.step1Data,
         step3Data: existingOnboarding?.step3Data,
+        sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data,
         clientEmail: client.email,
         clientPhone: client.phone
       });
@@ -3381,7 +3440,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       response.json(
         toStepThreeResponse(clientId, onboarding, {
           email: client.email,
-          phone: client.phone
+          phone: client.phone,
+          sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
         })
       );
     } catch (error) {
@@ -3481,7 +3541,13 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      response.json(toStepFourResponse(clientId, onboarding));
+      response.json(
+        toStepFourResponse(
+          clientId,
+          onboarding,
+          client.statementOfFinancialConditionOnboarding?.step1Data
+        )
+      );
     } catch (error) {
       next(error);
     }
@@ -3594,7 +3660,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
 
       const existingFields = getStep4FieldsWithAutofill({
         step1Data: existingOnboarding?.step1Data,
-        step4Data: existingOnboarding?.step4Data
+        step4Data: existingOnboarding?.step4Data,
+        sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
       });
       const visibleBefore = getVisibleStep4QuestionIds(existingFields);
 
@@ -3647,7 +3714,13 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json(toStepFourResponse(clientId, onboarding));
+      response.json(
+        toStepFourResponse(
+          clientId,
+          onboarding,
+          client.statementOfFinancialConditionOnboarding?.step1Data
+        )
+      );
     } catch (error) {
       next(error);
     }
@@ -4434,7 +4507,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             {
               name: client.name,
               email: client.email,
-              phone: client.phone
+              phone: client.phone,
+              sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
             },
             authUser.name,
             nextRouteAfterCompletion
@@ -4594,6 +4668,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           const fields = getStep3FieldsWithAutofill({
             step1Data: nextStep1Data,
             step3Data: parsedBody.data.fields as Prisma.JsonValue,
+            sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data,
             clientEmail: client.email,
             clientPhone: client.phone
           });
@@ -4602,7 +4677,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         } else if (stepNumber === 4) {
           const fields = getStep4FieldsWithAutofill({
             step1Data: nextStep1Data,
-            step4Data: parsedBody.data.fields as Prisma.JsonValue
+            step4Data: parsedBody.data.fields as Prisma.JsonValue,
+            sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
           });
           stepFieldErrors = isStep4RequiredFromStep1(nextStep1Data) ? validateStep4Completion(fields) : {};
           nextStep4Data = serializeStep4Fields(fields) as Prisma.JsonValue;
@@ -4737,7 +4813,8 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             {
               name: client.name,
               email: client.email,
-              phone: client.phone
+              phone: client.phone,
+              sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
             },
             authUser.name,
             nextRouteAfterCompletion

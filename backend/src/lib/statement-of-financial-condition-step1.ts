@@ -41,12 +41,14 @@ const INCOME_SUMMARY_FIELDS = [
   'other'
 ] as const;
 const ILLIQUID_QUALIFIED_ASSET_FIELDS = ['purchaseAmountValue'] as const;
+const ACCREDITATION_ADJUSTMENT_FIELDS = ['primaryResidenceSecuredDebtIncreaseLast60Days'] as const;
 
 const SFC_STEP_1_QUESTION_IDS = [
   'step1.accountRegistration',
   'step1.liquidNonQualifiedAssets',
   'step1.liabilities',
   'step1.illiquidNonQualifiedAssets',
+  'step1.accreditationAdjustments',
   'step1.liquidQualifiedAssets',
   'step1.incomeSummary',
   'step1.illiquidQualifiedAssets'
@@ -60,6 +62,7 @@ type IlliquidNonQualifiedAssetKey = (typeof ILLIQUID_NON_QUALIFIED_ASSET_FIELDS)
 type LiquidQualifiedAssetKey = (typeof LIQUID_QUALIFIED_ASSET_FIELDS)[number];
 type IncomeSummaryKey = (typeof INCOME_SUMMARY_FIELDS)[number];
 type IlliquidQualifiedAssetKey = (typeof ILLIQUID_QUALIFIED_ASSET_FIELDS)[number];
+type AccreditationAdjustmentKey = (typeof ACCREDITATION_ADJUSTMENT_FIELDS)[number];
 
 export type SfcStep1QuestionId = (typeof SFC_STEP_1_QUESTION_IDS)[number];
 
@@ -84,6 +87,7 @@ export interface SfcStep1Fields {
   liquidNonQualifiedAssets: Record<LiquidNonQualifiedAssetKey, number>;
   liabilities: Record<LiabilityKey, number>;
   illiquidNonQualifiedAssets: Record<IlliquidNonQualifiedAssetKey, number>;
+  accreditationAdjustments: Record<AccreditationAdjustmentKey, number>;
   liquidQualifiedAssets: Record<LiquidQualifiedAssetKey, number>;
   incomeSummary: Record<IncomeSummaryKey, number>;
   illiquidQualifiedAssets: Record<IlliquidQualifiedAssetKey, number>;
@@ -95,12 +99,19 @@ export interface SfcStep1Totals {
   totalLiquidQualifiedAssets: number;
   totalAnnualIncome: number;
   totalIlliquidAssetsEquity: number;
+  totalAssets: number;
   totalAssetsLessPrimaryResidence: number;
+  /** Backward-compatible name for accreditedInvestorNetWorth. */
   totalNetWorthAssetsLessPrimaryResidenceLiabilities: number;
   totalIlliquidSecurities: number;
   totalNetWorth: number;
   totalPotentialLiquidity: number;
   totalIlliquidQualifiedAssets: number;
+  primaryResidenceSecuredDebt: number;
+  excludedPrimaryResidenceSecuredDebt: number;
+  countedPrimaryResidenceSecuredDebt: number;
+  accreditedInvestorLiabilities: number;
+  accreditedInvestorNetWorth: number;
 }
 
 export interface SfcStep1PrefillContext {
@@ -298,6 +309,10 @@ export function defaultSfcStep1Fields(): SfcStep1Fields {
       ILLIQUID_NON_QUALIFIED_ASSET_FIELDS,
       {}
     ) as SfcStep1Fields['illiquidNonQualifiedAssets'],
+    accreditationAdjustments: normalizeAmountMap(
+      ACCREDITATION_ADJUSTMENT_FIELDS,
+      {}
+    ) as SfcStep1Fields['accreditationAdjustments'],
     liquidQualifiedAssets: normalizeAmountMap(
       LIQUID_QUALIFIED_ASSET_FIELDS,
       {}
@@ -334,6 +349,10 @@ export function normalizeSfcStep1Fields(step1Data: Prisma.JsonValue | null | und
       ILLIQUID_NON_QUALIFIED_ASSET_FIELDS,
       root.illiquidNonQualifiedAssets
     ) as SfcStep1Fields['illiquidNonQualifiedAssets'],
+    accreditationAdjustments: normalizeAmountMap(
+      ACCREDITATION_ADJUSTMENT_FIELDS,
+      root.accreditationAdjustments
+    ) as SfcStep1Fields['accreditationAdjustments'],
     liquidQualifiedAssets: normalizeAmountMap(
       LIQUID_QUALIFIED_ASSET_FIELDS,
       root.liquidQualifiedAssets
@@ -380,31 +399,67 @@ export function getSfcStep1Totals(fields: SfcStep1Fields): SfcStep1Totals {
   const totalLiquidQualifiedAssets = sumValues(fields.liquidQualifiedAssets);
   const totalAnnualIncome = sumValues(fields.incomeSummary);
   const totalIlliquidAssetsEquity = sumValues(fields.illiquidNonQualifiedAssets);
-  const totalAssetsLessPrimaryResidence =
+  const totalIlliquidQualifiedAssets = sumValues(fields.illiquidQualifiedAssets);
+  const primaryResidenceValue = fields.illiquidNonQualifiedAssets.primaryResidence;
+  const totalAssets =
     totalLiquidAssets +
-    fields.illiquidNonQualifiedAssets.investmentRealEstate +
-    fields.illiquidNonQualifiedAssets.privateBusiness;
-  const totalNetWorthAssetsLessPrimaryResidenceLiabilities =
-    totalAssetsLessPrimaryResidence - totalLiabilities;
+    totalLiquidQualifiedAssets +
+    totalIlliquidAssetsEquity +
+    totalIlliquidQualifiedAssets;
+  const totalAssetsLessPrimaryResidence =
+    totalAssets - primaryResidenceValue;
+
+  // SEC Rule 501(a)(5): exclude the primary residence as an asset. Debt secured
+  // by it is generally excluded up to fair market value, except for a non-
+  // acquisition increase during the prior 60 days; underwater excess is counted.
+  const primaryResidenceSecuredDebt =
+    fields.liabilities.mortgagePrimaryResidence + fields.liabilities.homeEquityLoans;
+  const underwaterPrimaryResidenceDebt = Math.max(
+    primaryResidenceSecuredDebt - primaryResidenceValue,
+    0
+  );
+  const recentSecuredDebtIncrease = Math.min(
+    fields.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days,
+    primaryResidenceSecuredDebt
+  );
+  // The recent increase can overlap the underwater portion of the same debt.
+  // Count the union of the two included portions, never the same debt twice.
+  const countedPrimaryResidenceSecuredDebt = Math.max(
+    underwaterPrimaryResidenceDebt,
+    recentSecuredDebtIncrease
+  );
+  const excludedPrimaryResidenceSecuredDebt =
+    primaryResidenceSecuredDebt - countedPrimaryResidenceSecuredDebt;
+  const accreditedInvestorLiabilities =
+    totalLiabilities - primaryResidenceSecuredDebt + countedPrimaryResidenceSecuredDebt;
+  const accreditedInvestorNetWorth =
+    totalAssetsLessPrimaryResidence - accreditedInvestorLiabilities;
+  const totalNetWorthAssetsLessPrimaryResidenceLiabilities = accreditedInvestorNetWorth;
   const totalIlliquidSecurities =
     fields.illiquidNonQualifiedAssets.investmentRealEstate +
-    fields.illiquidNonQualifiedAssets.privateBusiness;
-  const totalNetWorth = totalLiquidAssets + totalIlliquidAssetsEquity - totalLiabilities;
+    fields.illiquidNonQualifiedAssets.privateBusiness +
+    totalIlliquidQualifiedAssets;
+  const totalNetWorth = totalAssets - totalLiabilities;
   const totalPotentialLiquidity = totalLiquidAssets + totalLiquidQualifiedAssets;
-  const totalIlliquidQualifiedAssets = sumValues(fields.illiquidQualifiedAssets);
-  
+
   return {
     totalLiabilities,
     totalLiquidAssets,
     totalLiquidQualifiedAssets,
     totalAnnualIncome,
     totalIlliquidAssetsEquity,
+    totalAssets,
     totalAssetsLessPrimaryResidence,
     totalNetWorthAssetsLessPrimaryResidenceLiabilities,
     totalIlliquidSecurities,
     totalNetWorth,
     totalPotentialLiquidity,
-    totalIlliquidQualifiedAssets
+    totalIlliquidQualifiedAssets,
+    primaryResidenceSecuredDebt,
+    excludedPrimaryResidenceSecuredDebt,
+    countedPrimaryResidenceSecuredDebt,
+    accreditedInvestorLiabilities,
+    accreditedInvestorNetWorth
   };
 }
 
@@ -433,7 +488,8 @@ export function clampSfcStep1QuestionIndex(
 
 export function validateSfcStep1Answer(
   questionId: SfcStep1QuestionId,
-  answer: unknown
+  answer: unknown,
+  currentFields?: SfcStep1Fields
 ): ValidationResult<unknown> {
   switch (questionId) {
     case 'step1.accountRegistration':
@@ -452,6 +508,34 @@ export function validateSfcStep1Answer(
         ILLIQUID_NON_QUALIFIED_ASSET_FIELDS,
         'step1.illiquidNonQualifiedAssets'
       );
+    case 'step1.accreditationAdjustments': {
+      const validation = validateAmountMap(
+        answer,
+        ACCREDITATION_ADJUSTMENT_FIELDS,
+        'step1.accreditationAdjustments'
+      );
+      if (!validation.success || !currentFields) {
+        return validation;
+      }
+
+      const securedPrimaryResidenceDebt =
+        currentFields.liabilities.mortgagePrimaryResidence +
+        currentFields.liabilities.homeEquityLoans;
+      if (
+        validation.value.primaryResidenceSecuredDebtIncreaseLast60Days >
+        securedPrimaryResidenceDebt
+      ) {
+        return {
+          success: false,
+          fieldErrors: {
+            'step1.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days':
+              'The 60-day debt increase cannot exceed the current mortgage and home-equity debt.'
+          }
+        };
+      }
+
+      return validation;
+    }
     case 'step1.liquidQualifiedAssets':
       return validateAmountMap(
         answer,
@@ -496,6 +580,9 @@ export function applySfcStep1Answer(
     case 'step1.illiquidNonQualifiedAssets':
       next.illiquidNonQualifiedAssets = answer as SfcStep1Fields['illiquidNonQualifiedAssets'];
       break;
+    case 'step1.accreditationAdjustments':
+      next.accreditationAdjustments = answer as SfcStep1Fields['accreditationAdjustments'];
+      break;
     case 'step1.liquidQualifiedAssets':
       next.liquidQualifiedAssets = answer as SfcStep1Fields['liquidQualifiedAssets'];
       break;
@@ -529,6 +616,7 @@ export function validateSfcStep1Completion(fields: SfcStep1Fields): Record<strin
     { prefix: 'step1.liquidNonQualifiedAssets', values: fields.liquidNonQualifiedAssets },
     { prefix: 'step1.liabilities', values: fields.liabilities },
     { prefix: 'step1.illiquidNonQualifiedAssets', values: fields.illiquidNonQualifiedAssets },
+    { prefix: 'step1.accreditationAdjustments', values: fields.accreditationAdjustments },
     { prefix: 'step1.liquidQualifiedAssets', values: fields.liquidQualifiedAssets },
     { prefix: 'step1.incomeSummary', values: fields.incomeSummary },
     { prefix: 'step1.illiquidQualifiedAssets', values: fields.illiquidQualifiedAssets }
@@ -540,6 +628,17 @@ export function validateSfcStep1Completion(fields: SfcStep1Fields): Record<strin
         errors[`${section.prefix}.${key}`] = 'Enter a valid non-negative amount.';
       }
     }
+  }
+
+  const securedPrimaryResidenceDebt =
+    fields.liabilities.mortgagePrimaryResidence + fields.liabilities.homeEquityLoans;
+  if (
+    fields.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days >
+    securedPrimaryResidenceDebt
+  ) {
+    errors[
+      'step1.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days'
+    ] = 'The 60-day debt increase cannot exceed the current mortgage and home-equity debt.';
   }
 
   return errors;

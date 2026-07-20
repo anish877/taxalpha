@@ -86,6 +86,9 @@ describe('investor-profile-step4', () => {
     expect(visible).toContain('step4.holder.contact.phones');
     expect(visible).toContain('step4.holder.legalAddress');
     expect(visible).toContain('step4.investment.knowledgeExperience');
+    expect(visible).not.toContain('step4.financial.annualIncomeRange');
+    expect(visible).not.toContain('step4.financial.netWorthExPrimaryResidenceRange');
+    expect(visible).not.toContain('step4.financial.liquidNetWorthRange');
     expect(visible).not.toContain('step4.holder.contact.phones.mobile');
     expect(visible).not.toContain('step4.holder.legalAddress.line1');
     expect(visible).not.toContain('step4.investment.byType.equities.sinceYear');
@@ -178,11 +181,41 @@ describe('investor-profile-step4', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts years employed as a non-negative whole number instead of a calendar year', () => {
+    const validResult = validateStep4Answer('step4.holder.employment.yearsEmployed', 23);
+    expect(validResult.success).toBe(true);
+
+    const invalidResult = validateStep4Answer('step4.holder.employment.yearsEmployed', -1);
+    expect(invalidResult.success).toBe(false);
+    if (!invalidResult.success) {
+      expect(invalidResult.fieldErrors['step4.holder.employment.yearsEmployed']).toContain(
+        'whole number (0 or more)'
+      );
+    }
+  });
+
   it('prefills the default holder kind without overwriting an existing selection', () => {
     const fields = defaultStep4Fields();
 
-    const prefilled = applyStep4Prefill(fields, { defaultKind: 'entity' });
+    const prefilled = applyStep4Prefill(fields, {
+      defaultKind: 'entity',
+      annualIncome: 275000,
+      netWorthExPrimaryResidence: 1400000,
+      liquidNetWorth: 650000
+    });
     expect(prefilled.holder.kind).toEqual({ person: false, entity: true });
+    expect(prefilled.financialInformation.annualIncomeRange).toEqual({
+      fromBracket: 275000,
+      toBracket: null
+    });
+    expect(prefilled.financialInformation.netWorthExPrimaryResidenceRange).toEqual({
+      fromBracket: 1400000,
+      toBracket: null
+    });
+    expect(prefilled.financialInformation.liquidNetWorthRange).toEqual({
+      fromBracket: 650000,
+      toBracket: null
+    });
 
     const existing = defaultStep4Fields();
     existing.holder.kind = { person: true, entity: false };

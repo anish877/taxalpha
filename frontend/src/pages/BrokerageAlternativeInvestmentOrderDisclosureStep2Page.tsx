@@ -472,6 +472,9 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
                 step="any"
                 type="number"
                 value={answer.existingIlliquidAltPositions ?? ''}
+                onFocus={(event) => {
+                  if (event.currentTarget.value === '0') event.currentTarget.select();
+                }}
                 onChange={(event) => {
                   const payload = structuredClone(answer);
                   payload.existingIlliquidAltPositions = parseAmountInput(event.target.value);
@@ -489,6 +492,9 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
                 step="any"
                 type="number"
                 value={answer.existingSemiLiquidAltPositions ?? ''}
+                onFocus={(event) => {
+                  if (event.currentTarget.value === '0') event.currentTarget.select();
+                }}
                 onChange={(event) => {
                   const payload = structuredClone(answer);
                   payload.existingSemiLiquidAltPositions = parseAmountInput(event.target.value);
@@ -506,6 +512,9 @@ export function BrokerageAlternativeInvestmentOrderDisclosureStep2Page() {
                 step="any"
                 type="number"
                 value={answer.existingTaxAdvantageAltPositions ?? ''}
+                onFocus={(event) => {
+                  if (event.currentTarget.value === '0') event.currentTarget.select();
+                }}
                 onChange={(event) => {
                   const payload = structuredClone(answer);
                   payload.existingTaxAdvantageAltPositions = parseAmountInput(event.target.value);

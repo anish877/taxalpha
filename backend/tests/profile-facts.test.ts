@@ -45,6 +45,19 @@ describe('smart PDF facts', () => {
     });
   });
 
+  it('requires net worth to exceed, not merely equal, the $1 million threshold', () => {
+    const data = lookup({
+      'account.registrationType': { individual: true },
+      'financial.netWorthExPrimaryResidence': 1_000_000
+    });
+
+    expect(resolveFact('accreditation.naturalPersonNetWorthQualified', data)).toMatchObject({
+      value: false,
+      confidence: 'high',
+      needsReview: false
+    });
+  });
+
   it('keeps income accreditation unresolved without exact income-history inputs', () => {
     const resolved = resolveFact('accreditation.naturalPersonIncomeQualified', lookup({}));
     expect(resolved).toMatchObject({

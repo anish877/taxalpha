@@ -1035,7 +1035,7 @@ describe('forms workspace routes', () => {
           workspaceFormCode: 'INVESTOR_PROFILE',
           documentTitle: 'Additional Holder',
           pdfUrl: expect.stringMatching(
-            new RegExp(`/api/n8n/clients/client_1/form-pdfs/${createdPdfId}/file\\.pdf$`)
+            new RegExp(`/api/clients/client_1/form-pdfs/${createdPdfId}/file\\.pdf$`)
           ),
           sourceRunId: 'run_1'
         })
@@ -1049,7 +1049,7 @@ describe('forms workspace routes', () => {
       documentTitle: 'Additional Holder'
     });
     const fileResponse = await request(app)
-      .get(`/api/n8n/clients/client_1/form-pdfs/${createdPdfId}/file.pdf`)
+      .get(`/api/clients/client_1/form-pdfs/${createdPdfId}/file.pdf`)
       .set('Cookie', createAuthCookie());
 
     expect(fileResponse.status).toBe(200);
