@@ -58,9 +58,6 @@ export function SignInPage() {
   return (
     <AuthShell
       subtitle="Sign in to continue managing investor onboarding."
-      switchLabel="New here?"
-      switchText="Create account"
-      switchTo="/signup"
       title="Sign In"
     >
       <form className="space-y-4" onSubmit={handleSubmit}>

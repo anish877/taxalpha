@@ -19,6 +19,7 @@ const config = { nodeEnv: 'test', frontendUrl: 'x', jwtSecret: 'test_secret_test
 describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
   it('projects Investor Profile onboarding data into canonical keys', async () => {
     const prisma = {
+      clientBroker: { findFirst: vi.fn().mockResolvedValue(null) },
       investorProfileOnboarding: { findUnique: vi.fn().mockResolvedValue({
         step1Data: { rrName: 'Jane RR', rrNo: 'RR-1', typeOfAccount: { primaryType: { jointTenant: true, individual: false } } },
         step3Data: { holder: {
@@ -47,6 +48,7 @@ describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
 
   it('returns empty when no onboarding exists', async () => {
     const prisma = {
+      clientBroker: { findFirst: vi.fn().mockResolvedValue(null) },
       investorProfileOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
       statementOfFinancialConditionOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
       brokerageAlternativeInvestmentOrderDisclosureOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
@@ -58,6 +60,7 @@ describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
 
   it('projects SFC, BAIODF, and BAIV 506(c) data into mapping variables', async () => {
     const prisma = {
+      clientBroker: { findFirst: vi.fn().mockResolvedValue(null) },
       investorProfileOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
       statementOfFinancialConditionOnboarding: { findUnique: vi.fn().mockResolvedValue({
         step1Data: {
@@ -102,6 +105,37 @@ describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
     expect(lookup['investment.amount']?.value).toBe(250000);
     expect(lookup['investment.productName']?.value).toBe('RGP Income Fund II');
     expect(lookup['accreditation.rule506cGuidelineAcknowledged']?.value).toBe(true);
+  });
+
+  it('uses the selected primary broker as authoritative subscription-agreement context', async () => {
+    const prisma = {
+      clientBroker: { findFirst: vi.fn().mockResolvedValue({
+        broker: {
+          name: 'Jordan Representative',
+          email: 'jordan@example.com',
+          firmName: 'Northstar Broker-Dealer',
+          brokerDealerCrdNumber: 'BD-100',
+          representativeCrdNumber: 'RR-200',
+          branchAddressLine1: '10 Market Street',
+          branchAddressLine2: null,
+          branchCity: 'Austin',
+          branchState: 'TX',
+          branchPostalCode: '78701',
+          branchPhone: '+1 512 555 0100'
+        }
+      }) },
+      investorProfileOnboarding: { findUnique: vi.fn().mockResolvedValue({ step1Data: { rrName: 'Old RR', rrNo: 'OLD-1' } }) },
+      statementOfFinancialConditionOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
+      brokerageAlternativeInvestmentOrderDisclosureOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
+      brokerageAccreditedInvestorVerificationOnboarding: { findUnique: vi.fn().mockResolvedValue(null) },
+      clientProfileValue: { findMany: vi.fn().mockResolvedValue([]) }
+    } as unknown as PrismaClient;
+
+    const lookup = await getProfileLookup(prisma, 'c1');
+    expect(lookup['advisor.rrName']).toEqual({ value: 'Jordan Representative', sourceFormCode: 'PRIMARY_BROKER' });
+    expect(lookup['advisor.rrNumber']?.value).toBe('RR-200');
+    expect(lookup['broker.firmName']?.value).toBe('Northstar Broker-Dealer');
+    expect(lookup['broker.branchCityStateZip']?.value).toBe('Austin, TX 78701');
   });
 });
 

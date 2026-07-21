@@ -73,13 +73,22 @@ model User {
 }
 
 model Broker {
-  id          String     @id @default(cuid())
-  ownerUserId String
-  name        String
-  email       String
-  kind        BrokerKind
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id                          String     @id @default(cuid())
+  ownerUserId                 String
+  name                        String
+  email                       String
+  kind                        BrokerKind
+  firmName                    String?
+  brokerDealerCrdNumber       String?
+  representativeCrdNumber     String?
+  branchAddressLine1          String?
+  branchAddressLine2          String?
+  branchCity                  String?
+  branchState                 String?
+  branchPostalCode            String?
+  branchPhone                 String?
+  createdAt                   DateTime   @default(now())
+  updatedAt                   DateTime   @updatedAt
 
   owner       User           @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
   clientLinks ClientBroker[]
@@ -138,11 +147,13 @@ model ClientBroker {
   clientId String
   brokerId String
   role     ClientBrokerRole
+  position Int @default(0)
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   broker Broker @relation(fields: [brokerId], references: [id], onDelete: Cascade)
 
   @@id([clientId, brokerId])
+  @@unique([clientId, position])
 }
 
 model FormCatalog {

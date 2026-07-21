@@ -5,6 +5,7 @@ import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import { clientAccessWhere } from '../lib/client-access.js';
+import { postprocessGeneratedBaiodfPdf } from '../lib/baiodf-pdf-postprocess.js';
 import {
   getCallbackFormTitle,
   getWorkspaceFormCode,
@@ -136,6 +137,12 @@ export function createN8nRouter(deps: RouteDeps): ExpressRouter {
                 }
               }
             }
+          },
+          baiodfOnboarding: {
+            select: {
+              step1Data: true,
+              step2Data: true
+            }
           }
         }
       });
@@ -150,15 +157,25 @@ export function createN8nRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
+      let baiodfOnboarding = formCode === 'BAIODF' ? client.baiodfOnboarding : null;
       if (investmentId) {
         const investment = await deps.prisma.clientInvestment.findFirst({
           where: { id: investmentId, clientId },
-          select: { id: true }
+          select: {
+            id: true,
+            baiodfOnboarding: {
+              select: {
+                step1Data: true,
+                step2Data: true
+              }
+            }
+          }
         });
         if (!investment) {
           response.status(404).json({ message: 'Investment not found.' });
           return;
         }
+        baiodfOnboarding = investment.baiodfOnboarding;
       }
 
       const dedupeSourceRunId = effectiveSourceRunId(sourceRunId, parsedPdfUrl.data);
@@ -180,7 +197,15 @@ export function createN8nRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const fallbackDocumentTitle = documentTitle || getCallbackFormTitle(formCode);
-      const pdfBytes = await downloadCallbackPdf(parsedPdfUrl.data);
+      const downloadedPdfBytes = await downloadCallbackPdf(parsedPdfUrl.data);
+      const pdfBytes =
+        formCode === 'BAIODF' && baiodfOnboarding
+          ? await postprocessGeneratedBaiodfPdf(
+              downloadedPdfBytes,
+              baiodfOnboarding.step1Data,
+              baiodfOnboarding.step2Data
+            )
+          : downloadedPdfBytes;
       const pdfId = randomUUID();
       const storageKey = callbackPdfStorageKey(pdfId);
       await storeFilled(storageKey, pdfBytes, deps.config);

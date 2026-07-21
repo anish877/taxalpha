@@ -4,8 +4,7 @@ import { AdminProtectedRoute } from './components/AdminProtectedRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicOnlyRoute } from './components/PublicOnlyRoute';
 import { PdfUpdatesProvider } from './context/PdfUpdatesContext';
-import { AdminFormsPage } from './pages/AdminFormsPage';
-import { AdminReviewFormPage } from './pages/AdminReviewFormPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
 import { DynamicFormPage } from './pages/DynamicFormPage';
 import { SchemaWizardPage } from './pages/SchemaWizardPage';
 import { BrokerageAlternativeInvestmentOrderDisclosureStep1Page } from './pages/BrokerageAlternativeInvestmentOrderDisclosureStep1Page';
@@ -28,7 +27,6 @@ import { LandingPage } from './pages/LandingPage';
 import { StatementOfFinancialConditionStep1Page } from './pages/StatementOfFinancialConditionStep1Page';
 import { StatementOfFinancialConditionStep2Page } from './pages/StatementOfFinancialConditionStep2Page';
 import { SignInPage } from './pages/SignInPage';
-import { SignUpPage } from './pages/SignUpPage';
 
 export function App() {
   return (
@@ -38,19 +36,19 @@ export function App() {
           <Route element={<LandingPage />} path="/" />
           <Route
             element={
+              <AdminProtectedRoute>
+                <AdminUsersPage />
+              </AdminProtectedRoute>
+            }
+            path="/admin/users"
+          />
+          <Route
+            element={
               <PublicOnlyRoute>
                 <SignInPage />
               </PublicOnlyRoute>
             }
             path="/signin"
-          />
-          <Route
-            element={
-              <PublicOnlyRoute>
-                <SignUpPage />
-              </PublicOnlyRoute>
-            }
-            path="/signup"
           />
           <Route
             element={
@@ -235,18 +233,10 @@ export function App() {
           <Route
             element={
               <AdminProtectedRoute>
-                <AdminFormsPage />
+                <Navigate replace to="/admin/users" />
               </AdminProtectedRoute>
             }
-            path="/admin/forms"
-          />
-          <Route
-            element={
-              <AdminProtectedRoute>
-                <AdminReviewFormPage />
-              </AdminProtectedRoute>
-            }
-            path="/admin/forms/:id"
+            path="/admin/forms/*"
           />
           <Route element={<Navigate replace to="/" />} path="*" />
         </Routes>

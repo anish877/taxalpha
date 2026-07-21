@@ -49,6 +49,20 @@ export const CANONICAL_DICTIONARY: Record<string, CanonicalEntry> = {
   // advisor
   'advisor.rrName': { shape: 'string' },
   'advisor.rrNumber': { shape: 'string' },
+  // primary broker selected during client intake
+  'broker.firmName': { shape: 'string' },
+  'broker.brokerDealerCrdNumber': { shape: 'string' },
+  'broker.representativeName': { shape: 'string' },
+  'broker.representativeCrdNumber': { shape: 'string' },
+  'broker.branchAddressLine1': { shape: 'string' },
+  'broker.branchAddressLine2': { shape: 'string' },
+  'broker.branchCity': { shape: 'string' },
+  'broker.branchState': { shape: 'string' },
+  'broker.branchPostalCode': { shape: 'string' },
+  'broker.branchCityStateZip': { shape: 'string' },
+  'broker.branchFullAddress': { shape: 'string' },
+  'broker.branchPhone': { shape: 'string', rule: 'phone' },
+  'broker.email': { shape: 'string', rule: 'email' },
   // investment / financial
   'investment.amount': { shape: 'number', rule: 'nonNegativeNumber' },
   'investment.productName': { shape: 'string' },

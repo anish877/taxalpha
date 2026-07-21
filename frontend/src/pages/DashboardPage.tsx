@@ -6,7 +6,7 @@ import { CreateClientDrawer } from '../components/create-client/CreateClientDraw
 import { useAuth } from '../context/AuthContext';
 import { usePdfUpdates } from '../context/PdfUpdatesContext';
 import { useToast } from '../context/ToastContext';
-import type { BrokerUserOption, ClientRecord, FormCatalogItem } from '../types/api';
+import type { BrokerOption, ClientRecord, FormCatalogItem } from '../types/api';
 
 export function DashboardPage() {
   const { user, signOut } = useAuth();
@@ -16,20 +16,23 @@ export function DashboardPage() {
 
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [forms, setForms] = useState<FormCatalogItem[]>([]);
-  const [brokerUsers, setBrokerUsers] = useState<BrokerUserOption[]>([]);
+  const [brokers, setBrokers] = useState<BrokerOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const hasInvestorProfileForm = forms.some((form) => form.code === 'INVESTOR_PROFILE');
-  const canOpenCreateClient = !loading && !error && hasInvestorProfileForm;
+  const hasAssignedBroker = brokers.length > 0;
+  const canOpenCreateClient = !loading && !error && hasInvestorProfileForm && hasAssignedBroker;
 
   const handleOpenCreateClient = () => {
     if (!canOpenCreateClient) {
       pushToast(
-        hasInvestorProfileForm
-          ? 'Please wait until dashboard data finishes loading.'
-          : 'Investor Profile form is unavailable. Seed forms and refresh.',
+        !hasInvestorProfileForm
+          ? 'Investor Profile form is unavailable. Seed forms and refresh.'
+          : !hasAssignedBroker
+            ? 'No brokers are available. Ask an administrator to create one.'
+            : 'Please wait until dashboard data finishes loading.',
         'error'
       );
       return;
@@ -43,15 +46,15 @@ export function DashboardPage() {
     setError(null);
 
     try {
-      const [clientsResponse, formsResponse, brokerUsersResponse] = await Promise.all([
+      const [clientsResponse, formsResponse, brokersResponse] = await Promise.all([
         apiRequest<{ clients: ClientRecord[] }>('/api/clients'),
         apiRequest<{ forms: FormCatalogItem[] }>('/api/forms'),
-        apiRequest<{ users: BrokerUserOption[] }>('/api/clients/broker-users')
+        apiRequest<{ brokers: BrokerOption[] }>('/api/clients/brokers')
       ]);
 
       setClients(clientsResponse.clients);
       setForms(formsResponse.forms);
-      setBrokerUsers(brokerUsersResponse.users);
+      setBrokers(Array.isArray(brokersResponse.brokers) ? brokersResponse.brokers : []);
     } catch (requestError) {
       if (requestError instanceof ApiError && requestError.statusCode === 401) {
         await signOut();
@@ -101,9 +104,9 @@ export function DashboardPage() {
                 <button
                   className="rounded-full border border-line px-4 py-2 text-sm text-ink transition hover:border-accent"
                   type="button"
-                  onClick={() => navigate('/admin/forms')}
+                  onClick={() => navigate('/admin/users')}
                 >
-                  Form Library
+                  Admin
                 </button>
               )}
               <button
@@ -111,7 +114,7 @@ export function DashboardPage() {
                 type="button"
                 onClick={handleOpenCreateClient}
               >
-                New Client
+                Client Intake
               </button>
               <button
                 className="rounded-full border border-line px-4 py-2 text-sm text-mute transition hover:border-black hover:text-ink"
@@ -135,7 +138,7 @@ export function DashboardPage() {
               type="button"
               onClick={handleOpenCreateClient}
             >
-              Create Client
+              Client Intake
             </button>
           </div>
 
@@ -273,10 +276,9 @@ export function DashboardPage() {
 
       {user && (
         <CreateClientDrawer
-          brokerUsers={brokerUsers}
+          brokers={brokers}
           forms={forms}
           open={drawerOpen}
-          primaryBroker={user}
           onClientCreated={handleClientCreated}
           onClose={() => setDrawerOpen(false)}
         />

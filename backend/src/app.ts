@@ -6,7 +6,7 @@ import express, { type ErrorRequestHandler, type Express } from 'express';
 import { getRuntimeConfig } from './config/env.js';
 import { HttpError } from './lib/http-error.js';
 import { prisma } from './lib/prisma.js';
-import { createAdminFormsRouter } from './routes/admin-forms.js';
+import { createAdminUsersRouter } from './routes/admin-users.js';
 import { createAuthRouter } from './routes/auth.js';
 import { createBaiv506cRouter } from './routes/baiv-506c.js';
 import { createBaiodfRouter } from './routes/baiodf.js';
@@ -51,7 +51,7 @@ export function createApp(options: CreateAppOptions = {}): Express {
   app.use('/api/auth', createAuthRouter({ prisma: prismaClient, config }));
   app.use('/api/uploads', createUploadsRouter({ prisma: prismaClient, config }));
   app.use('/api/forms', createFormsRouter({ prisma: prismaClient, config }));
-  app.use('/api/admin', createAdminFormsRouter({ prisma: prismaClient, config }));
+  app.use('/api/admin', createAdminUsersRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientDocumentsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientInvestmentsRouter({ prisma: prismaClient, config }));
   app.use('/api/clients', createClientPdfTicketsRouter({ prisma: prismaClient, config }));

@@ -8,7 +8,7 @@ import { PdfMappingLayout, type PdfMappingRect, type PdfMappingTarget } from '..
 import { CANONICAL_DICTIONARY } from '../profile/canonical-dictionary.js';
 import { factDefinitions } from '../profile/facts.js';
 import { FORM_INTELLIGENCE_CORPUS, destinationProfileForFingerprint } from './form-intelligence.js';
-import { resolvePublicPdfFillLayout, type BuiltPdfFill } from './engine.js';
+import { buildPdfFillMapping, resolvePublicPdfFillLayout, type BuiltPdfFill } from './engine.js';
 
 type AiFormat = 'text' | 'date' | 'currency' | 'phone' | 'tin' | 'ssn';
 
@@ -95,6 +95,13 @@ function buildPrompt(structure: PdfStructure, fingerprint: string, lookup: Profi
     {
       task:
         'Map every extracted PDF field to the best internal data/fact key before PDF filling. Return exactly one decision for every fieldIndex. Do not invent keys. Use null when no safe mapping exists. Signature fields and signature-adjacent printed-name/date fields must be ignored with ignoredReason signature_skipped. Legal/evidence-heavy accreditation conclusions should map only to review-sensitive facts, not raw guesses.',
+      mappingRules: [
+        'Prefer a semantically correct variable whose resolvedClientDataSummary.hasValue is true.',
+        'Use null instead of a weak or ambiguous match; do not map merely because two labels share a generic word such as name, date, or address.',
+        'Map second-owner or joint/control-person variables only when the PDF label explicitly identifies that role.',
+        'For checkbox and radio widgets, set optionValue only when it is the exact source enum/one-hot key represented by that widget.',
+        'Do not map signature, initials, signature-adjacent printed-name, or signature-adjacent date fields.'
+      ],
       fingerprint,
       knownProfileContext: profile
         ? {
@@ -207,6 +214,43 @@ function decisionTarget(field: ExtractedField, index: number, decision: AiFieldD
   };
 }
 
+function mergeWithDeterministicTargets(
+  structure: PdfStructure,
+  fingerprint: string,
+  aiTargets: PdfMappingTarget[]
+): PdfMappingTarget[] {
+  const profile = destinationProfileForFingerprint(fingerprint);
+  const deterministic = buildPdfFillMapping(structure, fingerprint).targets;
+
+  return aiTargets.map((aiTarget, index) => {
+    const field = structure.fields[index];
+    const deterministicTarget = deterministic[index];
+    if (!field || !deterministicTarget) return aiTarget;
+
+    // A skip decision is safety-sensitive. Preserve it whether it came from
+    // deterministic signature detection or the model.
+    if (deterministicTarget.ignoredReason) return deterministicTarget;
+    if (aiTarget.ignoredReason) return aiTarget;
+
+    // Fingerprint-specific mappings have been reviewed against the exact PDF
+    // and must not be displaced by a probabilistic answer.
+    if (field.fieldName && profile?.knownFieldIntents[field.fieldName]) {
+      return deterministicTarget;
+    }
+
+    const deterministicConfidence = deterministicTarget.confidence ?? 0;
+    const aiConfidence = aiTarget.confidence ?? 0;
+    if (
+      deterministicTarget.variableKey &&
+      (!aiTarget.variableKey || deterministicConfidence >= aiConfidence)
+    ) {
+      return deterministicTarget;
+    }
+
+    return aiTarget;
+  });
+}
+
 export async function buildAiPdfFill(
   pdf: Uint8Array,
   structure: PdfStructure,
@@ -215,26 +259,41 @@ export async function buildAiPdfFill(
 ): Promise<BuiltPdfFill> {
   const fingerprint = fingerprintPdf(pdf);
   const profile = destinationProfileForFingerprint(fingerprint);
-  const raw = await chatCompletion(
-    [
+  const deterministicLayout = buildPdfFillMapping(structure, fingerprint);
+  let targets = deterministicLayout.targets;
+
+  try {
+    const raw = await chatCompletion(
+      [
+        {
+          role: 'system',
+          content:
+            'You are TaxAlpha PDF field mapper. Think carefully, then return strict JSON only. You map PDF fields to existing client-data keys before filling. Never guess legal conclusions. Never map signatures.'
+        },
+        { role: 'user', content: buildPrompt(structure, fingerprint, lookup) }
+      ],
       {
-        role: 'system',
-        content:
-          'You are TaxAlpha PDF field mapper. Think carefully, then return strict JSON only. You map PDF fields to existing client-data keys before filling. Never guess legal conclusions. Never map signatures.'
-      },
-      { role: 'user', content: buildPrompt(structure, fingerprint, lookup) }
-    ],
-    {
-      ...opts,
-      temperature: 0,
-      maxTokens: 64000,
-      jsonSchema: { name: 'direct_pdf_field_mapping', schema: RESPONSE_SCHEMA }
-    }
-  );
-  const decisions = validateDecisions(parseAiResponse(raw), structure);
+        ...opts,
+        temperature: 0,
+        maxTokens: 64000,
+        jsonSchema: { name: 'direct_pdf_field_mapping', schema: RESPONSE_SCHEMA }
+      }
+    );
+    const decisions = validateDecisions(parseAiResponse(raw), structure);
+    const aiTargets = structure.fields.map((field, index) =>
+      decisionTarget(field, index, decisions.get(index)!)
+    );
+    targets = mergeWithDeterministicTargets(structure, fingerprint, aiTargets);
+  } catch (error) {
+    console.warn('AI PDF mapping failed; using deterministic mapping fallback.', {
+      fingerprint,
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+
   const mappingLayout = PdfMappingLayout.parse({
     version: 1,
-    targets: structure.fields.map((field, index) => decisionTarget(field, index, decisions.get(index)!))
+    targets
   });
   const { resolvedLayout, warnings } = resolvePublicPdfFillLayout(structure.pages, mappingLayout, lookup, {
     fields: structure.fields

@@ -343,6 +343,11 @@ function createMockPrisma() {
     formCatalog: {
       findMany: vi.fn()
     },
+    broker: {
+      findMany: vi.fn().mockResolvedValue([
+        { id: 'broker_self', ownerUserId: 'admin_1', name: 'Advisor One', email: 'advisor@example.com', kind: 'EXTERNAL' }
+      ])
+    },
     client: {
       findMany: vi.fn(),
       findFirst: vi.fn()
@@ -379,42 +384,32 @@ describe('client routes', () => {
     expect(response.status).toBe(401);
   });
 
-  it('returns website users available for broker sharing', async () => {
+  it('returns the global broker directory for Client Intake', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.user.findMany.mockResolvedValue([
-      { id: 'user_2', name: 'Advisor Two', email: 'advisor.two@example.com' }
+    prisma.broker.findMany.mockResolvedValue([
+      { id: 'broker_1', ownerUserId: authUser.id, name: 'Advisor One', email: 'advisor@example.com', firmName: 'Alpha Securities' }
     ]);
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
 
-    const app = createApp({
-      prismaClient: prisma as unknown as PrismaClient,
-      config
-    });
-
-    const response = await request(app)
-      .get('/api/clients/broker-users')
-      .set('Cookie', createAuthCookie());
+    const response = await request(app).get('/api/clients/brokers').set('Cookie', createAuthCookie());
 
     expect(response.status).toBe(200);
-    expect(response.body.users).toEqual([
-      { id: 'user_2', name: 'Advisor Two', email: 'advisor.two@example.com' }
-    ]);
-    expect(prisma.user.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          id: {
-            not: authUser.id
-          }
-        }
-      })
-    );
+    expect(response.body.brokers[0]).toMatchObject({ id: 'broker_1', firmName: 'Alpha Securities' });
+    expect(prisma.broker.findMany).toHaveBeenCalledWith({
+      orderBy: [{ name: 'asc' }, { email: 'asc' }]
+    });
   });
 
-  it('creates a client with investor profile onboarding and reuses broker by email', async () => {
+  it('creates a client using brokers from the admin directory', async () => {
     const prisma = createMockPrisma();
 
     prisma.user.findUnique.mockResolvedValue(authUser);
     prisma.formCatalog.findMany.mockResolvedValue([{ id: 'form_investor', code: 'INVESTOR_PROFILE' }]);
+    prisma.broker.findMany.mockResolvedValue([
+      { id: 'broker_self', ownerUserId: 'admin_1', name: authUser.name, email: authUser.email, kind: 'EXTERNAL' },
+      { id: 'broker_2', ownerUserId: 'admin_1', name: 'Extra Broker', email: 'extra@example.com', kind: 'EXTERNAL' }
+    ]);
 
     const tx = {
       client: {
@@ -503,10 +498,7 @@ describe('client routes', () => {
         clientName: 'John Smith',
         clientEmail: 'John@example.com',
         clientPhone: '+1 222 333 4444',
-        additionalBrokers: [
-          { name: 'Extra Broker', email: 'extra@example.com' },
-          { name: 'Extra Broker', email: 'EXTRA@example.com' }
-        ]
+        brokerIds: ['broker_self', 'broker_2']
       });
 
     expect(response.status).toBe(201);
@@ -514,10 +506,15 @@ describe('client routes', () => {
     expect(response.body.client.additionalBrokers).toHaveLength(1);
     expect(response.body.client.investorProfileOnboardingStatus).toBe('NOT_STARTED');
     expect(response.body.client.hasInvestorProfile).toBe(true);
-    expect(tx.broker.upsert).toHaveBeenCalledTimes(1);
+    expect(tx.clientBroker.createMany).toHaveBeenCalledWith({
+      data: [
+        { clientId: 'client_1', brokerId: 'broker_self', role: 'PRIMARY', position: 0 },
+        { clientId: 'client_1', brokerId: 'broker_2', role: 'ADDITIONAL', position: 1 }
+      ]
+    });
   });
 
-  it('creates a shared client link for selected website broker users', async () => {
+  it('uses ordered broker ids and makes the first selected broker primary', async () => {
     const prisma = createMockPrisma();
     const sharedBrokerUser = {
       id: 'user_2',
@@ -526,8 +523,11 @@ describe('client routes', () => {
     };
 
     prisma.user.findUnique.mockResolvedValue(authUser);
-    prisma.user.findMany.mockResolvedValue([sharedBrokerUser]);
     prisma.formCatalog.findMany.mockResolvedValue([{ id: 'form_investor', code: 'INVESTOR_PROFILE' }]);
+    prisma.broker.findMany.mockResolvedValue([
+      { id: 'broker_self', ownerUserId: authUser.id, name: authUser.name, email: authUser.email, kind: 'SELF' },
+      { id: 'broker_shared', ownerUserId: authUser.id, name: sharedBrokerUser.name, email: sharedBrokerUser.email, kind: 'EXTERNAL' }
+    ]);
 
     const tx = {
       client: {
@@ -542,7 +542,8 @@ describe('client routes', () => {
             createdAt: new Date('2025-01-01T00:00:00.000Z'),
             brokerLinks: [
               {
-                role: 'PRIMARY',
+                role: 'ADDITIONAL',
+                position: 1,
                 broker: {
                   id: 'broker_self',
                   name: authUser.name,
@@ -551,7 +552,8 @@ describe('client routes', () => {
                 }
               },
               {
-                role: 'ADDITIONAL',
+                role: 'PRIMARY',
+                position: 0,
                 broker: {
                   id: 'broker_shared',
                   name: sharedBrokerUser.name,
@@ -571,23 +573,7 @@ describe('client routes', () => {
           }),
         create: vi.fn().mockResolvedValue({ id: 'client_1' })
       },
-      broker: {
-        findUnique: vi.fn().mockResolvedValue({
-          id: 'broker_self',
-          ownerUserId: authUser.id,
-          name: authUser.name,
-          email: authUser.email,
-          kind: 'SELF'
-        }),
-        create: vi.fn(),
-        upsert: vi.fn().mockResolvedValue({
-          id: 'broker_shared',
-          ownerUserId: sharedBrokerUser.id,
-          name: sharedBrokerUser.name,
-          email: sharedBrokerUser.email,
-          kind: 'SELF'
-        })
-      },
+      broker: { findUnique: vi.fn(), create: vi.fn(), upsert: vi.fn() },
       clientBroker: {
         createMany: vi.fn().mockResolvedValue({ count: 2 })
       },
@@ -615,35 +601,37 @@ describe('client routes', () => {
       .send({
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
-        additionalBrokerUserIds: [sharedBrokerUser.id]
+        brokerIds: ['broker_shared', 'broker_self']
       });
 
     expect(response.status).toBe(201);
+    expect(response.body.client.primaryBroker).toEqual({
+      id: 'broker_shared',
+      name: sharedBrokerUser.name,
+      email: sharedBrokerUser.email
+    });
     expect(response.body.client.additionalBrokers).toEqual([
       {
-        id: 'broker_shared',
-        name: sharedBrokerUser.name,
-        email: sharedBrokerUser.email
+        id: 'broker_self',
+        name: authUser.name,
+        email: authUser.email
       }
     ]);
-    expect(tx.broker.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          ownerUserId_email: {
-            ownerUserId: sharedBrokerUser.id,
-            email: sharedBrokerUser.email
-          }
-        }
-      })
-    );
     expect(tx.clientBroker.createMany).toHaveBeenCalledWith({
-      data: expect.arrayContaining([
+      data: [
         {
           clientId: 'client_1',
           brokerId: 'broker_shared',
-          role: 'ADDITIONAL'
+          role: 'PRIMARY',
+          position: 0
+        },
+        {
+          clientId: 'client_1',
+          brokerId: 'broker_self',
+          role: 'ADDITIONAL',
+          position: 1
         }
-      ])
+      ]
     });
   });
 
@@ -733,7 +721,7 @@ describe('client routes', () => {
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
         clientPhone: '+1 222 333 4444',
-        additionalBrokers: [],
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'SFC']
       });
 
@@ -851,7 +839,7 @@ describe('client routes', () => {
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
         clientPhone: '+1 222 333 4444',
-        additionalBrokers: [],
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF'],
         investments: [{ name: 'Growth Fund' }]
       });
@@ -882,6 +870,7 @@ describe('client routes', () => {
       .send({
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF'],
         investments: []
       });
@@ -901,6 +890,7 @@ describe('client routes', () => {
       .send({
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'BAIODF'],
         investments: [{ name: 'Growth Fund' }, { name: 'growth fund' }]
       });
@@ -924,6 +914,7 @@ describe('client routes', () => {
       .send({
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'UNKNOWN_FORM']
       });
 
@@ -948,6 +939,7 @@ describe('client routes', () => {
       .send({
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'SFC']
       });
 
@@ -998,7 +990,7 @@ describe('client routes', () => {
       .send({
         clientName: 'Duplicate User',
         clientEmail: 'duplicate@example.com',
-        additionalBrokers: []
+        brokerIds: ['broker_self']
       });
 
     expect(response.status).toBe(409);
@@ -2490,7 +2482,7 @@ describe('client routes', () => {
       .send({
         clientName: 'John Smith',
         clientEmail: 'john@example.com',
-        additionalBrokers: [],
+        brokerIds: ['broker_self'],
         selectedFormCodes: ['INVESTOR_PROFILE', 'BAIV_506C']
       });
 

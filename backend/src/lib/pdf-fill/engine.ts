@@ -140,6 +140,13 @@ function heuristicIntent(field: ExtractedField): PdfFieldIntent | null {
   const name = (field.fieldName ?? '').toLowerCase();
 
   if (field.type === 'text') {
+    if (text.includes('registered representative') && text.includes('crd')) return { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.92 };
+    if (text.includes('broker-dealer firm')) return { variableKey: 'canonical:broker.firmName', format: 'text', confidence: 0.94 };
+    if (text.includes('broker-dealer') && text.includes('crd')) return { variableKey: 'canonical:broker.brokerDealerCrdNumber', format: 'text', confidence: 0.9 };
+    if (text.includes('branch address') && text.includes('city')) return { variableKey: 'canonical:broker.branchFullAddress', format: 'text', confidence: 0.9 };
+    if (text.includes('branch address')) return { variableKey: 'canonical:broker.branchAddressLine1', format: 'text', confidence: 0.86 };
+    if (text.includes('branch phone')) return { variableKey: 'canonical:broker.branchPhone', format: 'phone', confidence: 0.9 };
+    if (name === 'email address_8') return { variableKey: 'canonical:broker.email', format: 'text', confidence: 0.96 };
     if (text.includes('rr name')) return { variableKey: 'fact:advisor.rrName', format: 'text', confidence: 0.86 };
     if (text.includes('rr no') || text.includes('crd no')) return { variableKey: 'fact:advisor.rrNumber', format: 'text', confidence: 0.82 };
     if (text.includes('customer name')) return { variableKey: 'fact:client.customerNames', format: 'text', confidence: 0.84 };
@@ -375,6 +382,24 @@ function overrideResolution(target: PdfMappingTarget, override: PdfFillOverride)
   };
 }
 
+function notApplicableReason(target: PdfMappingTarget, lookup: ProfileLookup): string | null {
+  const variableKey = target.variableKey ?? '';
+  const isAdditionalHolderField =
+    variableKey.startsWith('canonical:person2.') ||
+    variableKey.startsWith('canonical:person2.address.') ||
+    variableKey.startsWith('fact:joint.');
+
+  if (!isAdditionalHolderField) return null;
+
+  const jointOwner = resolveFact('account.requiresJointOwner', lookup);
+  const controlPerson = resolveFact('account.requiresControlPerson', lookup);
+  if (jointOwner?.value === false && controlPerson?.value === false) {
+    return 'Not applicable for the selected individual account registration.';
+  }
+
+  return null;
+}
+
 export function resolvePublicPdfFillLayout(
   pages: PdfPageGeometry[],
   layout: PdfMappingLayout,
@@ -407,6 +432,25 @@ export function resolvePublicPdfFillLayout(
         status: 'skipped',
         sourceLabel: 'Skipped',
         explanation: 'Signature fields are skipped in this version.',
+        confidence: targetConfidence,
+        editable: false,
+        pdfField: target.pdfField
+      };
+    }
+
+    const inapplicable = notApplicableReason(target, lookup);
+    if (inapplicable) {
+      return {
+        id: target.id,
+        page: target.page,
+        rect: target.rect,
+        widgetType: target.widgetType,
+        label,
+        value: null,
+        displayValue: '',
+        status: 'skipped',
+        sourceLabel: 'Not applicable',
+        explanation: inapplicable,
         confidence: targetConfidence,
         editable: false,
         pdfField: target.pdfField

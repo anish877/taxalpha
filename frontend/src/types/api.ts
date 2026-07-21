@@ -392,12 +392,25 @@ export interface BrokerSummary {
   id: string;
   name: string;
   email: string;
+  firmName?: string | null;
+  brokerDealerCrdNumber?: string | null;
+  representativeCrdNumber?: string | null;
+  branchAddressLine1?: string | null;
+  branchAddressLine2?: string | null;
+  branchCity?: string | null;
+  branchState?: string | null;
+  branchPostalCode?: string | null;
+  branchPhone?: string | null;
 }
 
-export interface BrokerUserOption {
+export type BrokerOption = BrokerSummary;
+
+export interface AdminUserRecord {
   id: string;
   name: string;
   email: string;
+  isAdmin: boolean;
+  createdAt: string;
 }
 
 export interface FormCatalogItem {

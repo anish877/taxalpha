@@ -14,7 +14,6 @@ import type { User } from '../types/api';
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
-  signUp: (payload: { name: string; email: string; password: string }) => Promise<void>;
   signIn: (payload: { email: string; password: string }) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -45,15 +44,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     void refreshUser();
   }, [refreshUser]);
 
-  const signUp = useCallback(async (payload: { name: string; email: string; password: string }) => {
-    const response = await apiRequest<{ user: User }>('/api/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-
-    setUser(response.user);
-  }, []);
-
   const signIn = useCallback(async (payload: { email: string; password: string }) => {
     const response = await apiRequest<{ user: User }>('/api/auth/signin', {
       method: 'POST',
@@ -77,12 +67,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     () => ({
       user,
       loading,
-      signUp,
       signIn,
       signOut,
       refreshUser
     }),
-    [loading, refreshUser, signIn, signOut, signUp, user]
+    [loading, refreshUser, signIn, signOut, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

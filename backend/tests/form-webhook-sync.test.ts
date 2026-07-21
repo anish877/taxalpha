@@ -1,4 +1,5 @@
 import {
+  BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus,
   InvestorProfileOnboardingStatus,
   StatementOfFinancialConditionOnboardingStatus
 } from '@prisma/client';
@@ -6,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildFormWebhookPayload,
+  BAIODF_FORM_CODE,
   INVESTOR_PROFILE_FORM_CODE,
   STATEMENT_OF_FINANCIAL_CONDITION_FORM_CODE,
   type FormWebhookClientSnapshot
@@ -184,5 +186,62 @@ describe('form-webhook-sync', () => {
     expect(fields.computed.financial.totalNetWorth).toBe(1_230_000);
     expect(fields.computed.financial.netWorthExPrimaryResidence).toBe(830_000);
     expect(fields.computed.financial.accreditedInvestorLiabilities).toBe(20_000);
+  });
+
+  it('includes explicit BAIODF tax selection and calculated concentrations', () => {
+    const client: FormWebhookClientSnapshot = {
+      id: 'client_1',
+      name: 'Client One',
+      email: 'client@example.com',
+      phone: null,
+      formSelections: [{ form: { code: 'BAIODF', title: 'BAIODF' } }],
+      investorProfileOnboarding: null,
+      statementOfFinancialConditionOnboarding: null,
+      baiodfOnboarding: {
+        status: BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED,
+        step1Data: {
+          orderBasics: {
+            proposedPrincipalAmount: 20_000,
+            taxAdvantagePurchase: { yes: true, no: false }
+          }
+        },
+        step2Data: {
+          existingAltPositions: {
+            existingIlliquidAltPositions: 10_000,
+            existingSemiLiquidAltPositions: 5_000,
+            existingTaxAdvantageAltPositions: 2_000
+          },
+          netWorthAndConcentration: {
+            totalNetWorth: 100_000,
+            liquidNetWorth: 50_000
+          }
+        },
+        step3Data: null
+      },
+      baiv506cOnboarding: null
+    };
+
+    const payload = buildFormWebhookPayload(
+      client,
+      BAIODF_FORM_CODE,
+      'Advisor One',
+      'https://api.example.com'
+    );
+    const fields = payload.fields as {
+      step2: { concentrations: Record<string, number> };
+      computed: {
+        taxAdvantagePurchase: string | null;
+        concentrations: Record<string, number>;
+      };
+    };
+
+    expect(fields.computed.taxAdvantagePurchase).toBe('yes');
+    expect(fields.step2.concentrations).toEqual({
+      existingIlliquidAltConcentrationPercent: 10,
+      existingSemiLiquidAltConcentrationPercent: 5,
+      existingTaxAdvantageAltConcentrationPercent: 2,
+      totalConcentrationPercent: 35
+    });
+    expect(fields.computed.concentrations).toEqual(fields.step2.concentrations);
   });
 });

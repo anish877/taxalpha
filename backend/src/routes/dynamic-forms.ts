@@ -91,7 +91,7 @@ export function createDynamicFormsRouter(deps: RouteDeps): ExpressRouter {
 
       const template = await loadTemplate(form.templateUrl, deps.config);
       if (!template) {
-        throw new HttpError(400, 'The original PDF for this form is not stored. Re-upload it in the Form Library.');
+        throw new HttpError(400, 'The original PDF is unavailable. Upload the document through Files & PDF Fill instead.');
       }
 
       // Use posted answers if present, else the saved ones.

@@ -260,6 +260,12 @@ function suggestFactBinding(field: ExtractedField): SchemaBinding | null {
   }
 
   if (field.type === 'text') {
+    if (text.includes('registered representative') && text.includes('crd')) return { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.92 };
+    if (text.includes('broker-dealer firm')) return { variableKey: 'canonical:broker.firmName', format: 'text', confidence: 0.94 };
+    if (text.includes('broker-dealer') && text.includes('crd')) return { variableKey: 'canonical:broker.brokerDealerCrdNumber', format: 'text', confidence: 0.9 };
+    if (text.includes('branch address') && text.includes('city')) return { variableKey: 'canonical:broker.branchFullAddress', format: 'text', confidence: 0.9 };
+    if (text.includes('branch address')) return { variableKey: 'canonical:broker.branchAddressLine1', format: 'text', confidence: 0.86 };
+    if (text.includes('branch phone')) return { variableKey: 'canonical:broker.branchPhone', format: 'phone', confidence: 0.9 };
     if (text.includes('rr name')) return { variableKey: 'fact:advisor.rrName', format: 'text', confidence: 0.88 };
     if (text.includes('rr no')) return { variableKey: 'fact:advisor.rrNumber', format: 'text', confidence: 0.88 };
     if (text.includes('customer name')) return { variableKey: 'fact:client.customerNames', format: 'text', confidence: 0.84 };

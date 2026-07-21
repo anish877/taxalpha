@@ -4,7 +4,6 @@ import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../src/app.js';
-import { AUTH_COOKIE_NAME } from '../src/lib/auth.js';
 
 const config = {
   nodeEnv: 'test' as const,
@@ -31,14 +30,8 @@ function createMockPrisma() {
 }
 
 describe('auth routes', () => {
-  it('creates user and self broker on signup', async () => {
+  it('does not expose public signup', async () => {
     const prisma = createMockPrisma();
-    prisma.user.findUnique.mockResolvedValue(null);
-    prisma.user.create.mockResolvedValue({
-      id: 'user_1',
-      name: 'Ada Lovelace',
-      email: 'ada@example.com'
-    });
 
     const app = createApp({
       prismaClient: prisma as unknown as PrismaClient,
@@ -51,27 +44,8 @@ describe('auth routes', () => {
       password: 'SuperSecure123'
     });
 
-    expect(response.status).toBe(201);
-    expect(response.body.user).toEqual({
-      id: 'user_1',
-      name: 'Ada Lovelace',
-      email: 'ada@example.com'
-    });
-
-    const createArgs = prisma.user.create.mock.calls[0]?.[0];
-    expect(createArgs?.data?.brokers?.create).toMatchObject({
-      name: 'Ada Lovelace',
-      email: 'ada@example.com',
-      kind: 'SELF'
-    });
-
-    const rawCookies = response.get('set-cookie');
-    const cookies = Array.isArray(rawCookies)
-      ? rawCookies
-      : typeof rawCookies === 'string'
-        ? [rawCookies]
-        : [];
-    expect(cookies.some((cookie: string) => cookie.includes(`${AUTH_COOKIE_NAME}=`))).toBe(true);
+    expect(response.status).toBe(404);
+    expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
   it('rejects signin with wrong password', async () => {

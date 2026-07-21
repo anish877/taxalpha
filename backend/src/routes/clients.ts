@@ -209,15 +209,9 @@ const createClientSchema = z.object({
     },
     z.string().regex(phonePattern, 'Enter a valid phone number.').optional()
   ),
-  additionalBrokers: z
-    .array(
-      z.object({
-        name: z.string().trim().min(1, 'Broker name is required.'),
-        email: z.string().trim().email('Enter a valid broker email.')
-      })
-    )
-    .default([]),
-  additionalBrokerUserIds: z.array(z.string().trim().min(1)).default([]),
+  brokerIds: z
+    .array(z.string().trim().min(1))
+    .min(1, 'Select at least one broker. The first broker will be primary.'),
   selectedFormCodes: z
     .array(z.string().trim().min(1))
     .default([INVESTOR_PROFILE_FORM_CODE]),
@@ -332,13 +326,25 @@ const investorProfileReviewStepUpdateSchema = z.object({
 
 const clientInclude = {
   brokerLinks: {
+    orderBy: {
+      position: 'asc' as const
+    },
     include: {
       broker: {
         select: {
           id: true,
           name: true,
           email: true,
-          kind: true
+          kind: true,
+          firmName: true,
+          brokerDealerCrdNumber: true,
+          representativeCrdNumber: true,
+          branchAddressLine1: true,
+          branchAddressLine2: true,
+          branchCity: true,
+          branchState: true,
+          branchPostalCode: true,
+          branchPhone: true
         }
       }
     }
@@ -2066,30 +2072,12 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     }
   });
 
-  router.get('/broker-users', requireAuth(deps), async (request, response, next) => {
+  router.get('/brokers', requireAuth(deps), async (_request, response, next) => {
     try {
-      const users = await deps.prisma.user.findMany({
-        where: {
-          id: {
-            not: request.authUser!.id
-          }
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true
-        },
-        orderBy: [
-          {
-            name: 'asc'
-          },
-          {
-            email: 'asc'
-          }
-        ]
+      const brokers = await deps.prisma.broker.findMany({
+        orderBy: [{ name: 'asc' }, { email: 'asc' }]
       });
-
-      response.json({ users });
+      response.json({ brokers });
     } catch (error) {
       next(error);
     }
@@ -2110,24 +2098,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     const clientName = parsed.data.clientName.trim();
     const clientEmail = normalizeEmail(parsed.data.clientEmail);
     const clientPhone = parsed.data.clientPhone?.trim() ?? null;
-    const additionalBrokerUserIds = [
-      ...new Set(parsed.data.additionalBrokerUserIds.filter((userId) => userId !== authUser.id))
-    ];
-
-    const additionalBrokerMap = new Map<string, { name: string; email: string }>();
-
-    for (const broker of parsed.data.additionalBrokers) {
-      const email = normalizeEmail(broker.email);
-
-      if (email === authUser.email) {
-        continue;
-      }
-
-      additionalBrokerMap.set(email, {
-        name: broker.name.trim(),
-        email
-      });
-    }
+    const brokerIds = [...new Set(parsed.data.brokerIds)];
 
     const selectedFormCodes = [...new Set(parsed.data.selectedFormCodes.map((code) => code.trim().toUpperCase()))];
 
@@ -2183,7 +2154,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
     }
 
     try {
-      const [selectedForms, additionalBrokerUsers] = await Promise.all([
+      const [selectedForms, availableSelectedBrokers] = await Promise.all([
         deps.prisma.formCatalog.findMany({
           where: {
             code: {
@@ -2196,17 +2167,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             code: true
           }
         }),
-        additionalBrokerUserIds.length > 0
-          ? deps.prisma.user.findMany({
+        brokerIds.length > 0
+          ? deps.prisma.broker.findMany({
               where: {
-                id: {
-                  in: additionalBrokerUserIds
-                }
-              },
-              select: {
-                id: true,
-                name: true,
-                email: true
+                id: { in: brokerIds }
               }
             })
           : Promise.resolve([])
@@ -2224,13 +2188,13 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      if (additionalBrokerUsers.length !== additionalBrokerUserIds.length) {
-        const foundUserIds = new Set(additionalBrokerUsers.map((user) => user.id));
-        const missingUserIds = additionalBrokerUserIds.filter((userId) => !foundUserIds.has(userId));
+      if (availableSelectedBrokers.length !== brokerIds.length) {
+        const foundBrokerIds = new Set(availableSelectedBrokers.map((broker) => broker.id));
+        const missingBrokerIds = brokerIds.filter((brokerId) => !foundBrokerIds.has(brokerId));
         response.status(400).json({
           message: 'Some selected brokers are no longer available.',
           fieldErrors: {
-            additionalBrokerUserIds: `Unavailable broker user id(s): ${missingUserIds.join(', ')}.`
+            brokerIds: `Unavailable broker id(s): ${missingBrokerIds.join(', ')}.`
           }
         });
         return;
@@ -2252,77 +2216,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           });
         }
 
-        let primaryBroker = await transactionClient.broker.findUnique({
-          where: {
-            ownerUserId_email: {
-              ownerUserId: authUser.id,
-              email: authUser.email
-            }
-          }
-        });
-
-        if (!primaryBroker) {
-          primaryBroker = await transactionClient.broker.create({
-            data: {
-              ownerUserId: authUser.id,
-              name: authUser.name,
-              email: authUser.email,
-              kind: 'SELF'
-            }
-          });
-        }
-
-        const additionalBrokerIds = new Set<string>();
-
-        for (const brokerUser of additionalBrokerUsers) {
-          const brokerRecord = await transactionClient.broker.upsert({
-            where: {
-              ownerUserId_email: {
-                ownerUserId: brokerUser.id,
-                email: brokerUser.email
-              }
-            },
-            update: {
-              name: brokerUser.name,
-              kind: 'SELF'
-            },
-            create: {
-              ownerUserId: brokerUser.id,
-              name: brokerUser.name,
-              email: brokerUser.email,
-              kind: 'SELF'
-            }
-          });
-
-          if (brokerRecord.id !== primaryBroker.id) {
-            additionalBrokerIds.add(brokerRecord.id);
-          }
-        }
-
-        for (const broker of additionalBrokerMap.values()) {
-          const brokerRecord = await transactionClient.broker.upsert({
-            where: {
-              ownerUserId_email: {
-                ownerUserId: authUser.id,
-                email: broker.email
-              }
-            },
-            update: {
-              name: broker.name,
-              kind: 'EXTERNAL'
-            },
-            create: {
-              ownerUserId: authUser.id,
-              name: broker.name,
-              email: broker.email,
-              kind: 'EXTERNAL'
-            }
-          });
-
-          if (brokerRecord.id !== primaryBroker.id) {
-            additionalBrokerIds.add(brokerRecord.id);
-          }
-        }
+        const orderedBrokerIds = brokerIds.filter((brokerId) =>
+          availableSelectedBrokers.some((broker) => broker.id === brokerId)
+        );
 
         const createdClient = await transactionClient.client.create({
           data: {
@@ -2334,21 +2230,17 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           }
         });
 
-        const brokerLinks: Array<{ clientId: string; brokerId: string; role: ClientBrokerRole }> = [
-          {
-            clientId: createdClient.id,
-            brokerId: primaryBroker.id,
-            role: ClientBrokerRole.PRIMARY
-          }
-        ];
-
-        for (const brokerId of additionalBrokerIds) {
-          brokerLinks.push({
-            clientId: createdClient.id,
-            brokerId,
-            role: ClientBrokerRole.ADDITIONAL
-          });
-        }
+        const brokerLinks: Array<{
+          clientId: string;
+          brokerId: string;
+          role: ClientBrokerRole;
+          position: number;
+        }> = orderedBrokerIds.map((brokerId, position) => ({
+          clientId: createdClient.id,
+          brokerId,
+          role: position === 0 ? ClientBrokerRole.PRIMARY : ClientBrokerRole.ADDITIONAL,
+          position
+        }));
 
         await transactionClient.clientBroker.createMany({ data: brokerLinks });
 

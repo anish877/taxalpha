@@ -31,6 +31,45 @@ export async function getProfileLookup(
 ): Promise<ProfileLookup> {
   const entries: ProjectedEntry[] = [];
 
+  // The first broker selected during Client Intake is authoritative for advisor
+  // and broker-dealer fields on downstream subscription agreements.
+  const primaryBrokerLink = await prisma.clientBroker.findFirst({
+    where: { clientId, role: 'PRIMARY' },
+    include: { broker: true },
+    orderBy: { position: 'asc' }
+  });
+  if (primaryBrokerLink) {
+    const broker = primaryBrokerLink.broker;
+    const sourceFormCode = 'PRIMARY_BROKER';
+    const sourceRank = -1;
+    const add = (canonicalField: string, value: unknown) => {
+      if (value !== null && value !== undefined && value !== '') {
+        entries.push({ canonicalField, value, sourceFormCode, sourceRank });
+      }
+    };
+    const stateZip = [broker.branchState, broker.branchPostalCode].filter(Boolean).join(' ');
+    const cityStateZip = [broker.branchCity, stateZip].filter(Boolean).join(', ');
+    const branchFullAddress = [broker.branchAddressLine1, broker.branchAddressLine2, cityStateZip]
+      .filter(Boolean)
+      .join(', ');
+
+    add('broker.firmName', broker.firmName);
+    add('broker.brokerDealerCrdNumber', broker.brokerDealerCrdNumber);
+    add('broker.representativeName', broker.name);
+    add('broker.representativeCrdNumber', broker.representativeCrdNumber);
+    add('broker.branchAddressLine1', broker.branchAddressLine1);
+    add('broker.branchAddressLine2', broker.branchAddressLine2);
+    add('broker.branchCity', broker.branchCity);
+    add('broker.branchState', broker.branchState);
+    add('broker.branchPostalCode', broker.branchPostalCode);
+    add('broker.branchCityStateZip', cityStateZip);
+    add('broker.branchFullAddress', branchFullAddress);
+    add('broker.branchPhone', broker.branchPhone);
+    add('broker.email', broker.email);
+    add('advisor.rrName', broker.name);
+    add('advisor.rrNumber', broker.representativeCrdNumber);
+  }
+
   // 1. Investor Profile onboarding (the rich source).
   const ip = await prisma.investorProfileOnboarding.findUnique({ where: { clientId } });
   if (ip) {

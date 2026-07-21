@@ -1,4 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
+import { readFile } from 'node:fs/promises';
+import { PDFDocument } from 'pdf-lib';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -1056,6 +1058,71 @@ describe('forms workspace routes', () => {
     expect(fileResponse.headers['content-type']).toContain('application/pdf');
 
     await deleteFilled(`n8n-callback-${createdPdfId}`, config);
+  });
+
+  it('corrects BAIODF tax selection and concentrations before storing the callback PDF', async () => {
+    const prisma = createMockPrisma();
+    const sourcePdf = await readFile('tests/fixtures/gold/BAIODF.source.pdf');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(sourcePdf, {
+          status: 200,
+          headers: { 'content-type': 'application/pdf', 'content-length': String(sourcePdf.length) }
+        })
+      )
+    );
+    prisma.client.findFirst.mockResolvedValue({
+      id: 'client_1',
+      name: 'Client One',
+      formSelections: [{ form: { code: 'BAIODF' } }],
+      baiodfOnboarding: {
+        step1Data: {
+          orderBasics: {
+            proposedPrincipalAmount: 20_000,
+            taxAdvantagePurchase: { yes: true, no: false }
+          }
+        },
+        step2Data: {
+          existingAltPositions: {
+            existingIlliquidAltPositions: 10_000,
+            existingSemiLiquidAltPositions: 5_000,
+            existingTaxAdvantageAltPositions: 2_000
+          },
+          netWorthAndConcentration: { totalNetWorth: 100_000 }
+        }
+      }
+    });
+    prisma.clientFormPdf.create.mockImplementation(async ({ data }: any) => data);
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const callbackResponse = await request(app)
+      .post('/api/n8n/clients/client_1/forms/BAIODF/pdfs')
+      .set('Content-Type', 'application/json')
+      .set('x-taxalpha-callback-secret', 'callback-secret')
+      .send({ pdfUrl: 'https://files.example.com/baiodf.pdf', sourceRunId: 'baiodf_run_1' });
+
+    expect(callbackResponse.status).toBe(201);
+    const pdfId = callbackResponse.body.pdfId as string;
+    prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.clientFormPdf.findFirst.mockResolvedValue({
+      id: pdfId,
+      fileName: 'baiodf.pdf',
+      documentTitle: 'BAIODF'
+    });
+    const fileResponse = await request(app)
+      .get(`/api/clients/client_1/form-pdfs/${pdfId}/file.pdf`)
+      .set('Cookie', createAuthCookie());
+    const document = await PDFDocument.load(fileResponse.body);
+    const form = document.getForm();
+
+    expect(form.getRadioGroup('Radio4').getSelected()).toBe('Choice1');
+    expect(form.getTextField('ExistingIlliquidAltConcentration').getText()).toBe('10.00');
+    expect(form.getTextField('ExistingSemiLiquidAltConcentration').getText()).toBe('5.00');
+    expect(form.getTextField('ExistingTaxAdvantageAltConcentration').getText()).toBe('2.00');
+    expect(form.getTextField('TotalConcentration').getText()).toBe('35.00');
+
+    await deleteFilled(`n8n-callback-${pdfId}`, config);
   });
 
   it('rejects callbacks with an invalid secret', async () => {

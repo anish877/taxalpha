@@ -5,9 +5,9 @@ interface AuthShellProps {
   title: string;
   subtitle: string;
   children: ReactNode;
-  switchLabel: string;
-  switchTo: string;
-  switchText: string;
+  switchLabel?: string;
+  switchTo?: string;
+  switchText?: string;
 }
 
 export function AuthShell({
@@ -37,12 +37,14 @@ export function AuthShell({
             <h2 className="text-2xl font-light tracking-tight text-ink">{title}</h2>
             <p className="mt-2 text-sm text-mute">{subtitle}</p>
             <div className="mt-8">{children}</div>
-            <p className="mt-6 text-sm text-mute">
-              {switchLabel}{' '}
-              <Link className="text-accent underline underline-offset-4" to={switchTo}>
-                {switchText}
-              </Link>
-            </p>
+            {switchLabel && switchTo && switchText && (
+              <p className="mt-6 text-sm text-mute">
+                {switchLabel}{' '}
+                <Link className="text-accent underline underline-offset-4" to={switchTo}>
+                  {switchText}
+                </Link>
+              </p>
+            )}
           </section>
         </div>
       </div>

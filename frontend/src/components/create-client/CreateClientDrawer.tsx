@@ -3,14 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { ApiError, apiRequest } from '../../api/client';
 import { finalizeClientSetup, uploadInvestmentAgreement } from '../../api/investments';
 import { useToast } from '../../context/ToastContext';
-import type { BrokerUserOption, ClientRecord, FormCatalogItem, User } from '../../types/api';
+import type { BrokerOption, ClientRecord, FormCatalogItem } from '../../types/api';
 
 interface CreateClientDrawerProps {
   open: boolean;
   onClose: () => void;
   forms: FormCatalogItem[];
-  brokerUsers: BrokerUserOption[];
-  primaryBroker: User;
+  brokers: BrokerOption[];
   onClientCreated: (client: ClientRecord, nextOnboardingRoute?: string | null) => void;
 }
 
@@ -29,8 +28,7 @@ export function CreateClientDrawer({
   open,
   onClose,
   forms,
-  brokerUsers,
-  primaryBroker,
+  brokers,
   onClientCreated
 }: CreateClientDrawerProps) {
   const { pushToast } = useToast();
@@ -56,7 +54,7 @@ export function CreateClientDrawer({
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [clientPhone, setClientPhone] = useState('');
-  const [selectedBrokerUserIds, setSelectedBrokerUserIds] = useState<string[]>([]);
+  const [selectedBrokerIds, setSelectedBrokerIds] = useState<string[]>([]);
   const [includeStatementOfFinancialCondition, setIncludeStatementOfFinancialCondition] = useState(false);
   const [includeBaiodf, setIncludeBaiodf] = useState(false);
   const [includeBaiv506c, setIncludeBaiv506c] = useState(false);
@@ -84,24 +82,20 @@ export function CreateClientDrawer({
   }, [step]);
   const lastStep = includeBaiodf ? 4 : 2;
 
-  const selectedBrokerUsers = useMemo(
+  const selectedBrokers = useMemo(
     () =>
-      selectedBrokerUserIds
-        .map((userId) => brokerUsers.find((brokerUser) => brokerUser.id === userId))
-        .filter((brokerUser): brokerUser is BrokerUserOption => Boolean(brokerUser)),
-    [brokerUsers, selectedBrokerUserIds]
+      selectedBrokerIds
+        .map((brokerId) => brokers.find((broker) => broker.id === brokerId))
+        .filter((broker): broker is BrokerOption => Boolean(broker)),
+    [brokers, selectedBrokerIds]
   );
 
-  const availableBrokerUsers = useMemo(
-    () =>
-      brokerUsers.filter(
-        (brokerUser) =>
-          brokerUser.id !== primaryBroker.id && !selectedBrokerUserIds.includes(brokerUser.id)
-      ),
-    [brokerUsers, primaryBroker.id, selectedBrokerUserIds]
+  const availableBrokers = useMemo(
+    () => brokers.filter((broker) => !selectedBrokerIds.includes(broker.id)),
+    [brokers, selectedBrokerIds]
   );
 
-  const brokerSectionError = errors.additionalBrokerUserIds ?? errors.additionalBrokers;
+  const brokerSectionError = errors.brokerIds;
 
   useEffect(() => {
     if (!open) {
@@ -109,7 +103,7 @@ export function CreateClientDrawer({
       setClientName('');
       setClientEmail('');
       setClientPhone('');
-      setSelectedBrokerUserIds([]);
+      setSelectedBrokerIds([]);
       setIncludeStatementOfFinancialCondition(false);
       setIncludeBaiodf(false);
       setIncludeBaiv506c(false);
@@ -142,6 +136,10 @@ export function CreateClientDrawer({
   };
 
   const validateStepTwo = () => {
+    if (selectedBrokerIds.length === 0) {
+      setErrors({ brokerIds: 'Select at least one broker. The first broker will be primary.' });
+      return false;
+    }
     setErrors({});
     return true;
   };
@@ -249,22 +247,32 @@ export function CreateClientDrawer({
     });
   };
 
-  const addBrokerUser = (userId: string) => {
-    if (!userId) {
+  const addBroker = (brokerId: string) => {
+    if (!brokerId) {
       return;
     }
 
-    setSelectedBrokerUserIds((current) => (current.includes(userId) ? current : [...current, userId]));
+    setSelectedBrokerIds((current) => (current.includes(brokerId) ? current : [...current, brokerId]));
     setErrors((current) => {
       const next = { ...current };
-      delete next.additionalBrokerUserIds;
-      delete next.additionalBrokers;
+      delete next.brokerIds;
       return next;
     });
   };
 
-  const removeBrokerUser = (userId: string) => {
-    setSelectedBrokerUserIds((current) => current.filter((selectedUserId) => selectedUserId !== userId));
+  const removeBroker = (brokerId: string) => {
+    setSelectedBrokerIds((current) => current.filter((selectedBrokerId) => selectedBrokerId !== brokerId));
+  };
+
+  const moveBroker = (brokerId: string, direction: -1 | 1) => {
+    setSelectedBrokerIds((current) => {
+      const index = current.indexOf(brokerId);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= current.length) return current;
+      const next = [...current];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
   };
 
   const handleSubmit = async () => {
@@ -287,7 +295,7 @@ export function CreateClientDrawer({
         clientName: clientName.trim(),
         clientEmail: clientEmail.trim(),
         clientPhone: clientPhone.trim() || undefined,
-        additionalBrokerUserIds: selectedBrokerUserIds,
+        brokerIds: selectedBrokerIds,
         selectedFormCodes: [
           'INVESTOR_PROFILE',
           ...(includeStatementOfFinancialCondition ? ['SFC'] : []),
@@ -344,7 +352,7 @@ export function CreateClientDrawer({
           setStep(0);
         }
 
-        if (fieldErrors.additionalBrokerUserIds) {
+        if (fieldErrors.brokerIds) {
           setStep(1);
         }
 
@@ -412,7 +420,7 @@ export function CreateClientDrawer({
         <header className="border-b border-line px-6 py-5 sm:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-mute">Create Client</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-mute">Client Intake</p>
               <h2 className="mt-2 text-2xl font-light tracking-tight text-ink">{stepTitle}</h2>
             </div>
             <button
@@ -484,16 +492,14 @@ export function CreateClientDrawer({
 
             {step === 1 && (
               <div className="space-y-6">
-                <div className="rounded-2xl border border-black/10 bg-black px-4 py-4 text-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/65">Primary Locked Broker</p>
-                  <p className="mt-3 text-lg font-light">{primaryBroker.name}</p>
-                  <p className="mt-1 text-sm text-white/80">{primaryBroker.email}</p>
-                </div>
-
                 <div>
                   <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-medium tracking-wide text-ink">Additional Brokers</h3>
+                    <h3 className="text-sm font-medium tracking-wide text-ink">Assigned Brokers</h3>
                   </div>
+
+                  <p className="mb-4 text-sm text-mute">
+                    Select one or more brokers. The first broker in the list is the primary broker used for document filling.
+                  </p>
 
                   {brokerSectionError && (
                     <div className="mb-3 rounded-xl border border-black/15 bg-black px-3 py-2 text-xs text-white">
@@ -502,47 +508,82 @@ export function CreateClientDrawer({
                   )}
 
                   <label className="block">
-                    <span className="mb-2 block text-sm text-mute">Select Website User</span>
+                    <span className="mb-2 block text-sm text-mute">Add Broker</span>
                     <select
                       className="w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm font-light text-ink outline-none ring-accent transition focus:border-accent focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
-                      disabled={availableBrokerUsers.length === 0}
+                      disabled={availableBrokers.length === 0}
                       value=""
-                      onChange={(event) => addBrokerUser(event.target.value)}
+                      onChange={(event) => addBroker(event.target.value)}
                     >
                       <option value="">
-                        {availableBrokerUsers.length === 0 ? 'No more users available' : 'Choose a broker'}
+                        {availableBrokers.length === 0 ? 'No more brokers available' : 'Choose a broker'}
                       </option>
-                      {availableBrokerUsers.map((brokerUser) => (
-                        <option key={brokerUser.id} value={brokerUser.id}>
-                          {brokerUser.name} ({brokerUser.email})
+                      {availableBrokers.map((broker) => (
+                        <option key={broker.id} value={broker.id}>
+                          {broker.name} · {broker.firmName ?? 'Firm not set'} ({broker.email})
                         </option>
                       ))}
                     </select>
                   </label>
 
-                  {selectedBrokerUsers.length === 0 && (
+                  {brokers.length === 0 && (
+                    <div className="mt-4 rounded-2xl border border-black/15 bg-black p-4 text-sm text-white">
+                      No brokers are assigned to your user. Ask an administrator to create one before starting client intake.
+                    </div>
+                  )}
+
+                  {selectedBrokers.length === 0 && brokers.length > 0 && (
                     <div className="mt-4 rounded-2xl border border-dashed border-line p-4 text-sm text-mute">
-                      No additional brokers selected.
+                      No brokers selected yet.
                     </div>
                   )}
 
                   <div className="mt-4 space-y-3">
-                    {selectedBrokerUsers.map((brokerUser) => (
+                    {selectedBrokers.map((broker, index) => (
                       <div
-                        key={brokerUser.id}
+                        key={broker.id}
                         className="flex items-center justify-between gap-3 rounded-2xl border border-line px-4 py-3"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-light text-ink">{brokerUser.name}</p>
-                          <p className="mt-1 truncate text-xs text-mute">{brokerUser.email}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-light text-ink">{broker.name}</p>
+                            {index === 0 && (
+                              <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white">
+                                Primary
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1 truncate text-xs text-mute">
+                            {broker.firmName ?? 'Firm not set'} · {broker.email}
+                          </p>
                         </div>
-                        <button
-                          className="shrink-0 text-xs uppercase tracking-[0.14em] text-mute transition hover:text-ink"
-                          type="button"
-                          onClick={() => removeBrokerUser(brokerUser.id)}
-                        >
-                          Remove
-                        </button>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <button
+                            aria-label={`Move ${broker.name} up`}
+                            className="text-sm text-mute transition hover:text-ink disabled:opacity-30"
+                            disabled={index === 0}
+                            type="button"
+                            onClick={() => moveBroker(broker.id, -1)}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            aria-label={`Move ${broker.name} down`}
+                            className="text-sm text-mute transition hover:text-ink disabled:opacity-30"
+                            disabled={index === selectedBrokers.length - 1}
+                            type="button"
+                            onClick={() => moveBroker(broker.id, 1)}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            className="text-xs uppercase tracking-[0.14em] text-mute transition hover:text-ink"
+                            type="button"
+                            onClick={() => removeBroker(broker.id)}
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

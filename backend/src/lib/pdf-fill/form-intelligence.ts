@@ -170,7 +170,19 @@ export const FORM_INTELLIGENCE_CORPUS: FormIntelligenceCorpus = {
         'Check Box27': { variableKey: 'fact:accreditation.naturalPersonIncomeQualified', confidence: 0.72, label: 'Income Accreditation' },
         'Check Box28': { variableKey: 'fact:accreditation.naturalPersonNetWorthQualified', confidence: 0.84, label: 'Net Worth Accreditation' },
         'Registered Representative Name Print': { variableKey: 'fact:advisor.rrName', format: 'text', confidence: 0.9, label: 'Registered Representative Name' },
-        'CRD No': { variableKey: 'fact:advisor.rrNumber', format: 'text', confidence: 0.84, label: 'Registered Representative CRD No.' }
+        'CRD No': { variableKey: 'fact:advisor.rrNumber', format: 'text', confidence: 0.84, label: 'Registered Representative CRD No.' },
+        'Broker-Dealer Firm Name': { variableKey: 'canonical:broker.firmName', format: 'text', confidence: 0.96, label: 'Broker-Dealer Firm Name' },
+        'Broker-Dealer CRD No': { variableKey: 'canonical:broker.brokerDealerCrdNumber', format: 'text', confidence: 0.94, label: 'Broker-Dealer CRD No.' },
+        'Registered Representative CRD No': { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.96, label: 'Registered Representative CRD No.' },
+        'Registered Representative Branch Address': { variableKey: 'canonical:broker.branchAddressLine1', format: 'text', confidence: 0.92, label: 'Registered Representative Branch Address' },
+        'Registered Representative Branch City State Zip': { variableKey: 'canonical:broker.branchCityStateZip', format: 'text', confidence: 0.92, label: 'Registered Representative Branch City, State, ZIP' },
+        'Broker Email Address': { variableKey: 'canonical:broker.email', format: 'text', confidence: 0.92, label: 'Broker E-mail Address' },
+        'BrokerDealer Firm Name': { variableKey: 'canonical:broker.firmName', format: 'text', confidence: 0.99, label: 'Broker-Dealer Firm Name' },
+        BrokerDealer: { variableKey: 'canonical:broker.brokerDealerCrdNumber', format: 'text', confidence: 0.99, label: 'Broker-Dealer CRD No.' },
+        'Registered Representative': { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.99, label: 'Registered Representative CRD No.' },
+        'Registered Representatives Branch Address City State Zip': { variableKey: 'canonical:broker.branchFullAddress', format: 'text', confidence: 0.99, label: 'Registered Representative Branch Address, City, State, ZIP' },
+        'Branch Phone Number': { variableKey: 'canonical:broker.branchPhone', format: 'phone', confidence: 0.99, label: 'Branch Phone Number' },
+        'Email Address_8': { variableKey: 'canonical:broker.email', format: 'text', confidence: 0.99, label: 'Broker E-mail Address' }
       },
       signatureZones: [
         { page: 5, rect: { x: 30, y: 560, width: 552, height: 170 } },
@@ -188,5 +200,6 @@ export function destinationProfileForFingerprint(fingerprint: string): Destinati
 }
 
 export function sourceFormTitle(code: string): string {
+  if (code === 'PRIMARY_BROKER') return 'Primary Broker';
   return FORM_INTELLIGENCE_CORPUS.sourceForms.find((form) => form.code === code)?.title ?? code;
 }

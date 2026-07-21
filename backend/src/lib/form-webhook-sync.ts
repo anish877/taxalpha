@@ -20,6 +20,7 @@ import {
 } from './baiodf-step1.js';
 import {
   applyBaiodfStep2Prefill,
+  getBaiodfStep2Concentrations,
   normalizeBaiodfStep2Fields
 } from './baiodf-step2.js';
 import {
@@ -461,6 +462,30 @@ function buildBaiodfPayload(
     financialProfessional.printedName = advisorName;
   }
 
+  const baiodfStep1 = applyBaiodfStep1Prefill(
+    normalizeBaiodfStep1Fields(client.baiodfOnboarding?.step1Data ?? null),
+    {
+      rrName: investorStep1.accountRegistration.rrName || null,
+      rrNo: investorStep1.accountRegistration.rrNo || null,
+      customerNames: investorStep1.accountRegistration.customerNames || client.name || null
+    }
+  );
+  const baiodfStep2 = applyBaiodfStep2Prefill(
+    normalizeBaiodfStep2Fields(client.baiodfOnboarding?.step2Data ?? null),
+    {
+      totalNetWorth: client.statementOfFinancialConditionOnboarding?.step1Data
+        ? sfcTotals.totalNetWorth
+        : null,
+      liquidNetWorth: client.statementOfFinancialConditionOnboarding?.step1Data
+        ? sfcTotals.totalPotentialLiquidity
+        : null
+    }
+  );
+  const concentrations = getBaiodfStep2Concentrations(
+    baiodfStep2,
+    baiodfStep1.orderBasics.proposedPrincipalAmount
+  );
+
   return {
     ...createPayload(
       createBaseMetadata(
@@ -471,25 +496,11 @@ function buildBaiodfPayload(
           BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.NOT_STARTED
       ),
       {
-        step1: applyBaiodfStep1Prefill(
-          normalizeBaiodfStep1Fields(client.baiodfOnboarding?.step1Data ?? null),
-          {
-            rrName: investorStep1.accountRegistration.rrName || null,
-            rrNo: investorStep1.accountRegistration.rrNo || null,
-            customerNames: investorStep1.accountRegistration.customerNames || client.name || null
-          }
-        ),
-        step2: applyBaiodfStep2Prefill(
-          normalizeBaiodfStep2Fields(client.baiodfOnboarding?.step2Data ?? null),
-          {
-            totalNetWorth: client.statementOfFinancialConditionOnboarding?.step1Data
-              ? sfcTotals.totalNetWorth
-              : null,
-            liquidNetWorth: client.statementOfFinancialConditionOnboarding?.step1Data
-              ? sfcTotals.totalPotentialLiquidity
-              : null
-          }
-        ),
+        step1: baiodfStep1,
+        step2: {
+          ...baiodfStep2,
+          concentrations
+        },
         step3: applyBaiodfStep3Prefill(
           normalizeBaiodfStep3Fields(client.baiodfOnboarding?.step3Data ?? null),
           {
@@ -504,7 +515,18 @@ function buildBaiodfPayload(
             ),
             financialProfessional
           }
-        )
+        ),
+        computed: {
+          taxAdvantagePurchase:
+            baiodfStep1.orderBasics.taxAdvantagePurchase.yes &&
+            !baiodfStep1.orderBasics.taxAdvantagePurchase.no
+              ? 'yes'
+              : baiodfStep1.orderBasics.taxAdvantagePurchase.no &&
+                  !baiodfStep1.orderBasics.taxAdvantagePurchase.yes
+                ? 'no'
+                : null,
+          concentrations
+        }
       }
     )
   };

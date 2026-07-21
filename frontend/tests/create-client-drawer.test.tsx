@@ -29,9 +29,9 @@ describe('CreateClientDrawer', () => {
     }
   ];
 
-  const brokerUsers = [
-    { id: 'user_2', name: 'Advisor Two', email: 'advisor.two@example.com' },
-    { id: 'user_3', name: 'Advisor Three', email: 'advisor.three@example.com' }
+  const brokers = [
+    { id: 'broker_1', name: 'Advisor One', email: 'advisor@example.com', firmName: 'Alpha Securities' },
+    { id: 'broker_2', name: 'Advisor Two', email: 'advisor.two@example.com', firmName: 'Beta Securities' }
   ];
 
   it('shows required investor profile and both optional forms on step 3', async () => {
@@ -40,10 +40,9 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
-          brokerUsers={brokerUsers}
+          brokers={brokers}
           forms={forms}
           open
-          primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
           onClientCreated={vi.fn()}
           onClose={vi.fn()}
         />
@@ -54,7 +53,8 @@ describe('CreateClientDrawer', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'john@example.com');
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
-    expect(screen.getByText('Primary Locked Broker')).toBeInTheDocument();
+    expect(screen.getByText('Assigned Brokers')).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText('Add Broker'), 'broker_1');
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
 
@@ -120,10 +120,9 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
-          brokerUsers={brokerUsers}
+          brokers={brokers}
           forms={forms}
           open
-          primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
           onClientCreated={onClientCreated}
           onClose={vi.fn()}
         />
@@ -134,6 +133,7 @@ describe('CreateClientDrawer', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'john@example.com');
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.selectOptions(screen.getByLabelText('Add Broker'), 'broker_1');
     await user.click(screen.getByRole('button', { name: 'Next' }));
 
     await user.click(screen.getByRole('button', { name: /statement of financial condition/i }));
@@ -148,7 +148,7 @@ describe('CreateClientDrawer', () => {
     expect(onClientCreated).toHaveBeenCalledTimes(1);
   });
 
-  it('submits selected website broker user ids', async () => {
+  it('submits ordered broker ids with the first broker primary', async () => {
     const user = userEvent.setup();
     const onClientCreated = vi.fn();
 
@@ -200,10 +200,9 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
-          brokerUsers={brokerUsers}
+          brokers={brokers}
           forms={forms}
           open
-          primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
           onClientCreated={onClientCreated}
           onClose={vi.fn()}
         />
@@ -214,7 +213,7 @@ describe('CreateClientDrawer', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'john@example.com');
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
-    await user.selectOptions(screen.getByLabelText('Select Website User'), 'user_2');
+    await user.selectOptions(screen.getByLabelText('Add Broker'), 'broker_2');
     expect(screen.getByText('Advisor Two')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
@@ -225,7 +224,7 @@ describe('CreateClientDrawer', () => {
 
     const [, requestInit] = postCall as [RequestInfo | URL, RequestInit | undefined];
     const body = JSON.parse(String(requestInit?.body ?? '{}'));
-    expect(body.additionalBrokerUserIds).toEqual(['user_2']);
+    expect(body.brokerIds).toEqual(['broker_2']);
     expect(onClientCreated).toHaveBeenCalledTimes(1);
   });
 
@@ -299,10 +298,9 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
-          brokerUsers={brokerUsers}
+          brokers={brokers}
           forms={forms}
           open
-          primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
           onClientCreated={onClientCreated}
           onClose={vi.fn()}
         />
@@ -313,6 +311,7 @@ describe('CreateClientDrawer', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'john@example.com');
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.selectOptions(screen.getByLabelText('Add Broker'), 'broker_1');
     await user.click(screen.getByRole('button', { name: 'Next' }));
 
     await user.click(screen.getByRole('button', { name: /brokerage alternative investment order/i }));
@@ -385,10 +384,9 @@ describe('CreateClientDrawer', () => {
     render(
       <ToastProvider>
         <CreateClientDrawer
-          brokerUsers={brokerUsers}
+          brokers={brokers}
           forms={forms}
           open
-          primaryBroker={{ id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' }}
           onClientCreated={onClientCreated}
           onClose={vi.fn()}
         />
@@ -399,6 +397,7 @@ describe('CreateClientDrawer', () => {
     await user.type(screen.getByPlaceholderText('name@example.com'), 'john@example.com');
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.selectOptions(screen.getByLabelText('Add Broker'), 'broker_1');
     await user.click(screen.getByRole('button', { name: 'Next' }));
 
     await user.click(screen.getByRole('button', { name: /accredited investor verification/i }));

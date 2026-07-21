@@ -263,7 +263,7 @@ export function createDynamicStepsRouter(
         throw new HttpError(400, 'This PDF template has not been mapped yet. Ask an admin to publish its mapping.');
       }
       const template = await loadTemplate(form?.templateUrl ?? null, deps.config);
-      if (!template) throw new HttpError(400, 'The original PDF for this form is not stored. Re-upload it in the Form Library.');
+      if (!template) throw new HttpError(400, 'The original PDF is unavailable. Upload the document through Files & PDF Fill instead.');
 
       const resp = await loadResponse(clientId, code);
       const stepData = (resp.stepData ?? {}) as StepDataMap;
