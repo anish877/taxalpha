@@ -8,10 +8,13 @@ import { z } from 'zod';
 import { clientAccessWhere } from '../lib/client-access.js';
 import { loadClientDocumentBytes, resolveClientDocumentStoragePath } from '../lib/client-document-storage.js';
 import {
+  deleteClientFormPdfBytes,
+  loadClientFormPdfBytes
+} from '../lib/client-form-pdf-storage.js';
+import {
   getGovernmentIdDocumentReferences,
   syncGovernmentIdDocuments
 } from '../lib/government-id-documents.js';
-import { loadFilled } from '../lib/ingestion/template-store.js';
 import {
   buildClientDocumentS3Key,
   deleteClientDocumentFromS3,
@@ -67,17 +70,19 @@ function toClientDocumentRecord(document: {
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  storageKey: string;
   createdAt: Date;
   uploadedBy: {
     name: string;
   };
-}) {
+}, intakeDocumentKeys: ReadonlySet<string> = new Set()) {
   return {
     id: document.id,
     clientId: document.clientId,
     fileName: document.fileName,
     contentType: document.contentType,
     sizeBytes: document.sizeBytes,
+    source: intakeDocumentKeys.has(document.storageKey) ? 'INTAKE_FORM' : 'DOCUMENT_DRAWER',
     uploadedByName: document.uploadedBy.name,
     createdAt: document.createdAt.toISOString(),
     viewUrl: `/api/clients/${document.clientId}/documents/${document.id}/view`
@@ -133,13 +138,14 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
+      const governmentIdReferences = getGovernmentIdDocumentReferences(
+        client.investorProfileOnboarding?.step3Data,
+        client.investorProfileOnboarding?.step4Data
+      );
       await syncGovernmentIdDocuments(deps.prisma, {
         clientId,
         uploadedByUserId: authUser.id,
-        next: getGovernmentIdDocumentReferences(
-          client.investorProfileOnboarding?.step3Data,
-          client.investorProfileOnboarding?.step4Data
-        )
+        next: governmentIdReferences
       });
 
       const documents = await deps.prisma.clientDocument.findMany({
@@ -158,7 +164,14 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json({ documents: documents.map(toClientDocumentRecord) });
+      const intakeDocumentKeys = new Set(
+        governmentIdReferences
+          .map((document) => document.documentKey)
+          .filter((key): key is string => Boolean(key))
+      );
+      response.json({
+        documents: documents.map((document) => toClientDocumentRecord(document, intakeDocumentKeys))
+      });
     } catch (error) {
       next(error);
     }
@@ -324,7 +337,16 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
           clientId,
           client: clientAccessWhere(request.authUser!.id)
         },
-        select: { id: true, fileName: true, documentTitle: true }
+        select: {
+          id: true,
+          clientId: true,
+          formCode: true,
+          workspaceFormCode: true,
+          pdfUrl: true,
+          sourceRunId: true,
+          fileName: true,
+          documentTitle: true
+        }
       });
 
       if (!pdf) {
@@ -332,17 +354,50 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      const bytes = await loadFilled(`n8n-callback-${pdf.id}`, deps.config);
-      if (!bytes) {
-        response.status(404).json({ message: 'PDF file is not available.' });
-        return;
-      }
+      const bytes = await loadClientFormPdfBytes(pdf, deps.config);
 
       const requestedName = sanitizeFileName(pdf.fileName || pdf.documentTitle || 'generated-document.pdf');
       response.setHeader('Content-Type', 'application/pdf');
       response.setHeader('Content-Length', String(bytes.length));
       response.setHeader('Content-Disposition', contentDisposition(requestedName.endsWith('.pdf') ? requestedName : `${requestedName}.pdf`));
       response.send(bytes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete('/:clientId/form-pdfs/:pdfId', requireAuth(deps), async (request, response, next) => {
+    const parsedParams = clientFormPdfViewParamsSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      response.status(400).json({ message: 'Invalid PDF identifier.' });
+      return;
+    }
+
+    const { clientId, pdfId } = parsedParams.data;
+    try {
+      const pdf = await deps.prisma.clientFormPdf.findFirst({
+        where: { id: pdfId, clientId, client: clientAccessWhere(request.authUser!.id) }
+      });
+      if (!pdf) {
+        response.status(404).json({ message: 'PDF not found.' });
+        return;
+      }
+
+      await deps.prisma.$transaction(async (transaction) => {
+        await transaction.clientFormPdf.delete({ where: { id: pdf.id } });
+        if (pdf.workspaceFormCode === 'PDF_UPLOAD' && pdf.sourceRunId) {
+          await transaction.clientUploadedPdfFill.updateMany({
+            where: { id: pdf.sourceRunId, clientId },
+            data: {
+              status: 'DRAFT',
+              generatedPdfUrl: null,
+              generatedAt: null
+            }
+          });
+        }
+      });
+      await deleteClientFormPdfBytes(pdf, deps.config);
+      response.status(204).send();
     } catch (error) {
       next(error);
     }

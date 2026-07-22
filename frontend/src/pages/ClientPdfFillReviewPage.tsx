@@ -4,7 +4,7 @@ import type { PDFDocumentLoadingTask, PDFDocumentProxy } from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
 import { ApiError } from '../api/client';
-import { generatePdfFill, getPdfFill, reanalyzePdfFill, savePdfFillValues } from '../api/pdfFills';
+import { deletePdfFill, generatePdfFill, getPdfFill, reanalyzePdfFill, savePdfFillValues } from '../api/pdfFills';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import type { PdfFillRecord, PdfFillTarget, PdfMapPage, PdfMappingRect } from '../types/api';
@@ -101,6 +101,7 @@ export function ClientPdfFillReviewPage() {
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [reanalyzing, setReanalyzing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleUnauthorized = useCallback(async () => {
@@ -273,6 +274,29 @@ export function ClientPdfFillReviewPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!clientId || !fillId || deleting) return;
+    const confirmed = window.confirm(
+      `Delete ${fill?.fileName ?? 'this PDF'}? The uploaded source and every generated version will be removed.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await deletePdfFill(clientId, fillId);
+      pushToast('PDF and generated versions deleted.');
+      navigate(`/clients/${clientId}/forms`, { replace: true });
+    } catch (requestError) {
+      if (requestError instanceof ApiError && requestError.statusCode === 401) {
+        await handleUnauthorized();
+        return;
+      }
+      pushToast(requestError instanceof ApiError ? requestError.message : 'Unable to delete PDF.', 'error');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <main className="workspace-premium min-h-screen px-4 py-5 sm:px-7 sm:py-7">
       <div className="mx-auto max-w-7xl">
@@ -330,6 +354,14 @@ export function ClientPdfFillReviewPage() {
                     onClick={() => void handleReanalyze()}
                   >
                     {reanalyzing ? 'Refreshing fields…' : 'Refresh suggested fields'}
+                  </button>
+                  <button
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50 disabled:opacity-45"
+                    disabled={deleting}
+                    type="button"
+                    onClick={() => void handleDelete()}
+                  >
+                    {deleting ? 'Deleting…' : 'Delete document'}
                   </button>
                 </div>
               </details>

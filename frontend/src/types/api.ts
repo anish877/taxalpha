@@ -463,6 +463,7 @@ export interface InvestmentAgreementSummary {
   fileName: string | null;
   status: string;
   warningCount: number;
+  generatedPdfId?: string | null;
   generatedPdfUrl: string | null;
   generatedAt: string | null;
   uploadedAt?: string | null;
@@ -1892,6 +1893,7 @@ export interface InvestmentTicketPair {
   position: number;
   baiodfPdf: ClientFormPdfRecord | null;
   agreement: { id: string; status: string; fileName: string | null; generatedPdfUrl: string | null } | null;
+  agreementPdf: ClientFormPdfRecord | null;
   ready: boolean;
 }
 
@@ -1901,9 +1903,10 @@ export interface ClientDocumentRecord {
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  source?: 'INTAKE_FORM' | 'DOCUMENT_DRAWER';
   uploadedByName: string;
   createdAt: string;
-  viewUrl: string;
+  viewUrl?: string;
 }
 
 export interface ClientFormPdfRecord {
@@ -1914,6 +1917,7 @@ export interface ClientFormPdfRecord {
   workspaceFormCode: string;
   workspaceFormTitle: string;
   pdfUrl: string;
+  viewUrl: string;
   documentTitle: string | null;
   fileName: string | null;
   sourceRunId: string | null;

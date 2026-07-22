@@ -714,4 +714,95 @@ describe('Client forms workspace', () => {
 
     vi.useRealTimers();
   }, 10_000);
+
+  it('groups package documents by source and selects investment PDFs independently', async () => {
+    const user = userEvent.setup();
+    const generatedPdf = (id: string, formCode: string, title: string) => ({
+      id,
+      clientId: 'client_1',
+      clientName: 'Client One',
+      formCode,
+      workspaceFormCode: formCode,
+      workspaceFormTitle: title,
+      pdfUrl: `https://files.example.com/${id}.pdf`,
+      viewUrl: `/api/clients/client_1/form-pdfs/${id}/file.pdf`,
+      documentTitle: title,
+      fileName: `${id}.pdf`,
+      sourceRunId: `run_${id}`,
+      generatedAt: '2026-07-22T10:00:00.000Z',
+      receivedAt: '2026-07-22T10:01:00.000Z'
+    });
+    const disclosure = generatedPdf('pdf_disclosure', 'BAIODF', 'Brokerage Alternative Investment Order and Disclosure Form');
+    const agreement = generatedPdf('pdf_agreement', 'PDF_UPLOAD', 'Subscription Agreement');
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/auth/me')) {
+        return new Response(JSON.stringify({ user: { id: 'user_1', name: 'Advisor One', email: 'advisor@example.com' } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      if (url.includes('/api/clients/client_1/pdf-ticket/pdfs')) {
+        return new Response(JSON.stringify({
+          clientId: 'client_1',
+          pdfs: [
+            generatedPdf('pdf_profile', 'INVESTOR_PROFILE', 'Investor Profile'),
+            generatedPdf('pdf_direct', 'PDF_UPLOAD', 'AI Filled Tax Form')
+          ],
+          documents: [
+            { id: 'doc_intake', clientId: 'client_1', fileName: 'Drivers License.png', contentType: 'image/png', sizeBytes: 100, uploadedByName: 'Advisor One', createdAt: '2026-07-22T09:00:00.000Z', viewUrl: '/api/clients/client_1/documents/doc_intake/view', source: 'INTAKE_FORM' },
+            { id: 'doc_drawer', clientId: 'client_1', fileName: 'Tax Return.pdf', contentType: 'application/pdf', sizeBytes: 200, uploadedByName: 'Advisor One', createdAt: '2026-07-22T09:10:00.000Z', viewUrl: '/api/clients/client_1/documents/doc_drawer/view', source: 'DOCUMENT_DRAWER' }
+          ],
+          investmentPairs: [{
+            investmentId: 'investment_1',
+            name: 'Growth Fund',
+            position: 1,
+            baiodfPdf: disclosure,
+            agreement: { id: 'fill_1', status: 'GENERATED', fileName: 'Growth Subscription.pdf', generatedPdfUrl: agreement.pdfUrl },
+            agreementPdf: agreement,
+            ready: true
+          }]
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (url.includes('/api/clients/client_1/documents')) {
+        return new Response(JSON.stringify({ documents: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (url.includes('/api/clients/client_1/pdf-fills')) {
+        return new Response(JSON.stringify({ fills: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      if (url.includes('/api/clients/client_1/forms/workspace')) {
+        return new Response(JSON.stringify({ workspace: { clientId: 'client_1', clientName: 'Client One', forms: [], investments: [] } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      return new Response(JSON.stringify({ message: 'Not Found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+    window.history.pushState({}, '', '/clients/client_1/forms');
+    render(<AuthProvider><ToastProvider><App /></ToastProvider></AuthProvider>);
+
+    await screen.findByRole('heading', { name: 'Client One' });
+    await user.click(screen.getByRole('button', { name: /Build package|Create Ticket/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Documents uploaded during intake')).toBeInTheDocument();
+      expect(screen.getByText('Files uploaded from Documents')).toBeInTheDocument();
+      expect(screen.getByText('AI-filled uploaded PDFs')).toBeInTheDocument();
+      expect(screen.getAllByText('Investor Profile').length).toBeGreaterThan(0);
+      expect(screen.getByText('Subscription agreements and disclosures')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('Subscription agreements and disclosures'));
+    await user.click(screen.getByText('1. Growth Fund'));
+    const disclosureCheckbox = screen.getByRole('checkbox', { name: 'Select Growth Fund brokerage alternative disclosure' });
+    const agreementCheckbox = screen.getByRole('checkbox', { name: 'Select Growth Fund subscription agreement' });
+    await user.click(agreementCheckbox);
+
+    expect(disclosureCheckbox).not.toBeChecked();
+    expect(agreementCheckbox).toBeChecked();
+    expect(screen.getByRole('button', { name: /Review package \(1\)|Create Ticket \(1\)/i })).toBeEnabled();
+  });
 });

@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../src/app.js';
 import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
-import { deleteFilled, storeFilled } from '../src/lib/ingestion/template-store.js';
+import { deleteFilled, loadFilled, storeFilled } from '../src/lib/ingestion/template-store.js';
 
 const s3Mocks = vi.hoisted(() => ({
   downloadClientDocumentFromS3: vi.fn()
@@ -65,7 +65,7 @@ function createAuthCookie(): string {
 }
 
 function createMockPrisma() {
-  return {
+  const prisma = {
     user: {
       findUnique: vi.fn().mockResolvedValue(authUser)
     },
@@ -81,9 +81,18 @@ function createMockPrisma() {
       upsert: vi.fn()
     },
     clientFormPdf: {
-      findFirst: vi.fn()
-    }
+      findFirst: vi.fn(),
+      delete: vi.fn()
+    },
+    clientUploadedPdfFill: {
+      updateMany: vi.fn()
+    },
+    $transaction: vi.fn()
   };
+  prisma.$transaction.mockImplementation(async (operation: (transaction: typeof prisma) => Promise<unknown>) =>
+    operation(prisma)
+  );
+  return prisma;
 }
 
 afterEach(async () => {
@@ -117,6 +126,42 @@ describe('client document routes', () => {
     expect(response.headers['content-disposition']).toContain('Disclosure.pdf');
 
     await deleteFilled(`n8n-callback-${pdfId}`, config);
+  });
+
+  it('serves and deletes a generated direct-fill PDF through the canonical route', async () => {
+    const prisma = createMockPrisma();
+    const pdfId = 'pdf_direct';
+    const fillId = 'fill_direct';
+    const pdfBytes = Buffer.from('%PDF-1.4\ndirect fill\n%%EOF');
+    await storeFilled(`pdf-fill-${fillId}`, pdfBytes, config);
+    prisma.clientFormPdf.findFirst.mockResolvedValue({
+      id: pdfId,
+      clientId: testClientId,
+      formCode: 'PDF_UPLOAD',
+      workspaceFormCode: 'PDF_UPLOAD',
+      pdfUrl: `/api/clients/${testClientId}/pdf-fills/${fillId}/filled.pdf`,
+      sourceRunId: fillId,
+      fileName: 'Subscription Agreement.pdf',
+      documentTitle: 'Subscription Agreement'
+    });
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const openResponse = await request(app)
+      .get(`/api/clients/${testClientId}/form-pdfs/${pdfId}/file.pdf`)
+      .set('Cookie', createAuthCookie());
+    expect(openResponse.status).toBe(200);
+    expect(openResponse.body).toEqual(pdfBytes);
+
+    const deleteResponse = await request(app)
+      .delete(`/api/clients/${testClientId}/form-pdfs/${pdfId}`)
+      .set('Cookie', createAuthCookie());
+    expect(deleteResponse.status).toBe(204);
+    expect(prisma.clientFormPdf.delete).toHaveBeenCalledWith({ where: { id: pdfId } });
+    expect(prisma.clientUploadedPdfFill.updateMany).toHaveBeenCalledWith({
+      where: { id: fillId, clientId: testClientId },
+      data: { status: 'DRAFT', generatedPdfUrl: null, generatedAt: null }
+    });
+    await expect(loadFilled(`pdf-fill-${fillId}`, config)).resolves.toBeNull();
   });
 
   it('lists documents for an owned client', async () => {
@@ -154,6 +199,7 @@ describe('client document routes', () => {
         fileName: 'Tax Return.pdf',
         contentType: 'application/pdf',
         sizeBytes: 4096,
+        source: 'DOCUMENT_DRAWER',
         uploadedByName: 'Advisor One',
         createdAt: '2026-07-07T10:00:00.000Z',
         viewUrl: `/api/clients/${testClientId}/documents/doc_1/view`

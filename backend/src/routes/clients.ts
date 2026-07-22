@@ -431,6 +431,7 @@ const clientInclude = {
           pdfUrl: true,
           documentTitle: true,
           fileName: true,
+          sourceRunId: true,
           generatedAt: true,
           receivedAt: true
         }
@@ -681,6 +682,7 @@ interface FormWorkspaceRecord {
       fileName: string | null;
       status: string;
       warningCount: number;
+      generatedPdfId: string | null;
       generatedPdfUrl: string | null;
       generatedAt: string | null;
     } | null;
@@ -696,6 +698,7 @@ interface ClientFormPdfRecord {
   workspaceFormCode: string;
   workspaceFormTitle: string;
   pdfUrl: string;
+  viewUrl: string;
   documentTitle: string | null;
   fileName: string | null;
   sourceRunId: string | null;
@@ -1287,6 +1290,7 @@ function toClientFormPdfRecord(pdf: {
     workspaceFormCode: pdf.workspaceFormCode,
     workspaceFormTitle: getWorkspaceFormTitle(pdf.workspaceFormCode),
     pdfUrl: browserPdfUrl(pdf),
+    viewUrl: clientFormPdfViewUrl(pdf.clientId, pdf.id),
     documentTitle: pdf.documentTitle,
     fileName: pdf.fileName,
     sourceRunId: pdf.sourceRunId,
@@ -1381,6 +1385,11 @@ function toFormWorkspaceRecord(
       const baiodfPdfs = investment.formPdfs.filter((pdf) => pdf.formCode === BAIODF_FORM_CODE);
       const latestBaiodfPdf = baiodfPdfs[0] ?? null;
       const agreement = investment.agreementPdfFill;
+      const agreementPdf = agreement
+        ? investment.formPdfs.find(
+            (pdf) => pdf.formCode === 'PDF_UPLOAD' && pdf.sourceRunId === agreement.id
+          ) ?? null
+        : null;
       const agreementAnalysisIsStale = Boolean(
         agreement?.status === 'ANALYZING' &&
         Date.now() - (agreement.analysisStartedAt ?? agreement.updatedAt).getTime() >= 5 * 60 * 1000
@@ -1412,6 +1421,7 @@ function toFormWorkspaceRecord(
               fileName: agreement.fileName,
               status: agreementAnalysisIsStale ? 'ANALYSIS_FAILED' : agreement.status,
               warningCount: Array.isArray(agreement.warnings) ? agreement.warnings.length : 0,
+              generatedPdfId: agreementPdf?.id ?? null,
               generatedPdfUrl: agreement.generatedPdfUrl
                 ? publicPdfFillUrl(pdfFillBaseUrl, client.id, agreement.id, 'filled')
                 : null,

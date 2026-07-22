@@ -211,6 +211,35 @@ describe('client PDF ticket routes', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('loads generated workspace forms from their durable storage key', async () => {
+    const prisma = createMockPrisma();
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1', name: 'Client One' });
+    prisma.clientFormPdf.findMany.mockResolvedValue([
+      pdfRecord({
+        id: 'pdf_sfc',
+        formCode: 'SFC',
+        workspaceFormCode: 'SFC',
+        pdfUrl: 'https://api.example.com/api/clients/client_1/forms/SFC/filled.pdf'
+      })
+    ]);
+    const sourcePdf = await createTestPdf('Statement of Financial Condition');
+    storageMocks.loadFilled.mockImplementation(async (key: string) =>
+      key === 'client_1__SFC' ? sourcePdf : null
+    );
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const response = await request(app)
+      .post('/api/clients/client_1/pdf-ticket')
+      .set('Cookie', createAuthCookie())
+      .send({ pdfIds: ['pdf_sfc'] });
+
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    expect(storageMocks.loadFilled).toHaveBeenCalledWith('client_1__SFC', config);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('resolves an investment as an atomic BAIODF and agreement pair', async () => {
     const prisma = createMockPrisma();
     prisma.client.findFirst.mockResolvedValue({ id: 'client_1', name: 'Client One' });
@@ -344,6 +373,50 @@ describe('client PDF ticket routes', () => {
       'https://files.example.com/first-baiodf.pdf',
       'https://files.example.com/first-agreement.pdf'
     ]);
+  });
+
+  it('allows selecting a subscription agreement without its brokerage disclosure', async () => {
+    const prisma = createMockPrisma();
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1', name: 'Client One' });
+    prisma.clientFormPdf.findMany.mockResolvedValue([]);
+    const disclosure = pdfRecord({
+      id: 'pdf_disclosure',
+      formCode: 'BAIODF',
+      workspaceFormCode: 'BAIODF',
+      pdfUrl: 'https://files.example.com/disclosure.pdf'
+    });
+    const agreement = pdfRecord({
+      id: 'pdf_subscription',
+      formCode: 'PDF_UPLOAD',
+      workspaceFormCode: 'PDF_UPLOAD',
+      pdfUrl: 'https://files.example.com/subscription.pdf',
+      sourceRunId: 'fill_subscription'
+    });
+    prisma.clientInvestment.findMany.mockResolvedValue([
+      {
+        id: 'investment_1',
+        name: 'Growth Fund',
+        agreementPdfFill: { id: 'fill_subscription', status: 'GENERATED', generatedPdfUrl: agreement.pdfUrl },
+        formPdfs: [disclosure, agreement]
+      }
+    ]);
+    const agreementBytes = await createTestPdf('Subscription only');
+    const fetchMock = vi.fn(async () => new Response(new Uint8Array(agreementBytes), {
+      status: 200,
+      headers: { 'content-type': 'application/pdf' }
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const response = await request(app)
+      .post('/api/clients/client_1/pdf-ticket')
+      .set('Cookie', createAuthCookie())
+      .send({ items: [{ kind: 'investment-agreement', id: 'investment_1' }] });
+
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    expect(response.headers['x-taxalpha-pdf-count']).toBe('1');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('https://files.example.com/subscription.pdf');
   });
 
   it('merges an original uploaded PDF without creating a PDF-fill record', async () => {

@@ -9,7 +9,7 @@ interface PdfTicketListResponse {
 }
 
 export type PdfTicketOrderItem = {
-  kind: 'pdf' | 'investment' | 'document';
+  kind: 'pdf' | 'investment' | 'investment-baiodf' | 'investment-agreement' | 'document';
   id: string;
 };
 
@@ -45,6 +45,19 @@ async function parseDownloadError(response: Response): Promise<ApiError> {
 export async function listPdfTicketPdfs(clientId: string): Promise<PdfTicketListResponse> {
   const response = await apiRequest<PdfTicketListResponse>(`/api/clients/${clientId}/pdf-ticket/pdfs`);
   return response;
+}
+
+export function generatedPdfViewUrl(pdf: ClientFormPdfRecord): string {
+  const path = pdf.viewUrl ?? `/api/clients/${pdf.clientId}/form-pdfs/${pdf.id}/file.pdf`;
+  return `${API_BASE_URL}${path}`;
+}
+
+export function generatedPdfFileUrl(clientId: string, pdfId: string): string {
+  return `${API_BASE_URL}/api/clients/${clientId}/form-pdfs/${pdfId}/file.pdf`;
+}
+
+export async function deleteGeneratedPdf(clientId: string, pdfId: string): Promise<void> {
+  await apiRequest(`/api/clients/${clientId}/form-pdfs/${pdfId}`, { method: 'DELETE' });
 }
 
 export async function createPdfTicket(

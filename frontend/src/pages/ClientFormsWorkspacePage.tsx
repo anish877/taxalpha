@@ -11,7 +11,14 @@ import {
 } from '../api/clientDocuments';
 import { generatePdf } from '../api/dynamicSteps';
 import { analyzePdfFill, createPdfFill, deletePdfFill, listPdfFills } from '../api/pdfFills';
-import { createPdfTicket, listPdfTicketPdfs, type PdfTicketOrderItem } from '../api/pdfTickets';
+import {
+  createPdfTicket,
+  deleteGeneratedPdf,
+  generatedPdfFileUrl,
+  generatedPdfViewUrl,
+  listPdfTicketPdfs,
+  type PdfTicketOrderItem
+} from '../api/pdfTickets';
 import {
   addInvestment,
   analyzeInvestmentAgreement,
@@ -149,6 +156,12 @@ function isPackageEligibleDocument(document: ClientDocumentRecord): boolean {
   );
 }
 
+type InvestmentDocumentKind = 'investment-baiodf' | 'investment-agreement';
+
+function investmentDocumentKey(kind: InvestmentDocumentKind, investmentId: string): string {
+  return `${kind}:${investmentId}`;
+}
+
 const ANALYSIS_STAGES = {
   QUEUED: { label: 'Preparing analysis', step: 1, progress: 10 },
   READING_PDF: { label: 'Reading PDF fields', step: 2, progress: 30 },
@@ -227,13 +240,14 @@ export function ClientFormsWorkspacePage() {
   const [ticketPdfsError, setTicketPdfsError] = useState<string | null>(null);
   const [selectedTicketPdfIds, setSelectedTicketPdfIds] = useState<Set<string>>(new Set());
   const [selectedTicketDocumentIds, setSelectedTicketDocumentIds] = useState<Set<string>>(new Set());
-  const [selectedTicketInvestmentIds, setSelectedTicketInvestmentIds] = useState<Set<string>>(new Set());
+  const [selectedTicketInvestmentDocumentKeys, setSelectedTicketInvestmentDocumentKeys] = useState<Set<string>>(new Set());
   const [ticketOrderItems, setTicketOrderItems] = useState<TicketOrderReviewItem[]>([]);
   const [ticketOrderDialogOpen, setTicketOrderDialogOpen] = useState(false);
   const [draggedTicketOrderKey, setDraggedTicketOrderKey] = useState<string | null>(null);
   const draggedTicketOrderKeyRef = useRef<string | null>(null);
   const [pdfFillDropActive, setPdfFillDropActive] = useState(false);
   const [creatingTicket, setCreatingTicket] = useState(false);
+  const [deletingGeneratedPdfId, setDeletingGeneratedPdfId] = useState<string | null>(null);
   const [investmentActionId, setInvestmentActionId] = useState<string | null>(null);
   const [newInvestmentName, setNewInvestmentName] = useState('');
   const [newInvestmentAgreement, setNewInvestmentAgreement] = useState<File | null>(null);
@@ -410,9 +424,14 @@ export function ClientFormsWorkspacePage() {
           const availableIds = new Set(nextTicketDocuments.map((document) => document.id));
           return new Set([...current].filter((documentId) => availableIds.has(documentId)));
         });
-        setSelectedTicketInvestmentIds((current) => {
-          const availableIds = new Set(ticketResponse.investmentPairs.filter((pair) => pair.ready).map((pair) => pair.investmentId));
-          return new Set([...current].filter((investmentId) => availableIds.has(investmentId)));
+        setSelectedTicketInvestmentDocumentKeys((current) => {
+          const availableKeys = new Set(
+            ticketResponse.investmentPairs.flatMap((pair) => [
+              ...(pair.baiodfPdf ? [investmentDocumentKey('investment-baiodf', pair.investmentId)] : []),
+              ...(pair.agreementPdf ? [investmentDocumentKey('investment-agreement', pair.investmentId)] : [])
+            ])
+          );
+          return new Set([...current].filter((key) => availableKeys.has(key)));
         });
       } catch (requestError) {
         if (requestError instanceof ApiError && requestError.statusCode === 401) {
@@ -552,23 +571,55 @@ export function ClientFormsWorkspacePage() {
   }, [workspace]);
 
   const selectedTicketPdfCount =
-    selectedTicketPdfIds.size + selectedTicketDocumentIds.size + selectedTicketInvestmentIds.size * 2;
+    selectedTicketPdfIds.size + selectedTicketDocumentIds.size + selectedTicketInvestmentDocumentKeys.size;
   const allTicketPdfIds = useMemo(() => ticketPdfs.map((pdf) => pdf.id), [ticketPdfs]);
   const allTicketDocumentIds = useMemo(
     () => ticketDocuments.map((document) => document.id),
     [ticketDocuments]
   );
-  const readyTicketInvestmentIds = useMemo(
-    () => ticketPairs.filter((pair) => pair.ready).map((pair) => pair.investmentId),
+  const availableTicketInvestmentDocumentKeys = useMemo(
+    () => ticketPairs.flatMap((pair) => [
+      ...(pair.baiodfPdf ? [investmentDocumentKey('investment-baiodf', pair.investmentId)] : []),
+      ...(pair.agreementPdf ? [investmentDocumentKey('investment-agreement', pair.investmentId)] : [])
+    ]),
     [ticketPairs]
   );
   const allSelectableTicketPdfCount =
-    ticketPdfs.length + ticketDocuments.length + readyTicketInvestmentIds.length * 2;
+    ticketPdfs.length + ticketDocuments.length + availableTicketInvestmentDocumentKeys.length;
   const allTicketPdfsSelected =
     allSelectableTicketPdfCount > 0 &&
     selectedTicketPdfIds.size === ticketPdfs.length &&
     selectedTicketDocumentIds.size === ticketDocuments.length &&
-    selectedTicketInvestmentIds.size === readyTicketInvestmentIds.length;
+    selectedTicketInvestmentDocumentKeys.size === availableTicketInvestmentDocumentKeys.length;
+  const intakeTicketDocuments = useMemo(
+    () => ticketDocuments.filter((document) => document.source === 'INTAKE_FORM'),
+    [ticketDocuments]
+  );
+  const drawerTicketDocuments = useMemo(
+    () => ticketDocuments.filter((document) => document.source !== 'INTAKE_FORM'),
+    [ticketDocuments]
+  );
+  const directFillTicketPdfs = useMemo(
+    () => ticketPdfs.filter((pdf) => pdf.workspaceFormCode === 'PDF_UPLOAD'),
+    [ticketPdfs]
+  );
+  const generatedFormGroups = useMemo(() => {
+    const groups = new Map<string, { title: string; pdfs: ClientFormPdfRecord[] }>();
+    for (const pdf of ticketPdfs.filter((item) => item.workspaceFormCode !== 'PDF_UPLOAD')) {
+      const key = pdf.workspaceFormCode || pdf.formCode;
+      const existing = groups.get(key);
+      if (existing) existing.pdfs.push(pdf);
+      else groups.set(key, { title: pdf.workspaceFormTitle, pdfs: [pdf] });
+    }
+    const preferredOrder = ['INVESTOR_PROFILE', 'INVESTOR_PROFILE_ADDITIONAL_HOLDER', 'SFC', 'BAIV_506C'];
+    return [...groups.entries()]
+      .map(([code, group]) => ({ code, ...group }))
+      .sort((left, right) => {
+        const leftRank = preferredOrder.indexOf(left.code);
+        const rightRank = preferredOrder.indexOf(right.code);
+        return (leftRank < 0 ? 99 : leftRank) - (rightRank < 0 ? 99 : rightRank);
+      });
+  }, [ticketPdfs]);
 
   const handleToggleStage = (formCode: string) => {
     setStagedCodes((current) => {
@@ -805,6 +856,46 @@ export function ClientFormsWorkspacePage() {
     }
   };
 
+  const handleDeleteGeneratedPdf = async (pdfId: string, title: string) => {
+    if (!clientId || deletingGeneratedPdfId) return;
+    if (!window.confirm(`Delete ${title}? The generated PDF will be removed.`)) return;
+
+    setDeletingGeneratedPdfId(pdfId);
+    try {
+      await deleteGeneratedPdf(clientId, pdfId);
+      setPdfs((current) => current.filter((item) => item.id !== pdfId));
+      setTicketPdfs((current) => current.filter((item) => item.id !== pdfId));
+      setTicketPairs((current) => current.map((pair) => ({
+        ...pair,
+        baiodfPdf: pair.baiodfPdf?.id === pdfId ? null : pair.baiodfPdf,
+        agreementPdf: pair.agreementPdf?.id === pdfId ? null : pair.agreementPdf,
+        ready:
+          Boolean(pair.baiodfPdf?.id === pdfId ? null : pair.baiodfPdf) &&
+          Boolean(pair.agreementPdf?.id === pdfId ? null : pair.agreementPdf)
+      })));
+      setSelectedTicketPdfIds((current) => {
+        const next = new Set(current);
+        next.delete(pdfId);
+        return next;
+      });
+      await Promise.all([
+        loadWorkspace({ preserveStage: true, silent: true }),
+        loadTicketPdfs({ silent: true }),
+        loadPdfFills({ silent: true }),
+        pdfDrawerForm ? loadFormPdfs(pdfDrawerForm.code, { silent: true }) : Promise.resolve()
+      ]);
+      pushToast('Generated PDF deleted.');
+    } catch (requestError) {
+      if (requestError instanceof ApiError && requestError.statusCode === 401) {
+        await handleUnauthorized();
+        return;
+      }
+      pushToast(requestError instanceof Error ? requestError.message : 'Unable to delete generated PDF.', 'error');
+    } finally {
+      setDeletingGeneratedPdfId(null);
+    }
+  };
+
   const handleToggleTicketPdf = (pdfId: string) => {
     setSelectedTicketPdfIds((current) => {
       const next = new Set(current);
@@ -817,11 +908,12 @@ export function ClientFormsWorkspacePage() {
     });
   };
 
-  const handleToggleTicketInvestment = (investmentId: string) => {
-    setSelectedTicketInvestmentIds((current) => {
+  const handleToggleTicketInvestmentDocument = (kind: InvestmentDocumentKind, investmentId: string) => {
+    const key = investmentDocumentKey(kind, investmentId);
+    setSelectedTicketInvestmentDocumentKeys((current) => {
       const next = new Set(current);
-      if (next.has(investmentId)) next.delete(investmentId);
-      else next.add(investmentId);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -840,8 +932,8 @@ export function ClientFormsWorkspacePage() {
     setSelectedTicketDocumentIds(
       allTicketPdfsSelected ? new Set() : new Set(allTicketDocumentIds)
     );
-    setSelectedTicketInvestmentIds(
-      allTicketPdfsSelected ? new Set() : new Set(readyTicketInvestmentIds)
+    setSelectedTicketInvestmentDocumentKeys(
+      allTicketPdfsSelected ? new Set() : new Set(availableTicketInvestmentDocumentKeys)
     );
   };
 
@@ -869,16 +961,30 @@ export function ClientFormsWorkspacePage() {
     });
     const order: TicketOrderReviewItem[] = [
       ...earlyPdfs.map(toPdfItem),
-      ...ticketPairs
-        .filter((pair) => selectedTicketInvestmentIds.has(pair.investmentId))
-        .map((pair) => ({
-          key: `investment:${pair.investmentId}`,
-          kind: 'investment' as const,
-          id: pair.investmentId,
-          title: pair.name,
-          detail: 'Disclosure form, then agreement',
-          pdfCount: 2
-        })),
+      ...ticketPairs.flatMap((pair) => {
+        const items: TicketOrderReviewItem[] = [];
+        if (selectedTicketInvestmentDocumentKeys.has(investmentDocumentKey('investment-baiodf', pair.investmentId))) {
+          items.push({
+            key: `investment-baiodf:${pair.investmentId}`,
+            kind: 'investment-baiodf',
+            id: pair.investmentId,
+            title: `${pair.name} — Brokerage Alternative Disclosure`,
+            detail: 'Investment disclosure form',
+            pdfCount: 1
+          });
+        }
+        if (selectedTicketInvestmentDocumentKeys.has(investmentDocumentKey('investment-agreement', pair.investmentId))) {
+          items.push({
+            key: `investment-agreement:${pair.investmentId}`,
+            kind: 'investment-agreement',
+            id: pair.investmentId,
+            title: `${pair.name} — Subscription Agreement`,
+            detail: 'Subscription agreement',
+            pdfCount: 1
+          });
+        }
+        return items;
+      }),
       ...latePdfs.map(toPdfItem),
       ...remainingPdfs.map(toPdfItem),
       ...ticketDocuments
@@ -942,9 +1048,7 @@ export function ClientFormsWorkspacePage() {
       const { blob, fileName } = await createPdfTicket(
         clientId,
         [...selectedTicketPdfIds],
-        ticketPairs
-          .filter((pair) => selectedTicketInvestmentIds.has(pair.investmentId))
-          .map((pair) => pair.investmentId),
+        [],
         ticketDocuments
           .filter((document) => selectedTicketDocumentIds.has(document.id))
           .map((document) => document.id),
@@ -1169,6 +1273,60 @@ export function ClientFormsWorkspacePage() {
               ? `Analyzing the agreement for ${guidedNextDocumentInvestment.name}`
               : `Complete the agreement for ${guidedNextDocumentInvestment.name}`
           : 'Create the final document package';
+
+  const renderTicketDocumentRows = (documents: ClientDocumentRecord[]) => (
+    <div className="divide-y divide-black/[0.055] border-t border-black/[0.055]">
+      {documents.map((document) => (
+        <div key={document.id} className="flex items-center justify-between gap-4 px-4 py-3">
+          <label className="flex min-w-0 cursor-pointer items-center gap-3">
+            <input
+              aria-label={`Select uploaded ${document.fileName}`}
+              checked={selectedTicketDocumentIds.has(document.id)}
+              className="h-4 w-4 rounded border-line text-accent focus:ring-accent"
+              type="checkbox"
+              onChange={() => handleToggleTicketDocument(document.id)}
+            />
+            <span className="min-w-0">
+              <span className="block truncate text-sm text-ink">{document.fileName}</span>
+              <span className="mt-1 block text-xs text-mute">
+                {formatFileSize(document.sizeBytes)} · Uploaded {formatTimestamp(document.createdAt)}
+              </span>
+            </span>
+          </label>
+          <a className="shrink-0 text-xs text-mute underline decoration-line underline-offset-4 hover:text-ink" href={clientDocumentViewUrl(document)} target="_blank" rel="noreferrer">Open</a>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderTicketPdfRows = (generatedPdfs: ClientFormPdfRecord[]) => (
+    <div className="divide-y divide-black/[0.055] border-t border-black/[0.055]">
+      {generatedPdfs.map((pdf) => (
+        <div key={pdf.id} className="flex items-center gap-3 px-4 py-3">
+          <input
+            aria-label={`Select ${pdfDisplayTitle(pdf)}`}
+            checked={selectedTicketPdfIds.has(pdf.id)}
+            className="h-4 w-4 shrink-0 rounded border-line text-accent focus:ring-accent"
+            type="checkbox"
+            onChange={() => handleToggleTicketPdf(pdf.id)}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-ink" title={pdfDisplayTitle(pdf)}>{pdfDisplayTitle(pdf)}</p>
+            <p className="mt-1 truncate text-xs text-mute">Generated {formatTimestamp(pdf.generatedAt)}</p>
+          </div>
+          <a className="shrink-0 text-xs text-mute underline decoration-line underline-offset-4 hover:text-ink" href={generatedPdfViewUrl(pdf)} rel="noreferrer" target="_blank">Open</a>
+          <button
+            className="shrink-0 text-xs text-mute underline decoration-line underline-offset-4 hover:text-red-700 disabled:opacity-45"
+            disabled={deletingGeneratedPdfId === pdf.id}
+            type="button"
+            onClick={() => void handleDeleteGeneratedPdf(pdf.id, pdfDisplayTitle(pdf))}
+          >
+            {deletingGeneratedPdfId === pdf.id ? 'Deleting…' : 'Delete'}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <>
@@ -1599,9 +1757,19 @@ export function ClientFormsWorkspacePage() {
                                   ) : (
                                     <>
                                       {investment.baiodfPdf && !generatingDisclosure && (
-                                        <a className="premium-secondary inline-flex items-center px-5 py-2.5 text-sm text-ink" href={investment.baiodfPdf.pdfUrl} target="_blank" rel="noreferrer">
+                                        <a className="premium-secondary inline-flex items-center px-5 py-2.5 text-sm text-ink" href={generatedPdfFileUrl(clientId!, investment.baiodfPdf.id)} target="_blank" rel="noreferrer">
                                           Open document
                                         </a>
+                                      )}
+                                      {investment.baiodfPdf && !generatingDisclosure && (
+                                        <button
+                                          className="px-2 py-2.5 text-sm text-mute hover:text-red-700 disabled:opacity-45"
+                                          disabled={deletingGeneratedPdfId === investment.baiodfPdf.id}
+                                          type="button"
+                                          onClick={() => void handleDeleteGeneratedPdf(investment.baiodfPdf!.id, `${investment.name} disclosure PDF`)}
+                                        >
+                                          {deletingGeneratedPdfId === investment.baiodfPdf.id ? 'Deleting…' : 'Delete'}
+                                        </button>
                                       )}
                                       <button
                                         className="premium-dark px-5 py-2.5 text-sm text-white disabled:cursor-wait disabled:opacity-45"
@@ -1666,9 +1834,19 @@ export function ClientFormsWorkspacePage() {
                                       </button>
                                     )}
                                     {investment.agreement?.generatedPdfUrl && (
-                                      <a className="premium-secondary inline-flex items-center px-5 py-2.5 text-sm text-ink" href={investment.agreement.generatedPdfUrl} target="_blank" rel="noreferrer">
+                                      <a className="premium-secondary inline-flex items-center px-5 py-2.5 text-sm text-ink" href={investment.agreement.generatedPdfId ? generatedPdfFileUrl(clientId!, investment.agreement.generatedPdfId) : investment.agreement.generatedPdfUrl} target="_blank" rel="noreferrer">
                                         Open document
                                       </a>
+                                    )}
+                                    {investment.agreement?.generatedPdfId && (
+                                      <button
+                                        className="px-2 py-2.5 text-sm text-mute hover:text-red-700 disabled:opacity-45"
+                                        disabled={deletingGeneratedPdfId === investment.agreement.generatedPdfId}
+                                        type="button"
+                                        onClick={() => void handleDeleteGeneratedPdf(investment.agreement!.generatedPdfId!, `${investment.name} subscription agreement`)}
+                                      >
+                                        {deletingGeneratedPdfId === investment.agreement.generatedPdfId ? 'Deleting…' : 'Delete'}
+                                      </button>
                                     )}
                                     {investment.agreement && agreementStatus === 'GENERATED' && (
                                       <button
@@ -1820,7 +1998,12 @@ export function ClientFormsWorkspacePage() {
                               </>
                             )}
                             {investment.baiodfPdf && (
-                              <a className="rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.14em] text-ink" href={investment.baiodfPdf.pdfUrl} target="_blank" rel="noreferrer">Open PDF</a>
+                              <a className="rounded-full border border-line px-4 py-2 text-xs uppercase tracking-[0.14em] text-ink" href={generatedPdfFileUrl(clientId!, investment.baiodfPdf.id)} target="_blank" rel="noreferrer">Open PDF</a>
+                            )}
+                            {investment.baiodfPdf && (
+                              <button className="px-2 py-2 text-xs text-mute hover:text-red-700 disabled:opacity-45" disabled={deletingGeneratedPdfId === investment.baiodfPdf.id} type="button" onClick={() => void handleDeleteGeneratedPdf(investment.baiodfPdf!.id, `${investment.name} disclosure PDF`)}>
+                                {deletingGeneratedPdfId === investment.baiodfPdf.id ? 'Deleting…' : 'Delete'}
+                              </button>
                             )}
                           </div>
                           <p className="mt-3 text-xs text-mute">{investment.baiodfPdfCount} generated PDF{investment.baiodfPdfCount === 1 ? '' : 's'}</p>
@@ -1891,7 +2074,12 @@ export function ClientFormsWorkspacePage() {
                               </button>
                             )}
                             {investment.agreement?.generatedPdfUrl && (
-                              <a className="rounded-xl bg-ink px-4 py-2 text-sm text-white" href={investment.agreement.generatedPdfUrl} target="_blank" rel="noreferrer">Open filled PDF</a>
+                              <a className="rounded-xl bg-ink px-4 py-2 text-sm text-white" href={investment.agreement.generatedPdfId ? generatedPdfFileUrl(clientId!, investment.agreement.generatedPdfId) : investment.agreement.generatedPdfUrl} target="_blank" rel="noreferrer">Open filled PDF</a>
+                            )}
+                            {investment.agreement?.generatedPdfId && (
+                              <button className="px-2 py-2 text-sm text-mute hover:text-red-700 disabled:opacity-45" disabled={deletingGeneratedPdfId === investment.agreement.generatedPdfId} type="button" onClick={() => void handleDeleteGeneratedPdf(investment.agreement!.generatedPdfId!, `${investment.name} subscription agreement`)}>
+                                {deletingGeneratedPdfId === investment.agreement.generatedPdfId ? 'Deleting…' : 'Delete'}
+                              </button>
                             )}
                             {investment.agreement && agreementStatus === 'GENERATED' && (
                               <button className="rounded-xl border border-line px-4 py-2 text-sm text-ink" type="button" onClick={() => void handleFillAgreement(investment.id, investment.agreement!.fillId, agreementStatus)}>
@@ -2185,7 +2373,7 @@ export function ClientFormsWorkspacePage() {
                           <th className="px-4 py-3 font-medium">Document</th>
                           <th className="px-4 py-3 font-medium">Received</th>
                           <th className="px-4 py-3 font-medium">Generated</th>
-                          <th className="px-4 py-3 font-medium">Open</th>
+                          <th className="px-4 py-3 font-medium">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2202,14 +2390,24 @@ export function ClientFormsWorkspacePage() {
                               {formatTimestamp(pdf.generatedAt)}
                             </td>
                             <td className="px-4 py-3 align-top">
+                              <div className="flex items-center gap-3">
                               <a
                                 className="inline-flex rounded-full border border-line px-3 py-1 text-xs uppercase tracking-[0.14em] text-ink transition hover:border-black"
-                                href={pdf.pdfUrl}
+                                href={generatedPdfViewUrl(pdf)}
                                 rel="noreferrer"
                                 target="_blank"
                               >
                                 Open PDF
                               </a>
+                              <button
+                                className="text-xs text-mute underline decoration-line underline-offset-4 hover:text-red-700 disabled:opacity-45"
+                                disabled={deletingGeneratedPdfId === pdf.id}
+                                type="button"
+                                onClick={() => void handleDeleteGeneratedPdf(pdf.id, pdfDisplayTitle(pdf))}
+                              >
+                                {deletingGeneratedPdfId === pdf.id ? 'Deleting…' : 'Delete'}
+                              </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -2295,7 +2493,7 @@ export function ClientFormsWorkspacePage() {
                   type="button"
                   onClick={() => setWorkspaceToolsDrawerMode('ticket')}
                 >
-                  {GUIDED_CLIENT_WORKSPACE ? `Build package (${ticketPdfs.length})` : `Ticket (${ticketPdfs.length})`}
+                  {GUIDED_CLIENT_WORKSPACE ? `Build package (${allSelectableTicketPdfCount})` : `Ticket (${allSelectableTicketPdfCount})`}
                 </button>
               </div>
             </div>
@@ -2599,124 +2797,99 @@ export function ClientFormsWorkspacePage() {
                       </div>
                     )}
 
-                    {!ticketPdfsLoading && !ticketPdfsError && ticketPairs.length > 0 && (
-                      <div className="mb-6">
-                        <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Investment pairs</p>
-                        <div className="grid gap-3">
-                          {ticketPairs.map((pair) => (
-                            <label
-                              key={pair.investmentId}
-                              className={`flex items-center justify-between gap-4 rounded-2xl border p-4 ${
-                                pair.ready ? 'border-black/[0.065] bg-white/70' : 'border-dashed border-black/10 bg-black/[0.025]'
-                              } ${pair.ready ? 'cursor-pointer' : ''}`}
-                            >
-                              <div className="flex min-w-0 items-center gap-3">
-                                <input
-                                  aria-label={`Select ${pair.name} pair`}
-                                  type="checkbox"
-                                  disabled={!pair.ready}
-                                  checked={selectedTicketInvestmentIds.has(pair.investmentId)}
-                                  onChange={() => handleToggleTicketInvestment(pair.investmentId)}
-                                />
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm text-ink">{pair.position}. {pair.name}</p>
-                                  <p className="mt-1 text-xs text-mute">Brokerage Alternative Investment Order and Disclosure Form, then agreement</p>
-                                </div>
-                              </div>
-                              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${pair.ready ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                                {pair.ready ? '2 PDFs ready' : !pair.baiodfPdf ? 'Disclosure form PDF missing' : 'Agreement PDF missing'}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {!ticketPdfsLoading && !ticketPdfsError && ticketDocuments.length > 0 && (
-                      <div className="mb-6">
-                        <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Uploaded documents · original files</p>
-                        <div className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
-                          {ticketDocuments.map((document) => (
-                            <div key={document.id} className="flex items-center justify-between gap-4 border-t border-black/[0.055] px-4 py-3 first:border-t-0">
-                              <label className="flex min-w-0 cursor-pointer items-center gap-3">
-                                <input
-                                  aria-label={`Select uploaded ${document.fileName}`}
-                                  checked={selectedTicketDocumentIds.has(document.id)}
-                                  className="h-4 w-4 rounded border-line text-accent focus:ring-accent"
-                                  type="checkbox"
-                                  onChange={() => handleToggleTicketDocument(document.id)}
-                                />
-                                <span className="min-w-0">
-                                  <span className="block truncate text-sm text-ink">{document.fileName}</span>
-                                  <span className="mt-1 block text-xs text-mute">
-                                    {formatFileSize(document.sizeBytes)} · Uploaded {formatTimestamp(document.createdAt)}
-                                  </span>
-                                </span>
-                              </label>
-                              <a
-                                className="shrink-0 text-xs text-mute underline decoration-line underline-offset-4 hover:text-ink"
-                                href={clientDocumentViewUrl(document)}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Open
-                              </a>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {!ticketPdfsLoading && !ticketPdfsError && clientDocuments.some((document) => !isPackageEligibleDocument(document)) && (
-                      <div className="mb-6">
-                        <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Supporting files not included</p>
-                        <div className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50/60">
-                          {clientDocuments.filter((document) => !isPackageEligibleDocument(document)).map((document) => (
-                            <div key={document.id} className="flex items-center justify-between gap-4 border-t border-amber-200/70 px-4 py-3 first:border-t-0">
-                              <div className="min-w-0">
-                                <p className="truncate text-sm text-ink">{document.fileName}</p>
-                                <p className="mt-1 text-xs text-amber-800">Upload a PDF, JPG, or PNG version to include this file in the final package.</p>
-                              </div>
-                              <a className="shrink-0 text-xs text-mute underline decoration-line underline-offset-4 hover:text-ink" href={clientDocumentViewUrl(document)} target="_blank" rel="noreferrer">Download</a>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {!ticketPdfsLoading && !ticketPdfsError && ticketPdfs.length > 0 && (
-                      <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Other generated PDFs</p>
-                    )}
-
                     {!ticketPdfsLoading && !ticketPdfsError && ticketPdfs.length === 0 && ticketDocuments.length === 0 && ticketPairs.length === 0 && (
                       <div className="rounded-2xl bg-black/[0.035] px-5 py-8 text-center text-sm text-mute">
                         No generated PDFs available yet.
                       </div>
                     )}
 
-                    {!ticketPdfsLoading && !ticketPdfsError && ticketPdfs.length > 0 && (
-                      <div className="grid gap-2">
-                        {ticketPdfs.map((pdf) => {
-                          const checked = selectedTicketPdfIds.has(pdf.id);
-                          return (
-                            <div key={pdf.id} className="flex items-center gap-3 rounded-2xl border border-black/[0.065] bg-white/70 px-4 py-4">
-                              <input
-                                aria-label={`Select ${pdfDisplayTitle(pdf)}`}
-                                checked={checked}
-                                className="h-4 w-4 shrink-0 rounded border-line text-accent focus:ring-accent"
-                                type="checkbox"
-                                onChange={() => handleToggleTicketPdf(pdf.id)}
-                              />
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium text-ink" title={pdfDisplayTitle(pdf)}>{pdfDisplayTitle(pdf)}</p>
-                                <p className="mt-1 truncate text-xs text-mute">
-                                  {pdf.workspaceFormTitle} · Generated {formatTimestamp(pdf.generatedAt)}
-                                </p>
-                              </div>
-                              <a className="premium-secondary inline-flex shrink-0 items-center px-4 py-2 text-sm text-ink" href={pdf.pdfUrl} rel="noreferrer" target="_blank">Open</a>
+                    {!ticketPdfsLoading && !ticketPdfsError && (
+                      <div className="grid gap-3">
+                        {intakeTicketDocuments.length > 0 && (
+                          <details className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4">
+                              <span><span className="block text-sm font-medium text-ink">Documents uploaded during intake</span><span className="mt-1 block text-xs text-mute">Government IDs and files supplied inside forms</span></span>
+                              <span className="text-xs text-mute">{intakeTicketDocuments.length} file{intakeTicketDocuments.length === 1 ? '' : 's'} ▾</span>
+                            </summary>
+                            {renderTicketDocumentRows(intakeTicketDocuments)}
+                          </details>
+                        )}
+
+                        {drawerTicketDocuments.length > 0 && (
+                          <details className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4">
+                              <span><span className="block text-sm font-medium text-ink">Files uploaded from Documents</span><span className="mt-1 block text-xs text-mute">Original files added through the Documents drawer</span></span>
+                              <span className="text-xs text-mute">{drawerTicketDocuments.length} file{drawerTicketDocuments.length === 1 ? '' : 's'} ▾</span>
+                            </summary>
+                            {renderTicketDocumentRows(drawerTicketDocuments)}
+                          </details>
+                        )}
+
+                        {directFillTicketPdfs.length > 0 && (
+                          <details className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4">
+                              <span><span className="block text-sm font-medium text-ink">AI-filled uploaded PDFs</span><span className="mt-1 block text-xs text-mute">Documents uploaded through Fill a PDF</span></span>
+                              <span className="text-xs text-mute">{directFillTicketPdfs.length} PDF{directFillTicketPdfs.length === 1 ? '' : 's'} ▾</span>
+                            </summary>
+                            {renderTicketPdfRows(directFillTicketPdfs)}
+                          </details>
+                        )}
+
+                        {generatedFormGroups.map((group) => (
+                          <details key={group.code} className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4">
+                              <span><span className="block text-sm font-medium text-ink">{group.title}</span><span className="mt-1 block text-xs text-mute">Generated form PDFs</span></span>
+                              <span className="text-xs text-mute">{group.pdfs.length} PDF{group.pdfs.length === 1 ? '' : 's'} ▾</span>
+                            </summary>
+                            {renderTicketPdfRows(group.pdfs)}
+                          </details>
+                        ))}
+
+                        {ticketPairs.length > 0 && (
+                          <details className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4">
+                              <span><span className="block text-sm font-medium text-ink">Subscription agreements and disclosures</span><span className="mt-1 block text-xs text-mute">Choose either document separately for each investment</span></span>
+                              <span className="text-xs text-mute">{ticketPairs.length} investment{ticketPairs.length === 1 ? '' : 's'} ▾</span>
+                            </summary>
+                            <div className="grid gap-2 border-t border-black/[0.055] p-3">
+                              {ticketPairs.map((pair) => (
+                                <details key={pair.investmentId} className="overflow-hidden rounded-xl border border-line bg-white">
+                                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                                    <span className="truncate text-sm font-medium text-ink">{pair.position}. {pair.name}</span>
+                                    <span className="text-xs text-mute">{Number(Boolean(pair.baiodfPdf)) + Number(Boolean(pair.agreementPdf))} of 2 ready ▾</span>
+                                  </summary>
+                                  <div className="divide-y divide-line border-t border-line">
+                                    <div className="flex items-center gap-3 px-4 py-3">
+                                      <input aria-label={`Select ${pair.name} brokerage alternative disclosure`} checked={selectedTicketInvestmentDocumentKeys.has(investmentDocumentKey('investment-baiodf', pair.investmentId))} disabled={!pair.baiodfPdf} type="checkbox" onChange={() => handleToggleTicketInvestmentDocument('investment-baiodf', pair.investmentId)} />
+                                      <div className="min-w-0 flex-1"><p className="text-sm text-ink">Brokerage Alternative Investment Order and Disclosure Form</p><p className="mt-1 text-xs text-mute">{pair.baiodfPdf ? 'PDF ready' : 'PDF not generated'}</p></div>
+                                      {pair.baiodfPdf && <a className="text-xs text-mute underline underline-offset-4" href={generatedPdfViewUrl(pair.baiodfPdf)} target="_blank" rel="noreferrer">Open</a>}
+                                      {pair.baiodfPdf && <button className="text-xs text-mute underline underline-offset-4 hover:text-red-700" type="button" onClick={() => void handleDeleteGeneratedPdf(pair.baiodfPdf!.id, `${pair.name} disclosure PDF`)}>Delete</button>}
+                                    </div>
+                                    <div className="flex items-center gap-3 px-4 py-3">
+                                      <input aria-label={`Select ${pair.name} subscription agreement`} checked={selectedTicketInvestmentDocumentKeys.has(investmentDocumentKey('investment-agreement', pair.investmentId))} disabled={!pair.agreementPdf} type="checkbox" onChange={() => handleToggleTicketInvestmentDocument('investment-agreement', pair.investmentId)} />
+                                      <div className="min-w-0 flex-1"><p className="text-sm text-ink">Subscription agreement</p><p className="mt-1 text-xs text-mute">{pair.agreementPdf ? pair.agreement?.fileName ?? 'PDF ready' : 'PDF not generated'}</p></div>
+                                      {pair.agreementPdf && <a className="text-xs text-mute underline underline-offset-4" href={generatedPdfViewUrl(pair.agreementPdf)} target="_blank" rel="noreferrer">Open</a>}
+                                      {pair.agreementPdf && <button className="text-xs text-mute underline underline-offset-4 hover:text-red-700" type="button" onClick={() => void handleDeleteGeneratedPdf(pair.agreementPdf!.id, `${pair.name} subscription agreement`)}>Delete</button>}
+                                    </div>
+                                  </div>
+                                </details>
+                              ))}
                             </div>
-                          );
-                        })}
+                          </details>
+                        )}
+
+                        {clientDocuments.some((document) => !isPackageEligibleDocument(document)) && (
+                          <details className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50/60">
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 text-sm text-amber-900">
+                              Supporting files not eligible for a PDF package <span className="text-xs">▾</span>
+                            </summary>
+                            <div className="divide-y divide-amber-200 border-t border-amber-200">
+                              {clientDocuments.filter((document) => !isPackageEligibleDocument(document)).map((document) => (
+                                <div key={document.id} className="flex items-center justify-between gap-4 px-4 py-3"><div className="min-w-0"><p className="truncate text-sm text-ink">{document.fileName}</p><p className="mt-1 text-xs text-amber-800">Upload a PDF, JPG, or PNG version to include it.</p></div><a className="text-xs text-mute underline underline-offset-4" href={clientDocumentViewUrl(document)} target="_blank" rel="noreferrer">Open</a></div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2744,7 +2917,7 @@ export function ClientFormsWorkspacePage() {
               <p className="text-xs uppercase tracking-[0.2em] text-mute">Ticket order</p>
               <h2 id="ticket-order-title" className="mt-2 text-xl font-medium text-ink">Arrange package</h2>
               <p className="mt-2 text-sm text-mute">
-                Drag items into the final sequence. Investment pairs stay together: Brokerage Alternative Investment Order and Disclosure Form first, agreement second.
+                Drag each selected document into the final sequence. Investment disclosures and subscription agreements can be arranged independently.
               </p>
             </div>
 

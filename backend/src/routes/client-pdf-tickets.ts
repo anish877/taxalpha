@@ -4,25 +4,25 @@ import { z } from 'zod';
 
 import { clientAccessWhere } from '../lib/client-access.js';
 import { loadClientDocumentBytes } from '../lib/client-document-storage.js';
+import { loadClientFormPdfBytes } from '../lib/client-form-pdf-storage.js';
 import { getWorkspaceFormTitle } from '../lib/form-pdf-utils.js';
 import {
   getGovernmentIdDocumentReferences,
   syncGovernmentIdDocuments
 } from '../lib/government-id-documents.js';
 import { HttpError } from '../lib/http-error.js';
-import { loadFilled } from '../lib/ingestion/template-store.js';
 import { requireAuth } from '../middleware/require-auth.js';
 import type { RouteDeps } from '../types/deps.js';
 
 const DIRECT_PDF_WORKSPACE_CODE = 'PDF_UPLOAD';
 const MAX_TICKET_PDFS = 25;
-const MAX_SOURCE_PDF_BYTES = 30 * 1024 * 1024;
 const MAX_TICKET_SOURCE_BYTES = 90 * 1024 * 1024;
-const EXTERNAL_PDF_FETCH_TIMEOUT_MS = 15_000;
 
 const ticketOrderItemSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('pdf'), id: z.string().trim().min(1) }),
   z.object({ kind: z.literal('investment'), id: z.string().trim().min(1) }),
+  z.object({ kind: z.literal('investment-baiodf'), id: z.string().trim().min(1) }),
+  z.object({ kind: z.literal('investment-agreement'), id: z.string().trim().min(1) }),
   z.object({ kind: z.literal('document'), id: z.string().trim().min(1) })
 ]);
 
@@ -132,6 +132,7 @@ function toTicketPdfRecord(pdf: TicketPdf) {
     workspaceFormTitle:
       pdf.workspaceFormCode === DIRECT_PDF_WORKSPACE_CODE ? 'Direct PDF Fill' : getWorkspaceFormTitle(pdf.formCode),
     pdfUrl: pdf.pdfUrl,
+    viewUrl: `/api/clients/${encodeURIComponent(pdf.clientId)}/form-pdfs/${encodeURIComponent(pdf.id)}/file.pdf`,
     documentTitle: pdf.documentTitle,
     fileName: pdf.fileName,
     sourceRunId: pdf.sourceRunId,
@@ -140,150 +141,19 @@ function toTicketPdfRecord(pdf: TicketPdf) {
   };
 }
 
-function decodePathSegment(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
-function getPdfUrlPath(pdfUrl: string): string | null {
-  try {
-    return new URL(pdfUrl, 'http://taxalpha.local').pathname;
-  } catch {
-    return null;
-  }
-}
-
-function getInternalFilledKey(clientId: string, pdf: TicketPdf): string | null {
-  if (pdf.workspaceFormCode === DIRECT_PDF_WORKSPACE_CODE && pdf.sourceRunId) {
-    return `pdf-fill-${pdf.sourceRunId}`;
-  }
-
-  const pathname = getPdfUrlPath(pdf.pdfUrl);
-  if (!pathname) {
-    return null;
-  }
-
-  const parts = pathname.split('/').filter(Boolean).map(decodePathSegment);
-  if (
-    parts[0] === 'api' &&
-    parts[1] === 'n8n' &&
-    parts[2] === 'clients' &&
-    parts[3] === clientId &&
-    parts[4] === 'form-pdfs' &&
-    parts[5] &&
-    parts[6] === 'file.pdf'
-  ) {
-    return `n8n-callback-${parts[5]}`;
-  }
-
-  if (
-    parts[0] === 'api' &&
-    parts[1] === 'clients' &&
-    parts[2] === clientId &&
-    parts[3] === 'form-pdfs' &&
-    parts[4] &&
-    parts[5] === 'file.pdf'
-  ) {
-    return `n8n-callback-${parts[4]}`;
-  }
-
-  if (parts[0] !== 'api' || parts[1] !== 'clients' || parts[2] !== clientId) {
-    return null;
-  }
-
-  if (parts[3] === 'pdf-fills' && parts[4] && parts[5] === 'filled.pdf') {
-    return `pdf-fill-${parts[4]}`;
-  }
-
-  if (parts[3] === 'forms' && parts[4]) {
-    if (parts[5] === 'filled.pdf' || (parts[5] === 'dynamic' && parts[6] === 'filled.pdf')) {
-      return `${clientId}__${parts[4]}`;
-    }
-  }
-
-  return null;
-}
-
-function assertPdfBytes(bytes: Buffer, title: string): void {
-  if (bytes.length === 0) {
-    throw new HttpError(422, `${title} is empty.`);
-  }
-
-  if (bytes.length > MAX_SOURCE_PDF_BYTES) {
-    throw new HttpError(413, `${title} is larger than 30 MB.`);
-  }
-
-  if (!bytes.subarray(0, 5).toString('utf8').startsWith('%PDF')) {
-    throw new HttpError(422, `${title} is not a readable PDF.`);
-  }
-}
-
-async function fetchExternalPdf(pdf: TicketPdf): Promise<Buffer> {
-  let url: URL;
-  try {
-    url = new URL(pdf.pdfUrl);
-  } catch {
-    throw new HttpError(422, `${displayTitle(pdf)} does not have a downloadable PDF URL.`);
-  }
-
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new HttpError(422, `${displayTitle(pdf)} does not have a downloadable PDF URL.`);
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), EXTERNAL_PDF_FETCH_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) {
-      throw new HttpError(422, `${displayTitle(pdf)} could not be downloaded.`);
-    }
-
-    const contentLength = Number(response.headers.get('content-length') ?? '0');
-    if (contentLength > MAX_SOURCE_PDF_BYTES) {
-      throw new HttpError(413, `${displayTitle(pdf)} is larger than 30 MB.`);
-    }
-
-    const bytes = Buffer.from(await response.arrayBuffer());
-    assertPdfBytes(bytes, displayTitle(pdf));
-    return bytes;
-  } catch (error) {
-    if (error instanceof HttpError) {
-      throw error;
-    }
-
-    throw new HttpError(422, `${displayTitle(pdf)} could not be downloaded.`);
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function loadTicketPdfBytes(deps: RouteDeps, clientId: string, pdf: TicketPdf): Promise<Buffer> {
+async function loadTicketPdfBytes(deps: RouteDeps, pdf: TicketPdf): Promise<Buffer> {
   if (pdf.rawDocument) {
     const bytes = await loadClientDocumentBytes(pdf.rawDocument, deps.config.s3);
     if (!bytes) throw new HttpError(404, `${displayTitle(pdf)} is not available.`);
     if (pdf.rawDocument.contentType.toLowerCase() !== 'application/pdf' && !pdf.rawDocument.fileName.toLowerCase().endsWith('.pdf')) {
       return imageDocumentToPdf(bytes, pdf.rawDocument, displayTitle(pdf));
     }
-    assertPdfBytes(bytes, displayTitle(pdf));
-    return bytes;
-  }
-
-  const internalKey = getInternalFilledKey(clientId, pdf);
-  if (internalKey) {
-    const bytes = await loadFilled(internalKey, deps.config);
-    if (!bytes) {
-      throw new HttpError(404, `${displayTitle(pdf)} is not available yet.`);
+    if (!bytes.subarray(0, 5).toString('utf8').startsWith('%PDF')) {
+      throw new HttpError(422, `${displayTitle(pdf)} is not a readable PDF.`);
     }
-
-    assertPdfBytes(bytes, displayTitle(pdf));
     return bytes;
   }
-
-  return fetchExternalPdf(pdf);
+  return loadClientFormPdfBytes(pdf, deps.config);
 }
 
 async function mergeTicketPdfs(items: Array<{ pdf: TicketPdf; bytes: Buffer }>): Promise<Buffer> {
@@ -323,21 +193,29 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
       }
     });
     if (!client) throw new HttpError(404, 'Client not found.');
+    const governmentIdReferences = getGovernmentIdDocumentReferences(
+      client.investorProfileOnboarding?.step3Data,
+      client.investorProfileOnboarding?.step4Data
+    );
     await syncGovernmentIdDocuments(deps.prisma, {
       clientId,
       uploadedByUserId: ownerUserId,
-      next: getGovernmentIdDocumentReferences(
-        client.investorProfileOnboarding?.step3Data,
-        client.investorProfileOnboarding?.step4Data
-      )
+      next: governmentIdReferences
     });
-    return client;
+    return {
+      ...client,
+      intakeDocumentKeys: new Set(
+        governmentIdReferences
+          .map((document) => document.documentKey)
+          .filter((key): key is string => Boolean(key))
+      )
+    };
   }
 
   router.get('/:clientId/pdf-ticket/pdfs', requireAuth(deps), async (request, response, next) => {
     try {
       const clientId = String(request.params.clientId);
-      await ownedClient(clientId, request.authUser!.id);
+      const client = await ownedClient(clientId, request.authUser!.id);
 
       const [pdfs, investments, documents] = await Promise.all([
         deps.prisma.clientFormPdf.findMany({
@@ -358,7 +236,7 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
             baiodfOnboarding: { select: { status: true } },
             agreementPdfFill: { select: { id: true, status: true, fileName: true, generatedPdfUrl: true } },
             formPdfs: {
-              where: { formCode: 'BAIODF' },
+              where: { formCode: { in: ['BAIODF', 'PDF_UPLOAD'] } },
               orderBy: [{ generatedAt: 'desc' }, { receivedAt: 'desc' }]
             }
           }
@@ -391,23 +269,31 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
           contentType: document.contentType,
           sizeBytes: document.sizeBytes,
           uploadedByName: document.uploadedBy.name,
+          source: client.intakeDocumentKeys.has(document.storageKey) ? 'INTAKE_FORM' : 'DOCUMENT_DRAWER',
           createdAt: document.createdAt.toISOString(),
           viewUrl: `/api/clients/${clientId}/documents/${document.id}/view`
         })),
-        investmentPairs: investments.map((investment) => ({
-          investmentId: investment.id,
-          name: investment.name,
-          position: investment.position,
-          baiodfPdf: investment.formPdfs[0]
-            ? toTicketPdfRecord({ ...investment.formPdfs[0], client: { name: '' } })
-            : null,
-          agreement: investment.agreementPdfFill,
-          ready: Boolean(
-            investment.formPdfs[0] &&
-            investment.agreementPdfFill?.status === 'GENERATED' &&
-            investment.agreementPdfFill.generatedPdfUrl
-          )
-        }))
+        investmentPairs: investments.map((investment) => {
+          const baiodfPdf = investment.formPdfs.find((pdf) => pdf.formCode === 'BAIODF') ?? null;
+          const agreementPdf = investment.agreementPdfFill
+            ? investment.formPdfs.find(
+                (pdf) => pdf.formCode === 'PDF_UPLOAD' && pdf.sourceRunId === investment.agreementPdfFill?.id
+              ) ?? null
+            : null;
+          return {
+            investmentId: investment.id,
+            name: investment.name,
+            position: investment.position,
+            baiodfPdf: baiodfPdf
+              ? toTicketPdfRecord({ ...baiodfPdf, client: { name: client.name } })
+              : null,
+            agreement: investment.agreementPdfFill,
+            agreementPdf: agreementPdf
+              ? toTicketPdfRecord({ ...agreementPdf, client: { name: client.name } })
+              : null,
+            ready: Boolean(baiodfPdf && agreementPdf)
+          };
+        })
       });
     } catch (error) {
       next(error);
@@ -433,18 +319,29 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
           ? requestedOrder.filter((item) => item.kind === 'pdf').map((item) => item.id)
           : parsed.data.otherPdfIds.length > 0 ? parsed.data.otherPdfIds : parsed.data.pdfIds
       )];
-      const investmentIds = [...new Set(
+      const legacyInvestmentIds = [...new Set(
         requestedOrder.length > 0
           ? requestedOrder.filter((item) => item.kind === 'investment').map((item) => item.id)
           : parsed.data.investmentIds
       )];
+      const baiodfInvestmentIds = [...new Set(
+        requestedOrder.filter((item) => item.kind === 'investment-baiodf').map((item) => item.id)
+      )];
+      const agreementInvestmentIds = [...new Set(
+        requestedOrder.filter((item) => item.kind === 'investment-agreement').map((item) => item.id)
+      )];
+      const investmentIds = [...new Set([
+        ...legacyInvestmentIds,
+        ...baiodfInvestmentIds,
+        ...agreementInvestmentIds
+      ])];
       const documentIds = [...new Set(
         requestedOrder.length > 0
           ? requestedOrder.filter((item) => item.kind === 'document').map((item) => item.id)
           : parsed.data.documentIds
       )];
       if (investmentIds.length > 10) {
-        throw new HttpError(400, 'A ticket can contain at most 10 investment pairs.');
+        throw new HttpError(400, 'A ticket can contain documents from at most 10 investments.');
       }
       const pdfs = await deps.prisma.clientFormPdf.findMany({
         where: {
@@ -508,9 +405,8 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
             include: {
               agreementPdfFill: true,
               formPdfs: {
-                where: { formCode: 'BAIODF' },
-                orderBy: [{ generatedAt: 'desc' }, { receivedAt: 'desc' }],
-                take: 1
+                where: { formCode: { in: ['BAIODF', 'PDF_UPLOAD'] } },
+                orderBy: [{ generatedAt: 'desc' }, { receivedAt: 'desc' }]
               }
             }
           })
@@ -523,27 +419,50 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
         .map((investmentId) => investmentById.get(investmentId))
         .filter((investment): investment is (typeof investmentRecords)[number] => Boolean(investment));
 
-      const pairPdfsByInvestmentId = new Map<string, TicketPdf[]>();
+      const baiodfPdfByInvestmentId = new Map<string, TicketPdf>();
+      const agreementPdfByInvestmentId = new Map<string, TicketPdf>();
       for (const investment of investments) {
-        const baiodfPdf = investment.formPdfs[0];
+        const baiodfPdf = investment.formPdfs.find((pdf) => pdf.formCode === 'BAIODF');
         const agreement = investment.agreementPdfFill;
-        if (!baiodfPdf || agreement?.status !== 'GENERATED' || !agreement.generatedPdfUrl) {
-          throw new HttpError(409, `${investment.name} does not have a complete document pair.`);
-        }
-        const agreementPdf = await deps.prisma.clientFormPdf.findFirst({
-          where: { clientId, investmentId: investment.id, sourceRunId: agreement.id },
-          include: { client: { select: { name: true } } },
-          orderBy: [{ generatedAt: 'desc' }, { receivedAt: 'desc' }]
-        });
-        if (!agreementPdf) throw new HttpError(409, `${investment.name} agreement PDF is unavailable.`);
-        pairPdfsByInvestmentId.set(investment.id, [
-          { ...baiodfPdf, client: { name: client.name } },
-          agreementPdf
-        ]);
-      }
-      const pairPdfs = investmentIds.flatMap((investmentId) => pairPdfsByInvestmentId.get(investmentId) ?? []);
+        const embeddedAgreementPdf = agreement
+          ? investment.formPdfs.find(
+              (pdf) => pdf.formCode === 'PDF_UPLOAD' && pdf.sourceRunId === agreement.id
+            )
+          : null;
+        const agreementPdf = embeddedAgreementPdf ?? (agreement
+          ? await deps.prisma.clientFormPdf.findFirst({
+              where: { clientId, investmentId: investment.id, sourceRunId: agreement.id },
+              include: { client: { select: { name: true } } },
+              orderBy: [{ generatedAt: 'desc' }, { receivedAt: 'desc' }]
+            })
+          : null);
 
-      if (pdfs.length + pairPdfs.length + uploadedPdfs.length > MAX_TICKET_PDFS) {
+        if (baiodfPdf) {
+          baiodfPdfByInvestmentId.set(investment.id, { ...baiodfPdf, client: { name: client.name } });
+        }
+        if (agreementPdf) {
+          agreementPdfByInvestmentId.set(investment.id, { ...agreementPdf, client: { name: client.name } });
+        }
+
+        const needsBaiodf = legacyInvestmentIds.includes(investment.id) || baiodfInvestmentIds.includes(investment.id);
+        const needsAgreement = legacyInvestmentIds.includes(investment.id) || agreementInvestmentIds.includes(investment.id);
+        if (needsBaiodf && !baiodfPdf) {
+          throw new HttpError(409, `${investment.name} brokerage alternative disclosure PDF is unavailable.`);
+        }
+        if (needsAgreement && !agreementPdf) {
+          throw new HttpError(409, `${investment.name} subscription agreement PDF is unavailable.`);
+        }
+      }
+      const pairPdfs = legacyInvestmentIds.flatMap((investmentId) => [
+        baiodfPdfByInvestmentId.get(investmentId),
+        agreementPdfByInvestmentId.get(investmentId)
+      ].filter((pdf): pdf is TicketPdf => Boolean(pdf)));
+      const selectedInvestmentPdfs = [
+        ...baiodfInvestmentIds.map((id) => baiodfPdfByInvestmentId.get(id)),
+        ...agreementInvestmentIds.map((id) => agreementPdfByInvestmentId.get(id))
+      ].filter((pdf): pdf is TicketPdf => Boolean(pdf));
+
+      if (pdfs.length + pairPdfs.length + selectedInvestmentPdfs.length + uploadedPdfs.length > MAX_TICKET_PDFS) {
         throw new HttpError(400, `A ticket can contain at most ${MAX_TICKET_PDFS} PDFs.`);
       }
 
@@ -565,7 +484,20 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
       const uploadedPdfById = new Map(uploadedPdfs.map((pdf) => [pdf.id, pdf]));
       const orderedPdfs: TicketPdf[] = requestedOrder.length > 0
         ? requestedOrder.flatMap((item) => {
-            if (item.kind === 'investment') return pairPdfsByInvestmentId.get(item.id) ?? [];
+            if (item.kind === 'investment') {
+              return [
+                baiodfPdfByInvestmentId.get(item.id),
+                agreementPdfByInvestmentId.get(item.id)
+              ].filter((pdf): pdf is TicketPdf => Boolean(pdf));
+            }
+            if (item.kind === 'investment-baiodf') {
+              const pdf = baiodfPdfByInvestmentId.get(item.id);
+              return pdf ? [pdf] : [];
+            }
+            if (item.kind === 'investment-agreement') {
+              const pdf = agreementPdfByInvestmentId.get(item.id);
+              return pdf ? [pdf] : [];
+            }
             if (item.kind === 'document') {
               const document = uploadedPdfById.get(item.id);
               return document ? [document] : [];
@@ -585,7 +517,7 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
       const loadedPdfs = await Promise.all(
         orderedPdfs.map(async (pdf) => ({
           pdf,
-          bytes: await loadTicketPdfBytes(deps, clientId, pdf)
+          bytes: await loadTicketPdfBytes(deps, pdf)
         }))
       );
       const totalBytes = loadedPdfs.reduce((sum, item) => sum + item.bytes.length, 0);
