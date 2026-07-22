@@ -156,6 +156,9 @@ interface SfcStep2Response {
 interface SfcClientContext {
   id: string;
   name: string;
+  brokerLinks?: Array<{
+    broker: { name: string; representativeCrdNumber: string | null };
+  }>;
   formSelections: Array<{
     form: {
       code: string;
@@ -187,6 +190,20 @@ interface SfcClientContext {
     step1Data: Prisma.JsonValue | null;
     step2Data: Prisma.JsonValue | null;
   } | null;
+}
+
+function getPrimaryBroker(client: SfcClientContext) {
+  return client.brokerLinks?.[0]?.broker ?? null;
+}
+
+function getFinancialProfessionalPrefill(
+  client: SfcClientContext,
+  block: { typedSignature: string | null; printedName: string | null; date: string | null }
+) {
+  return {
+    ...block,
+    printedName: getPrimaryBroker(client)?.name ?? block.printedName
+  };
 }
 
 const sfcReviewSelect = {
@@ -508,6 +525,14 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
       select: {
         id: true,
         name: true,
+        brokerLinks: {
+          where: { role: 'PRIMARY' },
+          orderBy: { position: 'asc' },
+          take: 1,
+          select: {
+            broker: { select: { name: true, representativeCrdNumber: true } }
+          }
+        },
         formSelections: {
           select: {
             form: {
@@ -613,8 +638,8 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           onboarding.step1CurrentQuestionIndex,
           onboarding.step1Data,
           {
-            rrName: investorStep1.accountRegistration.rrName || null,
-            rrNo: investorStep1.accountRegistration.rrNo || null,
+            rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+            rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
             customerNames: investorStep1.accountRegistration.customerNames || client.name || null
           }
         )
@@ -686,8 +711,8 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
       });
 
       const prefillContext = {
-        rrName: investorStep1.accountRegistration.rrName || null,
-        rrNo: investorStep1.accountRegistration.rrNo || null,
+        rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+        rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
         customerNames: investorStep1.accountRegistration.customerNames || client.name || null
       };
 
@@ -823,7 +848,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
             requiresJointOwnerSignature,
             accountOwner: step7Fields.signatures.accountOwner,
             jointAccountOwner: step7Fields.signatures.jointAccountOwner,
-            financialProfessional: step7Fields.signatures.financialProfessional,
+            financialProfessional: getFinancialProfessionalPrefill(client, step7Fields.signatures.financialProfessional),
             registeredPrincipal: step7Fields.signatures.supervisorPrincipal
           }
         )
@@ -900,7 +925,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
         requiresJointOwnerSignature,
         accountOwner: step7Fields.signatures.accountOwner,
         jointAccountOwner: step7Fields.signatures.jointAccountOwner,
-        financialProfessional: step7Fields.signatures.financialProfessional,
+        financialProfessional: getFinancialProfessionalPrefill(client, step7Fields.signatures.financialProfessional),
         registeredPrincipal: step7Fields.signatures.supervisorPrincipal
       };
 
@@ -928,8 +953,8 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
       const prefilledStep1Fields = applySfcStep1Prefill(
         normalizeSfcStep1Fields(existingOnboarding?.step1Data ?? null),
         {
-          rrName: client.investorProfileOnboarding?.step1RrName ?? null,
-          rrNo: client.investorProfileOnboarding?.step1RrNo ?? null,
+          rrName: getPrimaryBroker(client)?.name ?? client.investorProfileOnboarding?.step1RrName ?? null,
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? client.investorProfileOnboarding?.step1RrNo ?? null,
           customerNames:
             client.investorProfileOnboarding?.step1CustomerNames ?? client.name ?? null
         }
@@ -1035,8 +1060,8 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null
         });
         const prefillContext = {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
 
@@ -1048,7 +1073,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           requiresJointOwnerSignature,
           accountOwner: step7Fields.signatures.accountOwner,
           jointAccountOwner: step7Fields.signatures.jointAccountOwner,
-          financialProfessional: step7Fields.signatures.financialProfessional,
+          financialProfessional: getFinancialProfessionalPrefill(client, step7Fields.signatures.financialProfessional),
           registeredPrincipal: step7Fields.signatures.supervisorPrincipal
         };
         const nextRouteAfterCompletion =
@@ -1130,8 +1155,8 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null
         });
         const step1PrefillContext = {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
 
@@ -1143,7 +1168,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           requiresJointOwnerSignature,
           accountOwner: step7Fields.signatures.accountOwner,
           jointAccountOwner: step7Fields.signatures.jointAccountOwner,
-          financialProfessional: step7Fields.signatures.financialProfessional,
+          financialProfessional: getFinancialProfessionalPrefill(client, step7Fields.signatures.financialProfessional),
           registeredPrincipal: step7Fields.signatures.supervisorPrincipal
         };
 

@@ -119,6 +119,9 @@ function pdfDisplayTitle(pdf: ClientFormPdfRecord): string {
 }
 
 function formatFileSize(bytes: number): string {
+  if (bytes === 0) {
+    return 'Stored document';
+  }
   if (bytes < 1024) {
     return `${bytes} B`;
   }
@@ -130,6 +133,20 @@ function formatFileSize(bytes: number): string {
 
   const megabytes = kilobytes / 1024;
   return `${megabytes.toFixed(megabytes >= 10 ? 0 : 1)} MB`;
+}
+
+function isPackageEligibleDocument(document: ClientDocumentRecord): boolean {
+  const contentType = document.contentType.toLowerCase();
+  const fileName = document.fileName.toLowerCase();
+  return (
+    contentType === 'application/pdf' ||
+    contentType === 'image/jpeg' ||
+    contentType === 'image/png' ||
+    fileName.endsWith('.pdf') ||
+    fileName.endsWith('.jpg') ||
+    fileName.endsWith('.jpeg') ||
+    fileName.endsWith('.png')
+  );
 }
 
 const ANALYSIS_STAGES = {
@@ -2331,6 +2348,11 @@ export function ClientFormsWorkspacePage() {
                                 <p className="mt-1 text-xs text-mute">
                                   {formatFileSize(document.sizeBytes)} · Uploaded {formatTimestamp(document.createdAt)} by {document.uploadedByName}
                                 </p>
+                                <p className={`mt-1 text-xs ${isPackageEligibleDocument(document) ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                  {isPackageEligibleDocument(document)
+                                    ? 'Available for the final package'
+                                    : 'Supporting file only · upload a PDF, JPG, or PNG version to include it in the final package'}
+                                </p>
                               </div>
                               <div className="flex shrink-0 items-center gap-2">
                                 <a className="premium-secondary inline-flex items-center px-4 py-2 text-sm text-ink" href={clientDocumentViewUrl(document)} rel="noreferrer" target="_blank">Open</a>
@@ -2612,7 +2634,7 @@ export function ClientFormsWorkspacePage() {
 
                     {!ticketPdfsLoading && !ticketPdfsError && ticketDocuments.length > 0 && (
                       <div className="mb-6">
-                        <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Uploaded PDFs · original files</p>
+                        <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Uploaded documents · original files</p>
                         <div className="overflow-hidden rounded-2xl border border-black/[0.065] bg-white/70">
                           {ticketDocuments.map((document) => (
                             <div key={document.id} className="flex items-center justify-between gap-4 border-t border-black/[0.055] px-4 py-3 first:border-t-0">
@@ -2639,6 +2661,23 @@ export function ClientFormsWorkspacePage() {
                               >
                                 Open
                               </a>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {!ticketPdfsLoading && !ticketPdfsError && clientDocuments.some((document) => !isPackageEligibleDocument(document)) && (
+                      <div className="mb-6">
+                        <p className="mb-3 text-xs uppercase tracking-[0.18em] text-mute">Supporting files not included</p>
+                        <div className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50/60">
+                          {clientDocuments.filter((document) => !isPackageEligibleDocument(document)).map((document) => (
+                            <div key={document.id} className="flex items-center justify-between gap-4 border-t border-amber-200/70 px-4 py-3 first:border-t-0">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm text-ink">{document.fileName}</p>
+                                <p className="mt-1 text-xs text-amber-800">Upload a PDF, JPG, or PNG version to include this file in the final package.</p>
+                              </div>
+                              <a className="shrink-0 text-xs text-mute underline decoration-line underline-offset-4 hover:text-ink" href={clientDocumentViewUrl(document)} target="_blank" rel="noreferrer">Download</a>
                             </div>
                           ))}
                         </div>

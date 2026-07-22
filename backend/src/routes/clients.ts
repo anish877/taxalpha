@@ -10,6 +10,8 @@ import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import { publicPdfFillUrl } from '../lib/pdf-fill/engine.js';
+import { syncGovernmentIdDocuments } from '../lib/government-id-documents.js';
+import { getPrimaryBrokerIdentity, type PrimaryBrokerIdentity } from '../lib/primary-broker.js';
 import { publicRequestBaseUrl } from '../lib/request-base-url.js';
 
 import {
@@ -1626,7 +1628,8 @@ function createDefaultBaiv506cOnboardingPayload() {
 function toStepOneResponse(
   clientId: string,
   onboarding: StepOneSelectableOnboarding,
-  clientName: string | null = null
+  clientName: string | null = null,
+  primaryBroker: PrimaryBrokerIdentity | null = null
 ): Step1Response {
   const fields = getStep1FieldsWithAutofill({
     step1Data: onboarding.step1Data,
@@ -1637,6 +1640,10 @@ function toStepOneResponse(
     step1AccountType: onboarding.step1AccountType,
     clientName
   });
+  if (primaryBroker) {
+    fields.accountRegistration.rrName = primaryBroker.name;
+    fields.accountRegistration.rrNo = primaryBroker.representativeCrdNumber ?? '';
+  }
 
   const visibleQuestionIds = getVisibleStep1QuestionIds(fields);
   const currentQuestionIndex = clampStep1QuestionIndex(onboarding.step1CurrentQuestionIndex, visibleQuestionIds);
@@ -1931,7 +1938,7 @@ function toInvestorReviewResponse(
     phone?: string | null;
     sfcStep1Data?: Prisma.JsonValue | null;
   },
-  advisorName: string,
+  primaryBroker: PrimaryBrokerIdentity | null,
   nextRouteAfterCompletion: string | null
 ) {
   switch (stepNumber) {
@@ -1946,7 +1953,7 @@ function toInvestorReviewResponse(
           step1AccountType: onboarding.step1AccountType,
           step1CurrentQuestionIndex: onboarding.step1CurrentQuestionIndex,
           step1Data: onboarding.step1Data
-        }, clientContact.name ?? null),
+        }, clientContact.name ?? null, primaryBroker),
         stepNumber
       );
     case 2:
@@ -2013,7 +2020,7 @@ function toInvestorReviewResponse(
             step7CurrentQuestionIndex: onboarding.step7CurrentQuestionIndex,
             step7Data: onboarding.step7Data
           },
-          advisorName,
+          primaryBroker?.name ?? '',
           nextRouteAfterCompletion
         ),
         stepNumber
@@ -2719,10 +2726,13 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       );
 
       if (formCodesToSync.length > 0) {
+        const primaryBrokerName = hydratedClient.brokerLinks.find(
+          (link) => link.role === ClientBrokerRole.PRIMARY
+        )?.broker.name;
         await syncFormsToN8n({
           client: hydratedClient,
           formCodes: getWebhookSyncFormCodes(formCodesToSync),
-          advisorName: authUser.name,
+          advisorName: primaryBrokerName ?? authUser.name,
           backendPublicUrl: deps.config.backendPublicUrl ?? 'http://localhost:4000',
           config: deps.config.n8nWebhooks
         });
@@ -2783,8 +2793,9 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           step1Data: true
         }
       });
+      const primaryBroker = await getPrimaryBrokerIdentity(deps.prisma, clientId);
 
-      response.json(toStepOneResponse(clientId, onboarding, client.name));
+      response.json(toStepOneResponse(clientId, onboarding, client.name, primaryBroker));
     } catch (error) {
       next(error);
     }
@@ -2863,6 +2874,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           step1Data: true
         }
       });
+      const primaryBroker = await getPrimaryBrokerIdentity(deps.prisma, clientId);
 
       const existingFields = getStep1FieldsWithAutofill({
         step1Data: existingOnboarding?.step1Data,
@@ -2873,6 +2885,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         step1AccountType: existingOnboarding?.step1AccountType,
         clientName: client.name
       });
+      if (primaryBroker) {
+        existingFields.accountRegistration.rrName = primaryBroker.name;
+        existingFields.accountRegistration.rrNo = primaryBroker.representativeCrdNumber ?? '';
+      }
 
       const visibleBefore = getVisibleStep1QuestionIds(existingFields);
 
@@ -2887,6 +2903,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       }
 
       const nextFields = applyStep1Answer(existingFields, questionId, answerValidation.value);
+      if (primaryBroker) {
+        nextFields.accountRegistration.rrName = primaryBroker.name;
+        nextFields.accountRegistration.rrNo = primaryBroker.representativeCrdNumber ?? '';
+      }
 
       const visibleAfter = getVisibleStep1QuestionIds(nextFields);
       const currentAnsweredIndex = visibleAfter.indexOf(questionId);
@@ -2928,7 +2948,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      response.json(toStepOneResponse(clientId, onboarding, client.name));
+      response.json(toStepOneResponse(clientId, onboarding, client.name, primaryBroker));
     } catch (error) {
       next(error);
     }
@@ -3329,6 +3349,21 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
+      if (questionId === 'step3.govId.photoId1' || questionId === 'step3.govId.photoId2') {
+        await syncGovernmentIdDocuments(deps.prisma, {
+          clientId,
+          uploadedByUserId: authUser.id,
+          previous: [
+            existingFields.governmentIdentification.photoId1,
+            existingFields.governmentIdentification.photoId2
+          ],
+          next: [
+            nextFields.governmentIdentification.photoId1,
+            nextFields.governmentIdentification.photoId2
+          ]
+        });
+      }
+
       response.json(
         toStepThreeResponse(clientId, onboarding, {
           email: client.email,
@@ -3605,6 +3640,21 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
           step4Data: true
         }
       });
+
+      if (questionId === 'step4.govId.photoId1' || questionId === 'step4.govId.photoId2') {
+        await syncGovernmentIdDocuments(deps.prisma, {
+          clientId,
+          uploadedByUserId: authUser.id,
+          previous: [
+            existingFields.governmentIdentification.photoId1,
+            existingFields.governmentIdentification.photoId2
+          ],
+          next: [
+            nextFields.governmentIdentification.photoId1,
+            nextFields.governmentIdentification.photoId2
+          ]
+        });
+      }
 
       response.json(
         toStepFourResponse(
@@ -4048,7 +4098,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             })
           : null;
 
-      response.json(toStepSevenResponse(clientId, onboarding, authUser.name, nextRouteAfterCompletion));
+      const primaryBroker = await getPrimaryBrokerIdentity(deps.prisma, clientId);
+      response.json(
+        toStepSevenResponse(clientId, onboarding, primaryBroker?.name ?? '', nextRouteAfterCompletion)
+      );
     } catch (error) {
       next(error);
     }
@@ -4275,7 +4328,10 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
             })
           : null;
 
-      response.json(toStepSevenResponse(clientId, onboarding, authUser.name, nextRouteAfterCompletion));
+      const primaryBroker = await getPrimaryBrokerIdentity(deps.prisma, clientId);
+      response.json(
+        toStepSevenResponse(clientId, onboarding, primaryBroker?.name ?? '', nextRouteAfterCompletion)
+      );
     } catch (error) {
       next(error);
     }
@@ -4391,6 +4447,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               })
             : null;
 
+        const primaryBroker = await getPrimaryBrokerIdentity(deps.prisma, clientId);
         response.json(
           toInvestorReviewResponse(
             clientId,
@@ -4402,7 +4459,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               phone: client.phone,
               sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
             },
-            authUser.name,
+            primaryBroker,
             nextRouteAfterCompletion
           )
         );
@@ -4697,6 +4754,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               })
             : null;
 
+        const primaryBroker = await getPrimaryBrokerIdentity(deps.prisma, clientId);
         response.json(
           toInvestorReviewResponse(
             clientId,
@@ -4708,7 +4766,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
               phone: client.phone,
               sfcStep1Data: client.statementOfFinancialConditionOnboarding?.step1Data
             },
-            authUser.name,
+            primaryBroker,
             nextRouteAfterCompletion
           )
         );

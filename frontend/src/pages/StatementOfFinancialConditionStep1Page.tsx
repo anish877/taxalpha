@@ -242,16 +242,72 @@ function getErrorForQuestion(
 }
 
 function parseAmountInput(raw: string): number | null {
-  if (!raw.trim()) {
+  const normalized = raw.replace(/[$,\s]/g, '');
+  if (!normalized) {
     return null;
   }
 
-  const parsed = Number(raw);
+  const parsed = Number(normalized);
   if (!Number.isFinite(parsed) || parsed < 0) {
     return null;
   }
 
   return parsed;
+}
+
+function formatDollarAmount(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '';
+  }
+
+  return value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+function CurrencyAmountInput({
+  value,
+  onValueChange
+}: {
+  value: number | null;
+  onValueChange: (value: number | null) => void;
+}) {
+  const [focused, setFocused] = useState(false);
+  const [draft, setDraft] = useState(value === null ? '' : String(value));
+
+  useEffect(() => {
+    if (!focused) {
+      setDraft(value === null ? '' : String(value));
+    }
+  }, [focused, value]);
+
+  return (
+    <input
+      className="w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm font-light outline-none ring-accent transition focus:border-accent focus:ring-1"
+      inputMode="decimal"
+      value={focused ? draft : formatDollarAmount(value)}
+      onFocus={(event) => {
+        const input = event.currentTarget;
+        const nextDraft = value === null || value === 0 ? '' : String(value);
+        setDraft(nextDraft);
+        setFocused(true);
+        input.select();
+      }}
+      onChange={(event) => {
+        const nextDraft = event.target.value.replace(/[^0-9.,$\s]/g, '');
+        setDraft(nextDraft);
+        onValueChange(parseAmountInput(nextDraft));
+      }}
+      onBlur={() => {
+        const parsed = parseAmountInput(draft);
+        onValueChange(parsed);
+        setFocused(false);
+      }}
+    />
+  );
 }
 
 function getAnswer(
@@ -501,18 +557,11 @@ export function StatementOfFinancialConditionStep1Page() {
         {entries.map((entry) => (
           <label key={entry.key} className="block">
             <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-mute">{entry.label}</span>
-            <input
-              className="w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm font-light outline-none ring-accent transition focus:border-accent focus:ring-1"
-              min={0}
-              step="any"
-              type="number"
-              value={answer[entry.key] ?? ''}
-              onFocus={(event) => {
-                if (event.currentTarget.value === '0') event.currentTarget.select();
-              }}
-              onChange={(event) => {
+            <CurrencyAmountInput
+              value={answer[entry.key] ?? null}
+              onValueChange={(nextValue) => {
                 const payload = structuredClone(answer);
-                payload[entry.key] = parseAmountInput(event.target.value);
+                payload[entry.key] = nextValue;
                 setFields((current) => applyAnswer(current, currentQuestionId!, payload));
               }}
             />
@@ -637,25 +686,25 @@ export function StatementOfFinancialConditionStep1Page() {
             {renderActiveControl()}
 
             <div className="mt-8 grid gap-3 rounded-2xl border border-line bg-paper/70 p-4 sm:grid-cols-2 lg:grid-cols-3">
-              <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Liabilities: {totals.totalLiabilities}</p>
-              <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Liquid Assets: {totals.totalLiquidAssets}</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Liabilities: {formatDollarAmount(totals.totalLiabilities)}</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-mute">Total Liquid Assets: {formatDollarAmount(totals.totalLiquidAssets)}</p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
-                Total Net Worth (all assets): {totals.totalNetWorth}
+                Total Net Worth (all assets): {formatDollarAmount(totals.totalNetWorth)}
               </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
-                Accredited Net Worth (excludes primary residence): {totals.accreditedInvestorNetWorth}
+                Accredited Net Worth (excludes primary residence): {formatDollarAmount(totals.accreditedInvestorNetWorth)}
               </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
-                Total Annual Income: {totals.totalAnnualIncome}
+                Total Annual Income: {formatDollarAmount(totals.totalAnnualIncome)}
               </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
-                Total Potential Liquidity: {totals.totalPotentialLiquidity}
+                Total Potential Liquidity: {formatDollarAmount(totals.totalPotentialLiquidity)}
               </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
-                Total Illiquid Qualified Assets: {totals.totalIlliquidQualifiedAssets}
+                Total Illiquid Qualified Assets: {formatDollarAmount(totals.totalIlliquidQualifiedAssets)}
               </p>
               <p className="text-xs uppercase tracking-[0.14em] text-mute">
-                Counted Accredited Liabilities: {totals.accreditedInvestorLiabilities}
+                Counted Accredited Liabilities: {formatDollarAmount(totals.accreditedInvestorLiabilities)}
               </p>
             </div>
 

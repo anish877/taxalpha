@@ -387,17 +387,10 @@ describe('InvestorProfileStep7Page', () => {
       expect(screen.getByText('Joint Account Owner Signature (Required)')).toBeInTheDocument();
     });
 
-    const typedSignatureInputs = screen.getAllByLabelText('Typed Signature');
     const printedNameInputs = screen.getAllByLabelText('Printed Name');
-    const dateInputs = screen.getAllByLabelText('Date');
 
-    await user.type(typedSignatureInputs[0], 'John Smith');
     await user.type(printedNameInputs[0], 'John Smith');
-    await user.type(dateInputs[0], '2026-02-27');
-
-    await user.type(typedSignatureInputs[1], 'Jane Smith');
     await user.type(printedNameInputs[1], 'Jane Smith');
-    await user.type(dateInputs[1], '2026-02-27');
 
     await user.click(screen.getByRole('button', { name: 'Save and Return' }));
 
@@ -410,8 +403,10 @@ describe('InvestorProfileStep7Page', () => {
       expect(postCall).toBeDefined();
       const body = JSON.parse(String(postCall?.[1]?.body));
       expect(body.questionId).toBe('step7.signatures.accountOwners');
-      expect(body.answer.accountOwner.typedSignature).toBe('John Smith');
-      expect(body.answer.jointAccountOwner.typedSignature).toBe('Jane Smith');
+      expect(body.answer.accountOwner.typedSignature).toBeNull();
+      expect(body.answer.accountOwner.printedName).toBe('John Smith');
+      expect(body.answer.jointAccountOwner.typedSignature).toBeNull();
+      expect(body.answer.jointAccountOwner.printedName).toBe('Jane Smith');
     });
 
     await waitFor(() => {
@@ -521,15 +516,11 @@ describe('InvestorProfileStep7Page', () => {
     });
 
     const printedNameInputs = screen.getAllByLabelText('Printed Name');
-    const typedSignatureInputs = screen.getAllByLabelText('Typed Signature');
-    const dateInputs = screen.getAllByLabelText('Date');
 
     expect((printedNameInputs[0] as HTMLInputElement).value).toBe('Advisor One');
 
     await user.clear(printedNameInputs[0]);
     await user.type(printedNameInputs[0], 'Advisor Two');
-    await user.type(typedSignatureInputs[0], 'Advisor Two');
-    await user.type(dateInputs[0], '2026-02-27');
 
     await user.click(screen.getByRole('button', { name: 'Save and Return' }));
 
@@ -543,6 +534,8 @@ describe('InvestorProfileStep7Page', () => {
       const body = JSON.parse(String(postCall?.[1]?.body));
       expect(body.questionId).toBe('step7.signatures.firm');
       expect(body.answer.financialProfessional.printedName).toBe('Advisor Two');
+      expect(body.answer.financialProfessional.typedSignature).toBeNull();
+      expect(body.answer.financialProfessional.date).toBeNull();
       expect(body.answer.supervisorPrincipal.typedSignature).toBeNull();
     });
 

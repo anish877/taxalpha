@@ -124,19 +124,13 @@ function validateRequiredSignatureBlock(
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 
-  if (!block.typedSignature) {
-    errors[`${prefix}.typedSignature`] = `${label} typed signature is required.`;
-  }
-
   if (!block.printedName) {
-    errors[`${prefix}.printedName`] = `${label} printed name is required.`;
+    errors[`${prefix}.printedName`] = `${label} signer name is required for DocuSign.`;
   }
 
-  if (!block.date) {
-    errors[`${prefix}.date`] = `${label} signature date is required.`;
-  } else if (!isValidDateInput(block.date)) {
+  if (block.date && !isValidDateInput(block.date)) {
     errors[`${prefix}.date`] = 'Enter a valid date in YYYY-MM-DD format.';
-  } else if (!isPastOrToday(block.date)) {
+  } else if (block.date && !isPastOrToday(block.date)) {
     errors[`${prefix}.date`] = 'Signature date cannot be in the future.';
   }
 
@@ -371,10 +365,7 @@ export function applyStep7Prefill(fields: Step7Fields, context: Step7PrefillCont
     next.signatures.jointAccountOwner.printedName = context.jointAccountOwnerPrintedName.trim();
   }
 
-  if (
-    !next.signatures.financialProfessional.printedName &&
-    context.financialProfessionalPrintedName
-  ) {
+  if (context.financialProfessionalPrintedName) {
     next.signatures.financialProfessional.printedName = context.financialProfessionalPrintedName.trim();
   }
 

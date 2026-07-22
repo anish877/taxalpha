@@ -189,6 +189,9 @@ interface BaiodfStep3Response {
 interface BaiodfClientContext {
   id: string;
   name: string;
+  brokerLinks?: Array<{
+    broker: { name: string; representativeCrdNumber: string | null };
+  }>;
   formSelections: Array<{
     form: {
       code: string;
@@ -210,6 +213,10 @@ interface BaiodfClientContext {
     step1Data: Prisma.JsonValue | null;
     step2Data: Prisma.JsonValue | null;
   } | null;
+}
+
+function getPrimaryBroker(client: BaiodfClientContext) {
+  return client.brokerLinks?.[0]?.broker ?? null;
 }
 
 const baiodfReviewSelect = {
@@ -310,7 +317,7 @@ function getStep3PrefillContext(client: BaiodfClientContext, advisorName: string
     step7Fields.signatures.financialProfessional
   );
 
-  if (!financialProfessional.printedName) {
+  if (advisorName) {
     financialProfessional.printedName = advisorName;
   }
 
@@ -646,6 +653,14 @@ export function createBaiodfRouter(
       select: {
         id: true,
         name: true,
+        brokerLinks: {
+          where: { role: 'PRIMARY' },
+          orderBy: { position: 'asc' },
+          take: 1,
+          select: {
+            broker: { select: { name: true, representativeCrdNumber: true } }
+          }
+        },
         formSelections: {
           select: {
             form: {
@@ -731,8 +746,8 @@ export function createBaiodfRouter(
 
       response.json(
         toStep1Response(clientId, onboarding.status, onboarding.step1CurrentQuestionIndex, onboarding.step1Data, {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         })
       );
@@ -803,8 +818,8 @@ export function createBaiodfRouter(
       });
 
       const prefillContext = {
-        rrName: investorStep1.accountRegistration.rrName || null,
-        rrNo: investorStep1.accountRegistration.rrNo || null,
+        rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+        rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
         customerNames: investorStep1.accountRegistration.customerNames || client.name || null
       };
 
@@ -1092,7 +1107,7 @@ export function createBaiodfRouter(
           onboarding.step3CurrentQuestionIndex,
           onboarding.step3Data,
           nextRouteAfterCompletion,
-          getStep3PrefillContext(client, authUser.name)
+          getStep3PrefillContext(client, getPrimaryBroker(client)?.name ?? '')
         )
       );
     } catch (error) {
@@ -1157,7 +1172,7 @@ export function createBaiodfRouter(
         }
       });
 
-      const prefillContext = getStep3PrefillContext(client, authUser.name);
+      const prefillContext = getStep3PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
       const validationContext = {
         requiresJointOwnerSignature: prefillContext.requiresJointOwnerSignature
       };
@@ -1185,8 +1200,8 @@ export function createBaiodfRouter(
       const prefilledStep1 = applyBaiodfStep1Prefill(
         normalizeBaiodfStep1Fields(existingOnboarding?.step1Data ?? null),
         {
-          rrName: client.investorProfileOnboarding?.step1RrName ?? null,
-          rrNo: client.investorProfileOnboarding?.step1RrNo ?? null,
+          rrName: getPrimaryBroker(client)?.name ?? client.investorProfileOnboarding?.step1RrName ?? null,
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? client.investorProfileOnboarding?.step1RrNo ?? null,
           customerNames: client.investorProfileOnboarding?.step1CustomerNames ?? client.name ?? null
         }
       );
@@ -1297,12 +1312,12 @@ export function createBaiodfRouter(
           step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null
         });
         const step1PrefillContext = {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
         const step2PrefillContext = getStep2PrefillContext(client);
-        const step3PrefillContext = getStep3PrefillContext(client, authUser.name);
+        const step3PrefillContext = getStep3PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
 
         const nextRouteAfterCompletion =
           onboarding.status === BrokerageAlternativeInvestmentOrderDisclosureOnboardingStatus.COMPLETED
@@ -1381,12 +1396,12 @@ export function createBaiodfRouter(
           step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null
         });
         const step1PrefillContext = {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
         const step2PrefillContext = getStep2PrefillContext(client);
-        const step3PrefillContext = getStep3PrefillContext(client, authUser.name);
+        const step3PrefillContext = getStep3PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
 
         let nextStep1Data = (existing?.step1Data ?? defaults.step1Data) as Prisma.JsonValue | null;
         let nextStep2Data = (existing?.step2Data ?? defaults.step2Data) as Prisma.JsonValue | null;

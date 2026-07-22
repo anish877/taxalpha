@@ -10,6 +10,17 @@ import { createApp } from '../src/app.js';
 import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
 import { deleteFilled, storeFilled } from '../src/lib/ingestion/template-store.js';
 
+const s3Mocks = vi.hoisted(() => ({
+  downloadClientDocumentFromS3: vi.fn()
+}));
+
+vi.mock('../src/lib/s3-client-documents.js', async () => {
+  const actual = await vi.importActual<typeof import('../src/lib/s3-client-documents.js')>(
+    '../src/lib/s3-client-documents.js'
+  );
+  return { ...actual, downloadClientDocumentFromS3: s3Mocks.downloadClientDocumentFromS3 };
+});
+
 const config = {
   nodeEnv: 'test' as const,
   frontendUrl: 'http://localhost:5173',
@@ -65,7 +76,9 @@ function createMockPrisma() {
       findMany: vi.fn(),
       findFirst: vi.fn(),
       create: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+      upsert: vi.fn()
     },
     clientFormPdf: {
       findFirst: vi.fn()
@@ -74,6 +87,7 @@ function createMockPrisma() {
 }
 
 afterEach(async () => {
+  s3Mocks.downloadClientDocumentFromS3.mockReset();
   await fs.promises.rm(path.join(storageRoot, testClientId), { recursive: true, force: true });
 });
 
@@ -145,6 +159,48 @@ describe('client document routes', () => {
         viewUrl: `/api/clients/${testClientId}/documents/doc_1/view`
       }
     ]);
+  });
+
+  it('materializes an uploaded government ID as a client document', async () => {
+    const prisma = createMockPrisma();
+    prisma.client.findFirst.mockResolvedValue({
+      id: testClientId,
+      investorProfileOnboarding: {
+        step3Data: {
+          governmentIdentification: {
+            photoId1: {
+              documentKey: 'government-id/client_1/drivers-license.jpg',
+              documentFileName: 'Drivers License.jpg'
+            }
+          }
+        },
+        step4Data: null
+      }
+    });
+    prisma.clientDocument.findMany.mockResolvedValue([]);
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const response = await request(app)
+      .get(`/api/clients/${testClientId}/documents`)
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(prisma.clientDocument.upsert).toHaveBeenCalledWith({
+      where: { storageKey: 'government-id/client_1/drivers-license.jpg' },
+      update: expect.objectContaining({
+        clientId: testClientId,
+        fileName: 'Drivers License.jpg',
+        contentType: 'image/jpeg',
+        storageProvider: 'S3'
+      }),
+      create: expect.objectContaining({
+        clientId: testClientId,
+        fileName: 'Drivers License.jpg',
+        contentType: 'image/jpeg',
+        storageKey: 'government-id/client_1/drivers-license.jpg',
+        storageProvider: 'S3'
+      })
+    });
   });
 
   it('uploads any document bytes and stores metadata', async () => {
@@ -228,6 +284,50 @@ describe('client document routes', () => {
     expect(response.headers['content-type']).toContain('text/plain');
     expect(response.headers['content-disposition']).toContain('inline');
     expect(response.text).toBe('client note');
+  });
+
+  it('streams an S3 document through the authenticated backend route', async () => {
+    const prisma = createMockPrisma();
+    const documentBytes = Buffer.from('word document bytes');
+    s3Mocks.downloadClientDocumentFromS3.mockResolvedValue(documentBytes);
+    prisma.clientDocument.findFirst.mockResolvedValue({
+      id: 'doc_s3',
+      clientId: testClientId,
+      uploadedByUserId: authUser.id,
+      fileName: 'Disclosure.docx',
+      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      sizeBytes: documentBytes.length,
+      storageKey: 'client-documents/test-client/disclosure.docx',
+      storageProvider: 'S3',
+      createdAt: new Date('2026-07-07T10:00:00.000Z')
+    });
+
+    const app = createApp({
+      prismaClient: prisma as unknown as PrismaClient,
+      config: {
+        ...config,
+        s3: {
+          region: 'us-east-1',
+          bucket: 'test-bucket',
+          uploadPrefix: 'government-id',
+          clientDocumentPrefix: 'client-documents',
+          filledPdfPrefix: 'filled-pdfs'
+        }
+      }
+    });
+
+    const response = await request(app)
+      .get(`/api/clients/${testClientId}/documents/doc_s3/view`)
+      .set('Cookie', createAuthCookie());
+
+    expect(response.status).toBe(200);
+    expect(response.headers.location).toBeUndefined();
+    expect(response.headers['content-type']).toContain('officedocument.wordprocessingml.document');
+    expect(response.headers['content-length']).toBe(String(documentBytes.length));
+    expect(s3Mocks.downloadClientDocumentFromS3).toHaveBeenCalledWith(
+      expect.objectContaining({ bucket: 'test-bucket' }),
+      { key: 'client-documents/test-client/disclosure.docx' }
+    );
   });
 
   it('deletes an owned document and its local stored file', async () => {

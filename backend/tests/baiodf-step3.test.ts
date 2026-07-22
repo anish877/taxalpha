@@ -45,7 +45,7 @@ describe('baiodf-step3', () => {
     expect(validation.success).toBe(false);
     if (!validation.success) {
       expect(
-        validation.fieldErrors['step3.signatures.accountOwners.jointAccountOwner.typedSignature']
+        validation.fieldErrors['step3.signatures.accountOwners.jointAccountOwner.printedName']
       ).toContain('required');
     }
   });

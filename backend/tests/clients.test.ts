@@ -352,6 +352,13 @@ function createMockPrisma() {
       findMany: vi.fn(),
       findFirst: vi.fn()
     },
+    clientBroker: {
+      findFirst: vi.fn().mockResolvedValue(null)
+    },
+    clientDocument: {
+      upsert: vi.fn(),
+      deleteMany: vi.fn()
+    },
     investorProfileOnboarding: {
       findUnique: vi.fn(),
       upsert: vi.fn()
@@ -1000,6 +1007,12 @@ describe('client routes', () => {
   it('returns step 1 payload with visible question ids', async () => {
     const prisma = createMockPrisma();
     prisma.user.findUnique.mockResolvedValue(authUser);
+    prisma.clientBroker.findFirst.mockResolvedValue({
+      broker: {
+        name: 'Matt Chancey',
+        representativeCrdNumber: 'CRD-1001'
+      }
+    });
     prisma.client.findFirst.mockResolvedValue({
       id: 'client_1',
       name: 'Client One'
@@ -1028,6 +1041,8 @@ describe('client routes', () => {
     expect(response.body.onboarding.clientId).toBe('client_1');
     expect(response.body.onboarding.step.currentQuestionId).toBe('rrName');
     expect(response.body.onboarding.step.visibleQuestionIds).toContain('typeOfAccount.primaryType');
+    expect(response.body.onboarding.step.fields.accountRegistration.rrName).toBe('Matt Chancey');
+    expect(response.body.onboarding.step.fields.accountRegistration.rrNo).toBe('CRD-1001');
     expect(response.body.onboarding.step.fields.accountRegistration.customerNames).toBe('Client One');
   });
 

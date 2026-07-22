@@ -240,7 +240,7 @@ describe('StatementOfFinancialConditionStep1Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText("Let's confirm account registration details.")).toBeInTheDocument();
-      expect(screen.getByText('Total Liabilities: 45')).toBeInTheDocument();
+      expect(screen.getByText('Total Liabilities: $45')).toBeInTheDocument();
     });
 
     const rrName = screen.getByLabelText('RR Name');
@@ -407,10 +407,14 @@ describe('StatementOfFinancialConditionStep1Page', () => {
 
     await screen.findByText('What are the liquid non-qualified assets?');
 
-    const cashInput = screen.getByRole('spinbutton', { name: 'Cash / Money Markets / CDs' }) as HTMLInputElement;
-    expect(cashInput.value).toBe('0');
+    const cashInput = screen.getByRole('textbox', { name: 'Cash / Money Markets / CDs' }) as HTMLInputElement;
+    expect(cashInput.value).toBe('$0');
 
-    await user.clear(cashInput);
+    await user.click(cashInput);
     expect(cashInput.value).toBe('');
+
+    await user.type(cashInput, '1500000');
+    await user.tab();
+    expect(cashInput.value).toBe('$1,500,000');
   });
 });

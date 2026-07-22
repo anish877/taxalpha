@@ -100,7 +100,7 @@ describe('investor-profile-step7', () => {
     expect(withJointRequired.success).toBe(false);
   });
 
-  it('requires financial professional signature and allows empty supervisor block', () => {
+  it('requires the financial professional signer name and leaves signing to DocuSign', () => {
     const invalid = validateStep7Answer('step7.signatures.firm', {
       financialProfessional: {
         typedSignature: '',
@@ -117,9 +117,9 @@ describe('investor-profile-step7', () => {
 
     const valid = validateStep7Answer('step7.signatures.firm', {
       financialProfessional: {
-        typedSignature: 'Advisor One',
+        typedSignature: '',
         printedName: 'Advisor One',
-        date: '2026-02-27'
+        date: ''
       },
       supervisorPrincipal: {
         typedSignature: '',

@@ -7,7 +7,8 @@ import { createApp } from '../src/app.js';
 import { AUTH_COOKIE_NAME, createSessionToken } from '../src/lib/auth.js';
 
 const storageMocks = vi.hoisted(() => ({
-  loadClientDocumentBytes: vi.fn()
+  loadClientDocumentBytes: vi.fn(),
+  loadFilled: vi.fn()
 }));
 
 vi.mock('../src/lib/client-document-storage.js', async () => {
@@ -15,6 +16,13 @@ vi.mock('../src/lib/client-document-storage.js', async () => {
     '../src/lib/client-document-storage.js'
   );
   return { ...actual, loadClientDocumentBytes: storageMocks.loadClientDocumentBytes };
+});
+
+vi.mock('../src/lib/ingestion/template-store.js', async () => {
+  const actual = await vi.importActual<typeof import('../src/lib/ingestion/template-store.js')>(
+    '../src/lib/ingestion/template-store.js'
+  );
+  return { ...actual, loadFilled: storageMocks.loadFilled };
 });
 
 const config = {
@@ -58,7 +66,9 @@ function createMockPrisma() {
       findFirst: vi.fn()
     },
     clientDocument: {
-      findMany: vi.fn().mockResolvedValue([])
+      findMany: vi.fn().mockResolvedValue([]),
+      deleteMany: vi.fn(),
+      upsert: vi.fn()
     },
     clientInvestment: {
       findMany: vi.fn().mockResolvedValue([])
@@ -107,6 +117,7 @@ describe('client PDF ticket routes', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     storageMocks.loadClientDocumentBytes.mockReset();
+    storageMocks.loadFilled.mockReset();
   });
 
   it('lists generated PDFs available for a client ticket', async () => {
@@ -173,6 +184,31 @@ describe('client PDF ticket routes', () => {
 
     const merged = await PDFDocument.load(response.body);
     expect(merged.getPageCount()).toBe(2);
+  });
+
+  it('loads authenticated generated-PDF URLs from internal storage without fetching them', async () => {
+    const prisma = createMockPrisma();
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1', name: 'Client One' });
+    prisma.clientFormPdf.findMany.mockResolvedValue([
+      pdfRecord({
+        id: 'pdf_internal',
+        pdfUrl: 'https://api.example.com/api/clients/client_1/form-pdfs/pdf_internal/file.pdf'
+      })
+    ]);
+    const sourcePdf = await createTestPdf('Internal PDF');
+    storageMocks.loadFilled.mockResolvedValue(sourcePdf);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const response = await request(app)
+      .post('/api/clients/client_1/pdf-ticket')
+      .set('Cookie', createAuthCookie())
+      .send({ pdfIds: ['pdf_internal'] });
+
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    expect(storageMocks.loadFilled).toHaveBeenCalledWith('n8n-callback-pdf_internal', config);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('resolves an investment as an atomic BAIODF and agreement pair', async () => {
@@ -338,11 +374,48 @@ describe('client PDF ticket routes', () => {
     expect(response.status, JSON.stringify(response.body)).toBe(200);
     expect(response.headers['x-taxalpha-pdf-count']).toBe('1');
     expect(storageMocks.loadClientDocumentBytes).toHaveBeenCalledWith(
-      { storageKey: uploadedDocument.storageKey, storageProvider: uploadedDocument.storageProvider },
+      expect.objectContaining({
+        storageKey: uploadedDocument.storageKey,
+        storageProvider: uploadedDocument.storageProvider
+      }),
       undefined
     );
     expect(prisma.clientFormPdf.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expect.objectContaining({ id: { in: [] } }) })
     );
+  });
+
+  it('converts an uploaded ID image into a PDF page for the ticket', async () => {
+    const prisma = createMockPrisma();
+    prisma.client.findFirst.mockResolvedValue({ id: 'client_1', name: 'Client One' });
+    prisma.clientFormPdf.findMany.mockResolvedValue([]);
+    prisma.clientDocument.findMany.mockResolvedValue([
+      {
+        id: 'drivers_license',
+        clientId: 'client_1',
+        uploadedByUserId: 'user_1',
+        fileName: 'Drivers License.png',
+        contentType: 'image/png',
+        sizeBytes: 286,
+        storageKey: 'government-id/client_1/drivers-license.png',
+        storageProvider: 'S3',
+        createdAt: new Date('2026-07-17T10:00:00.000Z')
+      }
+    ]);
+    const image = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+    storageMocks.loadClientDocumentBytes.mockResolvedValue(image);
+
+    const app = createApp({ prismaClient: prisma as unknown as PrismaClient, config });
+    const response = await request(app)
+      .post('/api/clients/client_1/pdf-ticket')
+      .set('Cookie', createAuthCookie())
+      .send({ documentIds: ['drivers_license'] });
+
+    expect(response.status, JSON.stringify(response.body)).toBe(200);
+    const merged = await PDFDocument.load(response.body);
+    expect(merged.getPageCount()).toBe(1);
   });
 });

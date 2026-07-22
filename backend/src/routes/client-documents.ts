@@ -6,11 +6,14 @@ import express, { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 
 import { clientAccessWhere } from '../lib/client-access.js';
-import { resolveClientDocumentStoragePath } from '../lib/client-document-storage.js';
+import { loadClientDocumentBytes, resolveClientDocumentStoragePath } from '../lib/client-document-storage.js';
+import {
+  getGovernmentIdDocumentReferences,
+  syncGovernmentIdDocuments
+} from '../lib/government-id-documents.js';
 import { loadFilled } from '../lib/ingestion/template-store.js';
 import {
   buildClientDocumentS3Key,
-  createClientDocumentViewUrl,
   deleteClientDocumentFromS3,
   isClientDocumentsS3Configured,
   uploadClientDocumentToS3
@@ -118,10 +121,26 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
     const { clientId } = parsedParams.data;
 
     try {
-      if (!(await ensureOwnedClient(deps, clientId, authUser.id))) {
+      const client = await deps.prisma.client.findFirst({
+        where: { id: clientId, ...clientAccessWhere(authUser.id) },
+        select: {
+          id: true,
+          investorProfileOnboarding: { select: { step3Data: true, step4Data: true } }
+        }
+      });
+      if (!client) {
         response.status(404).json({ message: 'Client not found.' });
         return;
       }
+
+      await syncGovernmentIdDocuments(deps.prisma, {
+        clientId,
+        uploadedByUserId: authUser.id,
+        next: getGovernmentIdDocumentReferences(
+          client.investorProfileOnboarding?.step3Data,
+          client.investorProfileOnboarding?.step4Data
+        )
+      });
 
       const documents = await deps.prisma.clientDocument.findMany({
         where: {
@@ -275,40 +294,16 @@ export function createClientDocumentsRouter(deps: RouteDeps): ExpressRouter {
         return;
       }
 
-      if (document.storageProvider === 'S3') {
-        if (!isClientDocumentsS3Configured(deps.config.s3)) {
-          response.status(503).json({ message: 'S3 document storage is not configured.' });
-          return;
-        }
-
-        if (!document.storageKey) {
-          response.status(404).json({ message: 'Stored document file not found.' });
-          return;
-        }
-
-        response.redirect(
-          await createClientDocumentViewUrl(deps.config.s3, {
-            key: document.storageKey,
-            contentType: document.contentType,
-            fileName: document.fileName
-          })
-        );
-        return;
-      }
-
-      const storagePath = resolveClientDocumentStoragePath(document.storageKey);
-      try {
-        await fs.promises.access(storagePath, fs.constants.R_OK);
-      } catch {
+      const bytes = await loadClientDocumentBytes(document, deps.config.s3);
+      if (!bytes) {
         response.status(404).json({ message: 'Stored document file not found.' });
         return;
       }
 
       response.setHeader('Content-Type', document.contentType);
-      response.setHeader('Content-Length', String(document.sizeBytes));
+      response.setHeader('Content-Length', String(bytes.length));
       response.setHeader('Content-Disposition', contentDisposition(document.fileName));
-
-      fs.createReadStream(storagePath).on('error', next).pipe(response);
+      response.send(bytes);
     } catch (error) {
       next(error);
     }

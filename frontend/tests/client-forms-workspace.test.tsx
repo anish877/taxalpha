@@ -436,6 +436,9 @@ describe('Client forms workspace', () => {
       expect(uploaded).toBe(true);
       expect(screen.getByText('Operating Agreement.docx')).toBeInTheDocument();
       expect(screen.getByText('Document uploaded.')).toBeInTheDocument();
+      expect(
+        screen.getByText(/upload a PDF, JPG, or PNG version to include it in the final package/i)
+      ).toBeInTheDocument();
     });
 
     expect(

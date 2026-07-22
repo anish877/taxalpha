@@ -129,6 +129,9 @@ interface Baiv506cStep2Response {
 interface Baiv506cClientContext {
   id: string;
   name: string;
+  brokerLinks?: Array<{
+    broker: { name: string; representativeCrdNumber: string | null };
+  }>;
   formSelections: Array<{
     form: {
       code: string;
@@ -151,6 +154,10 @@ interface Baiv506cClientContext {
   investmentBaiodfOnboardings: Array<{
     step3Data: Prisma.JsonValue | null;
   }>;
+}
+
+function getPrimaryBroker(client: Baiv506cClientContext) {
+  return client.brokerLinks?.[0]?.broker ?? null;
 }
 
 const baiv506cReviewSelect = {
@@ -235,7 +242,7 @@ function getStep2PrefillContext(client: Baiv506cClientContext, advisorName: stri
     step7Fields.signatures.financialProfessional
   );
 
-  if (!financialProfessional.printedName) {
+  if (advisorName) {
     financialProfessional.printedName = advisorName;
   }
 
@@ -407,6 +414,14 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
       select: {
         id: true,
         name: true,
+        brokerLinks: {
+          where: { role: 'PRIMARY' },
+          orderBy: { position: 'asc' },
+          take: 1,
+          select: {
+            broker: { select: { name: true, representativeCrdNumber: true } }
+          }
+        },
         formSelections: {
           select: {
             form: {
@@ -496,8 +511,8 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
 
       response.json(
         toStep1Response(clientId, onboarding.status, onboarding.step1CurrentQuestionIndex, onboarding.step1Data, {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         })
       );
@@ -568,8 +583,8 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
       });
 
       const prefillContext = {
-        rrName: investorStep1.accountRegistration.rrName || null,
-        rrNo: investorStep1.accountRegistration.rrNo || null,
+        rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+        rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
         customerNames: investorStep1.accountRegistration.customerNames || client.name || null
       };
 
@@ -665,7 +680,7 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      const prefillContext = getStep2PrefillContext(client, authUser.name);
+      const prefillContext = getStep2PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
       const nextRouteAfterCompletion =
         onboarding.status === BrokerageAccreditedInvestorVerificationOnboardingStatus.COMPLETED ? null : null;
 
@@ -740,7 +755,7 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
         }
       });
 
-      const prefillContext = getStep2PrefillContext(client, authUser.name);
+      const prefillContext = getStep2PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
       const context = {
         requiresJointOwnerSignature: prefillContext.requiresJointOwnerSignature
       };
@@ -769,8 +784,8 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
       const prefilledStep1Fields = applyBaiv506cStep1Prefill(
         normalizeBaiv506cStep1Fields(existingOnboarding?.step1Data ?? null),
         {
-          rrName: client.investorProfileOnboarding?.step1RrName ?? null,
-          rrNo: client.investorProfileOnboarding?.step1RrNo ?? null,
+          rrName: getPrimaryBroker(client)?.name ?? client.investorProfileOnboarding?.step1RrName ?? null,
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? client.investorProfileOnboarding?.step1RrNo ?? null,
           customerNames: client.investorProfileOnboarding?.step1CustomerNames ?? client.name ?? null
         }
       );
@@ -866,11 +881,11 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
           step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null
         });
         const step1PrefillContext = {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
-        const step2PrefillContext = getStep2PrefillContext(client, authUser.name);
+        const step2PrefillContext = getStep2PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
 
         const nextRouteAfterCompletion = null;
 
@@ -938,11 +953,11 @@ export function createBaiv506cRouter(deps: RouteDeps): ExpressRouter {
           step1CustomerNames: client.investorProfileOnboarding?.step1CustomerNames ?? null
         });
         const step1PrefillContext = {
-          rrName: investorStep1.accountRegistration.rrName || null,
-          rrNo: investorStep1.accountRegistration.rrNo || null,
+          rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
+          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
-        const step2PrefillContext = getStep2PrefillContext(client, authUser.name);
+        const step2PrefillContext = getStep2PrefillContext(client, getPrimaryBroker(client)?.name ?? '');
         const validationContext = {
           requiresJointOwnerSignature: step2PrefillContext.requiresJointOwnerSignature
         };

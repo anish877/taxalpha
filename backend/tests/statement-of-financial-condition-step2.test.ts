@@ -56,7 +56,7 @@ describe('statement-of-financial-condition-step2', () => {
 
     expect(validation.success).toBe(false);
     if (!validation.success) {
-      expect(validation.fieldErrors['step2.signatures.accountOwners.jointAccountOwner.typedSignature']).toContain(
+      expect(validation.fieldErrors['step2.signatures.accountOwners.jointAccountOwner.printedName']).toContain(
         'required'
       );
     }
@@ -120,4 +120,3 @@ describe('statement-of-financial-condition-step2', () => {
     expect(Object.keys(errors)).toHaveLength(0);
   });
 });
-

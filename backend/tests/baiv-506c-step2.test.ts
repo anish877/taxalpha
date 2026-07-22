@@ -76,7 +76,7 @@ describe('baiv-506c-step2', () => {
     expect(validation.success).toBe(false);
     if (!validation.success) {
       expect(
-        validation.fieldErrors['step2.signatures.accountOwners.jointAccountOwner.typedSignature']
+        validation.fieldErrors['step2.signatures.accountOwners.jointAccountOwner.printedName']
       ).toContain('required');
     }
   });

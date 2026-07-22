@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { ApiError, apiRequest } from '../api/client';
+import { DocuSignSignerFields } from '../components/DocuSignSignerFields';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import type {
@@ -76,7 +77,7 @@ const QUESTION_CONFIG: Record<Baiv506cStepTwoQuestionId, Baiv506cStepTwoQuestion
   'step2.signatures.accountOwners': {
     key: 'step2.signatures.accountOwners',
     title: 'Now capture account owner signatures.',
-    helper: 'Typed signature, printed name, and date are required.',
+    helper: 'Confirm signer names. Signatures and dates will be captured in DocuSign.',
     type: 'account-owner-signatures-block'
   },
   'step2.signatures.financialProfessional': {
@@ -339,42 +340,7 @@ export function BrokerageAccreditedInvestorVerificationStep2Page() {
     label: string,
     value: { typedSignature: string | null; printedName: string | null; date: string | null },
     onChange: (next: { typedSignature: string | null; printedName: string | null; date: string | null }) => void
-  ) => (
-    <div className="rounded-2xl border border-line bg-paper p-4">
-      <p className="text-xs uppercase tracking-[0.14em] text-mute">{label}</p>
-      <div className="mt-3 grid gap-4 sm:grid-cols-3">
-        <label className="block">
-          <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-mute">Typed Signature</span>
-          <input
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light outline-none ring-accent transition focus:border-accent focus:ring-1"
-            type="text"
-            value={value.typedSignature ?? ''}
-            onChange={(event) => onChange({ ...value, typedSignature: event.target.value })}
-          />
-        </label>
-
-        <label className="block">
-          <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-mute">Printed Name</span>
-          <input
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light outline-none ring-accent transition focus:border-accent focus:ring-1"
-            type="text"
-            value={value.printedName ?? ''}
-            onChange={(event) => onChange({ ...value, printedName: event.target.value })}
-          />
-        </label>
-
-        <label className="block">
-          <span className="mb-2 block text-xs uppercase tracking-[0.14em] text-mute">Date</span>
-          <input
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-light outline-none ring-accent transition focus:border-accent focus:ring-1"
-            type="date"
-            value={value.date ?? ''}
-            onChange={(event) => onChange({ ...value, date: event.target.value })}
-          />
-        </label>
-      </div>
-    </div>
-  );
+  ) => <DocuSignSignerFields label={label} value={value} onChange={onChange} />;
 
   const renderActiveControl = () => {
     if (!activeQuestion || !currentQuestionId) {

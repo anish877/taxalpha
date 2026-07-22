@@ -5,6 +5,10 @@ import { z } from 'zod';
 import { clientAccessWhere } from '../lib/client-access.js';
 import { loadClientDocumentBytes } from '../lib/client-document-storage.js';
 import { getWorkspaceFormTitle } from '../lib/form-pdf-utils.js';
+import {
+  getGovernmentIdDocumentReferences,
+  syncGovernmentIdDocuments
+} from '../lib/government-id-documents.js';
 import { HttpError } from '../lib/http-error.js';
 import { loadFilled } from '../lib/ingestion/template-store.js';
 import { requireAuth } from '../middleware/require-auth.js';
@@ -50,6 +54,8 @@ interface TicketPdf {
   rawDocument?: {
     storageKey: string;
     storageProvider: string;
+    contentType: string;
+    fileName: string;
   };
 }
 
@@ -69,8 +75,51 @@ function displayTitle(pdf: TicketPdf): string {
   return pdf.documentTitle || pdf.fileName || `${pdf.workspaceFormCode}.pdf`;
 }
 
-function isPdfClientDocument(document: { fileName: string; contentType: string }): boolean {
-  return document.contentType.toLowerCase() === 'application/pdf' || document.fileName.toLowerCase().endsWith('.pdf');
+function isPackageEligibleClientDocument(document: { fileName: string; contentType: string }): boolean {
+  const contentType = document.contentType.toLowerCase();
+  const fileName = document.fileName.toLowerCase();
+  return (
+    contentType === 'application/pdf' ||
+    contentType === 'image/jpeg' ||
+    contentType === 'image/png' ||
+    fileName.endsWith('.pdf') ||
+    fileName.endsWith('.jpg') ||
+    fileName.endsWith('.jpeg') ||
+    fileName.endsWith('.png')
+  );
+}
+
+async function imageDocumentToPdf(
+  bytes: Buffer,
+  document: { contentType: string; fileName: string },
+  title: string
+): Promise<Buffer> {
+  const pdf = await PDFDocument.create();
+  const imageType = `${document.contentType} ${document.fileName}`.toLowerCase();
+
+  try {
+    const image = imageType.includes('png') ? await pdf.embedPng(bytes) : await pdf.embedJpg(bytes);
+    const pageWidth = 612;
+    const pageHeight = 792;
+    const margin = 24;
+    const scale = Math.min(
+      (pageWidth - margin * 2) / image.width,
+      (pageHeight - margin * 2) / image.height,
+      1
+    );
+    const width = image.width * scale;
+    const height = image.height * scale;
+    const page = pdf.addPage([pageWidth, pageHeight]);
+    page.drawImage(image, {
+      x: (pageWidth - width) / 2,
+      y: (pageHeight - height) / 2,
+      width,
+      height
+    });
+    return Buffer.from(await pdf.save());
+  } catch {
+    throw new HttpError(422, `${title} is not a readable JPG or PNG image.`);
+  }
 }
 
 function toTicketPdfRecord(pdf: TicketPdf) {
@@ -128,6 +177,17 @@ function getInternalFilledKey(clientId: string, pdf: TicketPdf): string | null {
     parts[6] === 'file.pdf'
   ) {
     return `n8n-callback-${parts[5]}`;
+  }
+
+  if (
+    parts[0] === 'api' &&
+    parts[1] === 'clients' &&
+    parts[2] === clientId &&
+    parts[3] === 'form-pdfs' &&
+    parts[4] &&
+    parts[5] === 'file.pdf'
+  ) {
+    return `n8n-callback-${parts[4]}`;
   }
 
   if (parts[0] !== 'api' || parts[1] !== 'clients' || parts[2] !== clientId) {
@@ -205,6 +265,9 @@ async function loadTicketPdfBytes(deps: RouteDeps, clientId: string, pdf: Ticket
   if (pdf.rawDocument) {
     const bytes = await loadClientDocumentBytes(pdf.rawDocument, deps.config.s3);
     if (!bytes) throw new HttpError(404, `${displayTitle(pdf)} is not available.`);
+    if (pdf.rawDocument.contentType.toLowerCase() !== 'application/pdf' && !pdf.rawDocument.fileName.toLowerCase().endsWith('.pdf')) {
+      return imageDocumentToPdf(bytes, pdf.rawDocument, displayTitle(pdf));
+    }
     assertPdfBytes(bytes, displayTitle(pdf));
     return bytes;
   }
@@ -253,9 +316,21 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
   async function ownedClient(clientId: string, ownerUserId: string) {
     const client = await deps.prisma.client.findFirst({
       where: { id: clientId, ...clientAccessWhere(ownerUserId) },
-      select: { id: true, name: true }
+      select: {
+        id: true,
+        name: true,
+        investorProfileOnboarding: { select: { step3Data: true, step4Data: true } }
+      }
     });
     if (!client) throw new HttpError(404, 'Client not found.');
+    await syncGovernmentIdDocuments(deps.prisma, {
+      clientId,
+      uploadedByUserId: ownerUserId,
+      next: getGovernmentIdDocumentReferences(
+        client.investorProfileOnboarding?.step3Data,
+        client.investorProfileOnboarding?.step4Data
+      )
+    });
     return client;
   }
 
@@ -293,7 +368,12 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
             clientId,
             OR: [
               { contentType: 'application/pdf' },
-              { fileName: { endsWith: '.pdf', mode: 'insensitive' } }
+              { contentType: 'image/jpeg' },
+              { contentType: 'image/png' },
+              { fileName: { endsWith: '.pdf', mode: 'insensitive' } },
+              { fileName: { endsWith: '.jpg', mode: 'insensitive' } },
+              { fileName: { endsWith: '.jpeg', mode: 'insensitive' } },
+              { fileName: { endsWith: '.png', mode: 'insensitive' } }
             ]
           },
           include: { uploadedBy: { select: { name: true } } },
@@ -395,8 +475,8 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
       if (documentRecords.length !== documentIds.length) {
         throw new HttpError(404, 'One or more selected uploaded documents are unavailable.');
       }
-      if (documentRecords.some((document) => !isPdfClientDocument(document))) {
-        throw new HttpError(422, 'Only uploaded PDF documents can be added to a ticket.');
+      if (documentRecords.some((document) => !isPackageEligibleClientDocument(document))) {
+        throw new HttpError(422, 'Only uploaded PDF, JPG, or PNG documents can be added to a ticket.');
       }
       const documentById = new Map(documentRecords.map((document) => [document.id, document]));
       const uploadedPdfs: TicketPdf[] = documentIds.map((documentId) => {
@@ -415,7 +495,9 @@ export function createClientPdfTicketsRouter(deps: RouteDeps): ExpressRouter {
           client: { name: client.name },
           rawDocument: {
             storageKey: document.storageKey,
-            storageProvider: document.storageProvider
+            storageProvider: document.storageProvider,
+            contentType: document.contentType,
+            fileName: document.fileName
           }
         };
       });
