@@ -141,6 +141,7 @@ function heuristicIntent(field: ExtractedField): PdfFieldIntent | null {
 
   if (field.type === 'text') {
     if (text.includes('registered representative') && text.includes('crd')) return { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.92 };
+    if (text.includes('rep code') || text.includes('representative code') || name === 'repcode') return { variableKey: 'canonical:broker.repCode', format: 'text', confidence: 0.94 };
     if (text.includes('broker-dealer firm')) return { variableKey: 'canonical:broker.firmName', format: 'text', confidence: 0.94 };
     if (text.includes('broker-dealer') && text.includes('crd')) return { variableKey: 'canonical:broker.brokerDealerCrdNumber', format: 'text', confidence: 0.9 };
     if (text.includes('branch address') && text.includes('city')) return { variableKey: 'canonical:broker.branchFullAddress', format: 'text', confidence: 0.9 };
@@ -148,7 +149,8 @@ function heuristicIntent(field: ExtractedField): PdfFieldIntent | null {
     if (text.includes('branch phone')) return { variableKey: 'canonical:broker.branchPhone', format: 'phone', confidence: 0.9 };
     if (name === 'email address_8') return { variableKey: 'canonical:broker.email', format: 'text', confidence: 0.96 };
     if (text.includes('rr name')) return { variableKey: 'fact:advisor.rrName', format: 'text', confidence: 0.86 };
-    if (text.includes('rr no') || text.includes('crd no')) return { variableKey: 'fact:advisor.rrNumber', format: 'text', confidence: 0.82 };
+    if (text.includes('rr no')) return { variableKey: 'fact:advisor.rrNumber', format: 'text', confidence: 0.88 };
+    if (text.includes('crd no')) return { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.82 };
     if (text.includes('customer name')) return { variableKey: 'fact:client.customerNames', format: 'text', confidence: 0.84 };
     if (text.includes('total purchase price') || name === 'investment') return { variableKey: 'fact:investment.subscriptionAmount', format: 'currency', confidence: 0.9 };
     if (text.includes('date of birth')) return { variableKey: name.endsWith('_2') ? 'canonical:person2.dateOfBirth' : 'canonical:person.dateOfBirth', format: 'date', confidence: 0.76 };

@@ -57,6 +57,7 @@ export async function getProfileLookup(
     add('broker.brokerDealerCrdNumber', broker.brokerDealerCrdNumber);
     add('broker.representativeName', broker.name);
     add('broker.representativeCrdNumber', broker.representativeCrdNumber);
+    add('broker.repCode', broker.repCode);
     add('broker.branchAddressLine1', broker.branchAddressLine1);
     add('broker.branchAddressLine2', broker.branchAddressLine2);
     add('broker.branchCity', broker.branchCity);
@@ -67,7 +68,8 @@ export async function getProfileLookup(
     add('broker.branchPhone', broker.branchPhone);
     add('broker.email', broker.email);
     add('advisor.rrName', broker.name);
-    add('advisor.rrNumber', broker.representativeCrdNumber);
+    add('advisor.rrNumber', broker.repCode);
+    add('advisor.repCode', broker.repCode);
   }
 
   // 1. Investor Profile onboarding (the rich source).

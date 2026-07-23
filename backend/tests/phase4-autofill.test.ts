@@ -116,6 +116,7 @@ describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
           firmName: 'Northstar Broker-Dealer',
           brokerDealerCrdNumber: 'BD-100',
           representativeCrdNumber: 'RR-200',
+          repCode: 'JBR-42',
           branchAddressLine1: '10 Market Street',
           branchAddressLine2: null,
           branchCity: 'Austin',
@@ -133,8 +134,11 @@ describe('Phase 4 — getProfileLookup (read-time gold projection)', () => {
 
     const lookup = await getProfileLookup(prisma, 'c1');
     expect(lookup['advisor.rrName']).toEqual({ value: 'Jordan Representative', sourceFormCode: 'PRIMARY_BROKER' });
-    expect(lookup['advisor.rrNumber']?.value).toBe('RR-200');
+    expect(lookup['advisor.rrNumber']?.value).toBe('JBR-42');
+    expect(lookup['broker.representativeCrdNumber']?.value).toBe('RR-200');
     expect(lookup['broker.firmName']?.value).toBe('Northstar Broker-Dealer');
+    expect(lookup['broker.repCode']?.value).toBe('JBR-42');
+    expect(lookup['advisor.repCode']?.value).toBe('JBR-42');
     expect(lookup['broker.branchCityStateZip']?.value).toBe('Austin, TX 78701');
   });
 });

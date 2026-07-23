@@ -1010,7 +1010,7 @@ describe('client routes', () => {
     prisma.clientBroker.findFirst.mockResolvedValue({
       broker: {
         name: 'Matt Chancey',
-        representativeCrdNumber: 'CRD-1001'
+        repCode: 'MC-1001'
       }
     });
     prisma.client.findFirst.mockResolvedValue({
@@ -1042,7 +1042,7 @@ describe('client routes', () => {
     expect(response.body.onboarding.step.currentQuestionId).toBe('rrName');
     expect(response.body.onboarding.step.visibleQuestionIds).toContain('typeOfAccount.primaryType');
     expect(response.body.onboarding.step.fields.accountRegistration.rrName).toBe('Matt Chancey');
-    expect(response.body.onboarding.step.fields.accountRegistration.rrNo).toBe('CRD-1001');
+    expect(response.body.onboarding.step.fields.accountRegistration.rrNo).toBe('MC-1001');
     expect(response.body.onboarding.step.fields.accountRegistration.customerNames).toBe('Client One');
   });
 

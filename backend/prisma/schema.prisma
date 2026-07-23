@@ -81,6 +81,7 @@ model Broker {
   firmName                    String?
   brokerDealerCrdNumber       String?
   representativeCrdNumber     String?
+  repCode                     String?
   branchAddressLine1          String?
   branchAddressLine2          String?
   branchCity                  String?

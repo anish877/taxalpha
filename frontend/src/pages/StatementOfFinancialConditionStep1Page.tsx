@@ -46,16 +46,6 @@ const ILLIQUID_NON_QUALIFIED_FIELDS: Array<{
   { key: 'privateBusiness', label: 'Private Business' }
 ];
 
-const ACCREDITATION_ADJUSTMENT_FIELDS: Array<{
-  key: keyof StatementOfFinancialConditionStepOneFields['accreditationAdjustments'];
-  label: string;
-}> = [
-  {
-    key: 'primaryResidenceSecuredDebtIncreaseLast60Days',
-    label: 'Increase in primary-residence secured debt during the last 60 days'
-  }
-];
-
 const LIQUID_QUALIFIED_FIELDS: Array<{
   key: keyof StatementOfFinancialConditionStepOneFields['liquidQualifiedAssets'];
   label: string;
@@ -189,13 +179,6 @@ const QUESTION_CONFIG: Record<
       'Enter the primary residence at estimated fair market value. For investment real estate and private businesses, enter current equity value.',
     type: 'amount-grid-block'
   },
-  'step1.accreditationAdjustments': {
-    key: 'step1.accreditationAdjustments',
-    title: 'Did primary-residence secured debt increase recently?',
-    helper:
-      'Enter how much the current mortgage and home-equity debt exceeds its balance 60 days ago, excluding debt incurred to acquire the residence. Enter 0 if none.',
-    type: 'amount-grid-block'
-  },
   'step1.liquidQualifiedAssets': {
     key: 'step1.liquidQualifiedAssets',
     title: 'What liquid qualified assets are available?',
@@ -323,8 +306,6 @@ function getAnswer(
       return fields.liabilities;
     case 'step1.illiquidNonQualifiedAssets':
       return fields.illiquidNonQualifiedAssets;
-    case 'step1.accreditationAdjustments':
-      return fields.accreditationAdjustments;
     case 'step1.liquidQualifiedAssets':
       return fields.liquidQualifiedAssets;
     case 'step1.incomeSummary':
@@ -357,10 +338,6 @@ function applyAnswer(
     case 'step1.illiquidNonQualifiedAssets':
       next.illiquidNonQualifiedAssets =
         answer as StatementOfFinancialConditionStepOneFields['illiquidNonQualifiedAssets'];
-      break;
-    case 'step1.accreditationAdjustments':
-      next.accreditationAdjustments =
-        answer as StatementOfFinancialConditionStepOneFields['accreditationAdjustments'];
       break;
     case 'step1.liquidQualifiedAssets':
       next.liquidQualifiedAssets = answer as StatementOfFinancialConditionStepOneFields['liquidQualifiedAssets'];
@@ -631,10 +608,6 @@ export function StatementOfFinancialConditionStep1Page() {
 
     if (currentQuestionId === 'step1.illiquidNonQualifiedAssets') {
       return renderAmountGrid('illiquidNonQualifiedAssets', ILLIQUID_NON_QUALIFIED_FIELDS);
-    }
-
-    if (currentQuestionId === 'step1.accreditationAdjustments') {
-      return renderAmountGrid('accreditationAdjustments', ACCREDITATION_ADJUSTMENT_FIELDS);
     }
 
     if (currentQuestionId === 'step1.liquidQualifiedAssets') {

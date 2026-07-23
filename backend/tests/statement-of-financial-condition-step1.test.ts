@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   applySfcStep1Prefill,
   defaultSfcStep1Fields,
+  getVisibleSfcStep1QuestionIds,
   getSfcStep1Totals,
+  normalizeSfcStep1Fields,
   validateSfcStep1Answer,
   validateSfcStep1Completion
 } from '../src/lib/statement-of-financial-condition-step1.js';
@@ -105,24 +107,16 @@ describe('statement-of-financial-condition-step1', () => {
     expect(totals.accreditedInvestorNetWorth).toBe(1_300_000);
   });
 
-  it('rejects a 60-day increase larger than current residence-secured debt', () => {
-    const fields = defaultSfcStep1Fields();
-    fields.liabilities.mortgagePrimaryResidence = 100_000;
-
-    const validation = validateSfcStep1Answer(
-      'step1.accreditationAdjustments',
-      { primaryResidenceSecuredDebtIncreaseLast60Days: 100_001 },
-      fields
-    );
-
-    expect(validation.success).toBe(false);
-    if (!validation.success) {
-      expect(
-        validation.fieldErrors[
-          'step1.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days'
-        ]
-      ).toContain('cannot exceed');
-    }
+  it('does not expose the unsupported 60-day debt question and clears legacy values', () => {
+    expect(getVisibleSfcStep1QuestionIds()).not.toContain('step1.accreditationAdjustments');
+    const normalized = normalizeSfcStep1Fields({
+      accreditationAdjustments: {
+        primaryResidenceSecuredDebtIncreaseLast60Days: 100_001
+      }
+    });
+    expect(
+      normalized.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days
+    ).toBe(0);
   });
 
   it('requires account registration completion fields', () => {

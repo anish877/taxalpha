@@ -78,7 +78,7 @@ describe('admin user and broker routes', () => {
   it('creates an independent broker in the global directory', async () => {
     const broker = {
       id: 'broker_2', ownerUserId: 'admin_1', name: 'Jordan Broker', email: 'jordan@example.com',
-      firmName: 'Northstar Broker-Dealer', representativeCrdNumber: 'RR-200'
+      firmName: 'Northstar Broker-Dealer', representativeCrdNumber: 'RR-200', repCode: 'JBR-42'
     };
     const prisma = {
       user: {
@@ -94,7 +94,8 @@ describe('admin user and broker routes', () => {
         representativeName: 'Jordan Broker',
         email: 'jordan@example.com',
         firmName: 'Northstar Broker-Dealer',
-        representativeCrdNumber: 'RR-200'
+        representativeCrdNumber: 'RR-200',
+        repCode: 'JBR-42'
       });
 
     expect(response.status).toBe(201);
@@ -103,7 +104,8 @@ describe('admin user and broker routes', () => {
       data: expect.objectContaining({
         ownerUserId: 'admin_1',
         name: 'Jordan Broker',
-        firmName: 'Northstar Broker-Dealer'
+        firmName: 'Northstar Broker-Dealer',
+        repCode: 'JBR-42'
       })
     });
   });

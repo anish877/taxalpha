@@ -395,6 +395,7 @@ export interface BrokerSummary {
   firmName?: string | null;
   brokerDealerCrdNumber?: string | null;
   representativeCrdNumber?: string | null;
+  repCode?: string | null;
   branchAddressLine1?: string | null;
   branchAddressLine2?: string | null;
   branchCity?: string | null;
@@ -1371,7 +1372,6 @@ export type StatementOfFinancialConditionStepOneQuestionId =
   | 'step1.liquidNonQualifiedAssets'
   | 'step1.liabilities'
   | 'step1.illiquidNonQualifiedAssets'
-  | 'step1.accreditationAdjustments'
   | 'step1.liquidQualifiedAssets'
   | 'step1.incomeSummary'
   | 'step1.illiquidQualifiedAssets';

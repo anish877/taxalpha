@@ -12,6 +12,7 @@ interface BrokerDraft {
   firmName: string;
   brokerDealerCrdNumber: string;
   representativeCrdNumber: string;
+  repCode: string;
   branchAddressLine1: string;
   branchAddressLine2: string;
   branchCity: string;
@@ -26,6 +27,7 @@ const emptyBroker = (): BrokerDraft => ({
   firmName: '',
   brokerDealerCrdNumber: '',
   representativeCrdNumber: '',
+  repCode: '',
   branchAddressLine1: '',
   branchAddressLine2: '',
   branchCity: '',
@@ -42,6 +44,7 @@ function BrokerFields({ value, onChange }: { value: BrokerDraft; onChange: (next
     <label className="block">
       <span className="mb-1.5 block text-xs uppercase tracking-[0.12em] text-mute">{label}</span>
       <input
+        aria-label={label}
         className={inputClass}
         placeholder={placeholder}
         required={key === 'representativeName' || key === 'email' || key === 'firmName'}
@@ -59,6 +62,7 @@ function BrokerFields({ value, onChange }: { value: BrokerDraft; onChange: (next
       <div className="sm:col-span-2">{field('firmName', 'Broker-Dealer Firm Name', 'Example Securities LLC')}</div>
       {field('brokerDealerCrdNumber', 'Broker-Dealer CRD No.')}
       {field('representativeCrdNumber', 'Registered Representative CRD No.')}
+      {field('repCode', 'Rep Code')}
       <div className="sm:col-span-2">{field('branchAddressLine1', 'Branch Address')}</div>
       <div className="sm:col-span-2">{field('branchAddressLine2', 'Branch Address Line 2')}</div>
       {field('branchCity', 'City')}
@@ -173,6 +177,7 @@ export function AdminUsersPage() {
       firmName: broker.firmName ?? '',
       brokerDealerCrdNumber: broker.brokerDealerCrdNumber ?? '',
       representativeCrdNumber: broker.representativeCrdNumber ?? '',
+      repCode: broker.repCode ?? '',
       branchAddressLine1: broker.branchAddressLine1 ?? '',
       branchAddressLine2: broker.branchAddressLine2 ?? '',
       branchCity: broker.branchCity ?? '',
@@ -251,6 +256,7 @@ export function AdminUsersPage() {
                     <p className="font-medium text-ink">{broker.name}</p>
                     <p className="mt-1 text-sm text-mute">{broker.firmName ?? 'Firm not set'} · {broker.email}</p>
                     {broker.representativeCrdNumber && <p className="mt-1 text-xs text-mute">Representative CRD {broker.representativeCrdNumber}</p>}
+                    {broker.repCode && <p className="mt-1 text-xs text-mute">Rep Code {broker.repCode}</p>}
                   </div>
                   <button className="text-xs uppercase tracking-[0.14em] text-accent" type="button" onClick={() => editBroker(broker)}>Edit</button>
                 </article>

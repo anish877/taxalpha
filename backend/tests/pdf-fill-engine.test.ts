@@ -84,6 +84,7 @@ describe('direct PDF fill engine', () => {
       ['BrokerDealer Firm Name', 'Broker-Dealer Firm Name'],
       ['BrokerDealer', 'Broker-Dealer CRD No.'],
       ['Registered Representative', 'Registered Representative CRD No.'],
+      ['RepCode', 'Rep Code'],
       ['Registered Representatives Branch Address City State Zip', 'Registered Representative Branch Address'],
       ['Branch Phone Number', 'Branch Phone Number'],
       ['Email Address_8', 'E-mail Address']
@@ -105,6 +106,7 @@ describe('direct PDF fill engine', () => {
       'canonical:broker.firmName',
       'canonical:broker.brokerDealerCrdNumber',
       'canonical:broker.representativeCrdNumber',
+      'canonical:broker.repCode',
       'canonical:broker.branchFullAddress',
       'canonical:broker.branchPhone',
       'canonical:broker.email'

@@ -261,6 +261,7 @@ function suggestFactBinding(field: ExtractedField): SchemaBinding | null {
 
   if (field.type === 'text') {
     if (text.includes('registered representative') && text.includes('crd')) return { variableKey: 'canonical:broker.representativeCrdNumber', format: 'text', confidence: 0.92 };
+    if (text.includes('rep code') || text.includes('representative code')) return { variableKey: 'canonical:broker.repCode', format: 'text', confidence: 0.94 };
     if (text.includes('broker-dealer firm')) return { variableKey: 'canonical:broker.firmName', format: 'text', confidence: 0.94 };
     if (text.includes('broker-dealer') && text.includes('crd')) return { variableKey: 'canonical:broker.brokerDealerCrdNumber', format: 'text', confidence: 0.9 };
     if (text.includes('branch address') && text.includes('city')) return { variableKey: 'canonical:broker.branchFullAddress', format: 'text', confidence: 0.9 };

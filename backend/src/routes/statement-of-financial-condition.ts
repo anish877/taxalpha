@@ -157,7 +157,7 @@ interface SfcClientContext {
   id: string;
   name: string;
   brokerLinks?: Array<{
-    broker: { name: string; representativeCrdNumber: string | null };
+    broker: { name: string; repCode: string | null };
   }>;
   formSelections: Array<{
     form: {
@@ -530,7 +530,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           orderBy: { position: 'asc' },
           take: 1,
           select: {
-            broker: { select: { name: true, representativeCrdNumber: true } }
+            broker: { select: { name: true, repCode: true } }
           }
         },
         formSelections: {
@@ -639,7 +639,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
           onboarding.step1Data,
           {
             rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-            rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+            rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
             customerNames: investorStep1.accountRegistration.customerNames || client.name || null
           }
         )
@@ -712,7 +712,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
 
       const prefillContext = {
         rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-        rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+        rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
         customerNames: investorStep1.accountRegistration.customerNames || client.name || null
       };
 
@@ -954,7 +954,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
         normalizeSfcStep1Fields(existingOnboarding?.step1Data ?? null),
         {
           rrName: getPrimaryBroker(client)?.name ?? client.investorProfileOnboarding?.step1RrName ?? null,
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? client.investorProfileOnboarding?.step1RrNo ?? null,
+          rrNo: getPrimaryBroker(client)?.repCode ?? client.investorProfileOnboarding?.step1RrNo ?? null,
           customerNames:
             client.investorProfileOnboarding?.step1CustomerNames ?? client.name ?? null
         }
@@ -1061,7 +1061,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
         });
         const prefillContext = {
           rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+          rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
 
@@ -1156,7 +1156,7 @@ export function createStatementOfFinancialConditionRouter(deps: RouteDeps): Expr
         });
         const step1PrefillContext = {
           rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+          rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
 

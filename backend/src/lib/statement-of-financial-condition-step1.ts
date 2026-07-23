@@ -48,7 +48,6 @@ const SFC_STEP_1_QUESTION_IDS = [
   'step1.liquidNonQualifiedAssets',
   'step1.liabilities',
   'step1.illiquidNonQualifiedAssets',
-  'step1.accreditationAdjustments',
   'step1.liquidQualifiedAssets',
   'step1.incomeSummary',
   'step1.illiquidQualifiedAssets'
@@ -349,10 +348,12 @@ export function normalizeSfcStep1Fields(step1Data: Prisma.JsonValue | null | und
       ILLIQUID_NON_QUALIFIED_ASSET_FIELDS,
       root.illiquidNonQualifiedAssets
     ) as SfcStep1Fields['illiquidNonQualifiedAssets'],
-    accreditationAdjustments: normalizeAmountMap(
-      ACCREDITATION_ADJUSTMENT_FIELDS,
-      root.accreditationAdjustments
-    ) as SfcStep1Fields['accreditationAdjustments'],
+    // The source SFC does not ask for a 60-day secured-debt adjustment.
+    // Retain the internal shape for backward compatibility, but never surface
+    // or carry forward a value that was collected by the former extra screen.
+    accreditationAdjustments: {
+      primaryResidenceSecuredDebtIncreaseLast60Days: 0
+    },
     liquidQualifiedAssets: normalizeAmountMap(
       LIQUID_QUALIFIED_ASSET_FIELDS,
       root.liquidQualifiedAssets
@@ -489,7 +490,7 @@ export function clampSfcStep1QuestionIndex(
 export function validateSfcStep1Answer(
   questionId: SfcStep1QuestionId,
   answer: unknown,
-  currentFields?: SfcStep1Fields
+  _currentFields?: SfcStep1Fields
 ): ValidationResult<unknown> {
   switch (questionId) {
     case 'step1.accountRegistration':
@@ -508,34 +509,6 @@ export function validateSfcStep1Answer(
         ILLIQUID_NON_QUALIFIED_ASSET_FIELDS,
         'step1.illiquidNonQualifiedAssets'
       );
-    case 'step1.accreditationAdjustments': {
-      const validation = validateAmountMap(
-        answer,
-        ACCREDITATION_ADJUSTMENT_FIELDS,
-        'step1.accreditationAdjustments'
-      );
-      if (!validation.success || !currentFields) {
-        return validation;
-      }
-
-      const securedPrimaryResidenceDebt =
-        currentFields.liabilities.mortgagePrimaryResidence +
-        currentFields.liabilities.homeEquityLoans;
-      if (
-        validation.value.primaryResidenceSecuredDebtIncreaseLast60Days >
-        securedPrimaryResidenceDebt
-      ) {
-        return {
-          success: false,
-          fieldErrors: {
-            'step1.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days':
-              'The 60-day debt increase cannot exceed the current mortgage and home-equity debt.'
-          }
-        };
-      }
-
-      return validation;
-    }
     case 'step1.liquidQualifiedAssets':
       return validateAmountMap(
         answer,
@@ -580,9 +553,6 @@ export function applySfcStep1Answer(
     case 'step1.illiquidNonQualifiedAssets':
       next.illiquidNonQualifiedAssets = answer as SfcStep1Fields['illiquidNonQualifiedAssets'];
       break;
-    case 'step1.accreditationAdjustments':
-      next.accreditationAdjustments = answer as SfcStep1Fields['accreditationAdjustments'];
-      break;
     case 'step1.liquidQualifiedAssets':
       next.liquidQualifiedAssets = answer as SfcStep1Fields['liquidQualifiedAssets'];
       break;
@@ -616,7 +586,6 @@ export function validateSfcStep1Completion(fields: SfcStep1Fields): Record<strin
     { prefix: 'step1.liquidNonQualifiedAssets', values: fields.liquidNonQualifiedAssets },
     { prefix: 'step1.liabilities', values: fields.liabilities },
     { prefix: 'step1.illiquidNonQualifiedAssets', values: fields.illiquidNonQualifiedAssets },
-    { prefix: 'step1.accreditationAdjustments', values: fields.accreditationAdjustments },
     { prefix: 'step1.liquidQualifiedAssets', values: fields.liquidQualifiedAssets },
     { prefix: 'step1.incomeSummary', values: fields.incomeSummary },
     { prefix: 'step1.illiquidQualifiedAssets', values: fields.illiquidQualifiedAssets }
@@ -628,17 +597,6 @@ export function validateSfcStep1Completion(fields: SfcStep1Fields): Record<strin
         errors[`${section.prefix}.${key}`] = 'Enter a valid non-negative amount.';
       }
     }
-  }
-
-  const securedPrimaryResidenceDebt =
-    fields.liabilities.mortgagePrimaryResidence + fields.liabilities.homeEquityLoans;
-  if (
-    fields.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days >
-    securedPrimaryResidenceDebt
-  ) {
-    errors[
-      'step1.accreditationAdjustments.primaryResidenceSecuredDebtIncreaseLast60Days'
-    ] = 'The 60-day debt increase cannot exceed the current mortgage and home-equity debt.';
   }
 
   return errors;

@@ -341,6 +341,7 @@ const clientInclude = {
           firmName: true,
           brokerDealerCrdNumber: true,
           representativeCrdNumber: true,
+          repCode: true,
           branchAddressLine1: true,
           branchAddressLine2: true,
           branchCity: true,
@@ -1652,7 +1653,7 @@ function toStepOneResponse(
   });
   if (primaryBroker) {
     fields.accountRegistration.rrName = primaryBroker.name;
-    fields.accountRegistration.rrNo = primaryBroker.representativeCrdNumber ?? '';
+    fields.accountRegistration.rrNo = primaryBroker.repCode ?? '';
   }
 
   const visibleQuestionIds = getVisibleStep1QuestionIds(fields);
@@ -2897,7 +2898,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       });
       if (primaryBroker) {
         existingFields.accountRegistration.rrName = primaryBroker.name;
-        existingFields.accountRegistration.rrNo = primaryBroker.representativeCrdNumber ?? '';
+        existingFields.accountRegistration.rrNo = primaryBroker.repCode ?? '';
       }
 
       const visibleBefore = getVisibleStep1QuestionIds(existingFields);
@@ -2915,7 +2916,7 @@ export function createClientsRouter(deps: RouteDeps): ExpressRouter {
       const nextFields = applyStep1Answer(existingFields, questionId, answerValidation.value);
       if (primaryBroker) {
         nextFields.accountRegistration.rrName = primaryBroker.name;
-        nextFields.accountRegistration.rrNo = primaryBroker.representativeCrdNumber ?? '';
+        nextFields.accountRegistration.rrNo = primaryBroker.repCode ?? '';
       }
 
       const visibleAfter = getVisibleStep1QuestionIds(nextFields);

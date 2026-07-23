@@ -190,7 +190,7 @@ interface BaiodfClientContext {
   id: string;
   name: string;
   brokerLinks?: Array<{
-    broker: { name: string; representativeCrdNumber: string | null };
+    broker: { name: string; repCode: string | null };
   }>;
   formSelections: Array<{
     form: {
@@ -658,7 +658,7 @@ export function createBaiodfRouter(
           orderBy: { position: 'asc' },
           take: 1,
           select: {
-            broker: { select: { name: true, representativeCrdNumber: true } }
+            broker: { select: { name: true, repCode: true } }
           }
         },
         formSelections: {
@@ -747,7 +747,7 @@ export function createBaiodfRouter(
       response.json(
         toStep1Response(clientId, onboarding.status, onboarding.step1CurrentQuestionIndex, onboarding.step1Data, {
           rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+          rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         })
       );
@@ -819,7 +819,7 @@ export function createBaiodfRouter(
 
       const prefillContext = {
         rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-        rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+        rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
         customerNames: investorStep1.accountRegistration.customerNames || client.name || null
       };
 
@@ -1201,7 +1201,7 @@ export function createBaiodfRouter(
         normalizeBaiodfStep1Fields(existingOnboarding?.step1Data ?? null),
         {
           rrName: getPrimaryBroker(client)?.name ?? client.investorProfileOnboarding?.step1RrName ?? null,
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? client.investorProfileOnboarding?.step1RrNo ?? null,
+          rrNo: getPrimaryBroker(client)?.repCode ?? client.investorProfileOnboarding?.step1RrNo ?? null,
           customerNames: client.investorProfileOnboarding?.step1CustomerNames ?? client.name ?? null
         }
       );
@@ -1313,7 +1313,7 @@ export function createBaiodfRouter(
         });
         const step1PrefillContext = {
           rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+          rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
         const step2PrefillContext = getStep2PrefillContext(client);
@@ -1397,7 +1397,7 @@ export function createBaiodfRouter(
         });
         const step1PrefillContext = {
           rrName: getPrimaryBroker(client)?.name ?? (investorStep1.accountRegistration.rrName || null),
-          rrNo: getPrimaryBroker(client)?.representativeCrdNumber ?? (investorStep1.accountRegistration.rrNo || null),
+          rrNo: getPrimaryBroker(client)?.repCode ?? (investorStep1.accountRegistration.rrNo || null),
           customerNames: investorStep1.accountRegistration.customerNames || client.name || null
         };
         const step2PrefillContext = getStep2PrefillContext(client);

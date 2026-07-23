@@ -2,7 +2,7 @@ import type { PrismaClient } from '@prisma/client';
 
 export interface PrimaryBrokerIdentity {
   name: string;
-  representativeCrdNumber: string | null;
+  repCode: string | null;
 }
 
 export async function getPrimaryBrokerIdentity(
@@ -16,7 +16,7 @@ export async function getPrimaryBrokerIdentity(
       broker: {
         select: {
           name: true,
-          representativeCrdNumber: true
+          repCode: true
         }
       }
     }
